@@ -103,6 +103,7 @@
     main.appendChild(content);
     app.appendChild(main);
     main.scrollTop = scroll;
+    IL.runFits();
     if (st.open) { var o = st.open; st.open = null; if (IL.openers[o]) IL.openers[o](); }
   };
   IL.openers = {};
@@ -140,6 +141,7 @@
     if (sub) drawer.appendChild(h('p', { class: 'sub' }, sub));
     drawer.appendChild(h('div', null, body));
     drawer.hidden = false; scrim.hidden = false; drawer.scrollTop = 0;
+    IL.runFits();
   };
   IL.closeDrawer = function () { drawer.hidden = true; scrim.hidden = true; };
   IL.section = function (title) { var args = Array.prototype.slice.call(arguments, 1); return h('div', { class: 'dr-sec' }, h('h4', null, title), args); };

@@ -83,8 +83,8 @@
       })];
   };
   IL.pacePicture = function (p) {
-    return [C.strip({ dots: p.dots.map(function (d) { return { sid: d.sid, v: d.pc }; }), median: p.median, band: [Math.max(0, p.median - 15), Math.min(100, p.median + 15)], fmt: function (v) { return Math.round(v) + '%'; },
-      flag: function (d) { return d.v <= p.median - 15; }, label: 'Percent complete on chapter ' + p.unit.num }),
+    return [C.fit(function (W) { return C.strip({ w: W, dots: p.dots.map(function (d) { return { sid: d.sid, v: d.pc }; }), median: p.median, band: [Math.max(0, p.median - 15), Math.min(100, p.median + 15)], fmt: function (v) { return Math.round(v) + '%'; },
+      flag: function (d) { return d.v <= p.median - 15; }, label: 'Percent complete on chapter ' + p.unit.num }); }),
       p.behind.length ? h('p', { class: 'note' }, h('b', null, p.behind.length + ' behind: '), IL.whoList(p.behind.map(function (x) { return x.sid; }), 10)) : null,
       p.ahead.length ? h('p', { class: 'note' }, h('b', null, p.ahead.length + ' ahead: '), IL.whoList(p.ahead.map(function (x) { return x.sid; }), 10)) : null];
   };
@@ -103,8 +103,10 @@
     });
   };
   IL.movePicture = function (m, rows) {
-    return C.dumbbell({ rows: rows.slice(0, 8).map(function (r) { return { sid: r.sid, a: r.prev.gap, b: r.cur.gap, aTip: r.prev.n + ' first attempts', bTip: r.cur.n + ' first attempts' }; }), min: -0.5, max: 0.5, zero: 0, aLabel: 'two class weeks before', bLabel: 'last two class weeks',
-      fmt: signed, label: 'Gap to classmates, before and now' });
+    return C.fit(function (W) {
+      return C.dumbbell({ w: W, labW: Math.round(W * 0.22), rows: rows.slice(0, 8).map(function (r) { return { sid: r.sid, a: r.prev.gap, b: r.cur.gap, aTip: r.prev.n + ' first attempts', bTip: r.cur.n + ' first attempts' }; }), min: -0.5, max: 0.5, zero: 0, aLabel: 'two class weeks before', bLabel: 'last two class weeks',
+        fmt: signed, label: 'Gap to classmates, before and now' });
+    });
   };
   IL.followupPicture = function (f) {
     if (f.action.kind === 'check-in') return f.rows.map(function (r) { return h('p', null, IL.who(r.sid), ': ', r.state === 'active' ? 'active again since ' + T.fmtDay(r.lastDay) : 'no recorded activity since ' + (r.lastDay != null ? T.fmtDay(r.lastDay) : 'the start of term')); });
@@ -115,7 +117,7 @@
         note: r.state === 'improved' ? 'improved' : r.state === 'same' ? 'no change' : r.state === 'new' ? 'new evidence' : '' };
     });
     return [h('p', { class: 'finding', style: 'font-size:13.5px' }, f.improved + ' improved · ' + f.same + ' no change · ' + f.noWork + ' no new work'),
-      C.dumbbell({ rows: rows, min: 0, max: 1, aLabel: 'before (same skill)', bLabel: 'after (new questions)', noteW: 84, w: 600 }),
+      C.fit(function (W) { return C.dumbbell({ rows: rows, min: 0, max: 1, aLabel: 'before (same skill)', bLabel: 'after (new questions)', noteW: 90, labW: Math.round(W * 0.2), w: W }); }),
       f.rows.length > 12 ? h('p', { class: 'sub' }, '+' + (f.rows.length - 12) + ' more students') : null];
   };
 
@@ -424,8 +426,8 @@
       if (sec.textbooks.length > 1 && m.transfer.length) {
         var tf = m.transfer.filter(function (t) { return Math.abs(t.gap) >= 0.2; }).slice(0, 6);
         cards.push(C.card({ id: 'UN-6', title: 'Same skill, different textbook', finding: tf.length ? '“' + tf[0].skill.name + '” is at ' + pct(tf[0].primary.p) + ' in ' + tf[0].primary.tb.short + ' and ' + pct(tf[0].other.p) + ' in ' + tf[0].other.tb.short + '.' : 'No large gap between textbooks.',
-          body: tf.length ? [C.dumbbell({ rows: tf.map(function (t) { return { label: t.skill.name + ' (' + t.other.tb.short + ')', a: t.other.p, b: t.primary.p, aTip: t.other.tb.short + ' · ' + t.other.n + ' attempts', bTip: t.primary.tb.short + ' · ' + t.primary.n + ' attempts' }; }),
-            min: 0, max: 1, labW: 250, w: 620, aLabel: 'supplemental', bLabel: sec.textbooks[0].tb.short, colors: ['#16A085', '#1864F2'], upColor: '#9aa0aa', downColor: '#9aa0aa' })] : null,
+          body: tf.length ? [C.fit(function (W) { return C.dumbbell({ rows: tf.map(function (t) { return { label: t.skill.name + ' (' + t.other.tb.short + ')', a: t.other.p, b: t.primary.p, aTip: t.other.tb.short + ' · ' + t.other.n + ' attempts', bTip: t.primary.tb.short + ' · ' + t.primary.n + ' attempts' }; }),
+            min: 0, max: 1, labW: Math.round(W * 0.38), w: W, aLabel: 'supplemental', bLabel: sec.textbooks[0].tb.short, colors: ['#16A085', '#1864F2'], upColor: '#9aa0aa', downColor: '#9aa0aa' }); })] : null,
           guard: 'Lab and exam questions differ in format and depth from the main textbook, which accounts for some of the gap.' }));
       }
       var wide = [];

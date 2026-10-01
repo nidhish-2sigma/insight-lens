@@ -17,7 +17,11 @@
       el.appendChild(C.card({ id: 'EN-1', title: 'Participation rhythm',
         finding: 'The class was active in ' + (wk.length - quietWeeks.length) + ' of ' + wk.length + ' weeks' + (quietWeeks.length ? '; the week' + (quietWeeks.length > 1 ? 's' : '') + ' of ' + quietWeeks.map(function (x) { return T.fmtDay(x.week * 7); }).join(' and ') + ' ' + (quietWeeks.length > 1 ? 'were' : 'was') + ' quiet for everyone.' : '.'),
         body: [h('p', { class: 'sub' }, 'Students active each week'),
-          C.columns({ vals: wk.map(function (x) { return { v: x.active, pale: !x.classWeek, label: T.fmtDay(x.week * 7), top: String(x.active), tip: 'Week of ' + T.fmtDay(x.week * 7) + '\n' + x.active + ' of ' + N + ' active' + (x.classWeek ? '' : '\nquiet week: does not count toward inactivity') }; }), max: N, ref: N, refLabel: 'roster ' + N, cw: 44, h: 130, label: 'Students active per week' }),
+          C.fit(function (W) {
+            var cw = Math.max(34, (W - 130) / wk.length);
+            return C.columns({ vals: wk.map(function (x) { return { v: x.active, pale: !x.classWeek, label: T.fmtDay(x.week * 7), top: String(x.active), tip: 'Week of ' + T.fmtDay(x.week * 7) + '\n' + x.active + ' of ' + N + ' active' + (x.classWeek ? '' : '\nquiet week: does not count toward inactivity') }; }),
+              max: N, ref: N, refLabel: 'roster ' + N, w: W, cw: cw, bw: Math.max(22, Math.min(52, cw * 0.46)), h: 150, label: 'Students active per week' });
+          }),
           C.legend([{ color: '#1864F2', label: 'class week (60% or more active)' }, { color: '#d9dce2', label: 'quiet week (break, or nothing assigned)' }]),
           h('p', { class: 'sub', style: 'margin:12px 0 4px' }, 'By day · darker means more students'), dayGrid],
         table: function () { return C.table(['Week of', 'Students active', 'Class week'], wk.map(function (x) { return [T.fmtDay(x.week * 7), x.active + ' of ' + N, x.classWeek ? 'yes' : 'no']; })); },
@@ -62,7 +66,7 @@
       var strict = m.roster.filter(function (s) { return m.stu[s.id].strict === 'grind'; });
       el.appendChild(h('div', { style: 'margin-top:14px' }, C.card({ id: 'EN-4', title: 'Activity map',
         finding: strict.length ? U.plural(strict.length, 'student stands', 'students stand') + ' out: far more recorded time than classmates, and far fewer answers right first time.' : 'Recorded activity and first-try success, one dot per student.',
-        body: h('div', { class: 'grid g-21' }, C.scatter({ dots: m.map.dots.map(function (d) { return { sid: d.sid, x: d.x, y: d.y, hot: m.stu[d.sid].strict === 'grind' }; }), medX: m.map.medMin, medY: m.map.medFts }),
+        body: h('div', { class: 'grid g-21' }, C.fit(function (W) { return C.scatter({ w: W, dots: m.map.dots.map(function (d) { return { sid: d.sid, x: d.x, y: d.y, hot: m.stu[d.sid].strict === 'grind' }; }), medX: m.map.medMin, medY: m.map.medFts }); }),
           h('div', null, h('table', { style: 'border-collapse:collapse;width:100%' }, h('tbody', null,
             h('tr', null, cell('Getting it without spending long', q.tl), cell('On track', q.tr)),
             h('tr', null, cell('Little recorded work', q.bl), cell('Putting in the time, not landing it', q.br)))),
@@ -97,8 +101,10 @@
         C.card({ id: 'WH-2', title: 'Fast wrong first answers',
           finding: m.fastWrong.classNote ? 'Across the class, ' + pct(m.fastWrong.median) + ' of first answers are wrong and under five seconds: a class habit, not a few students.' : m.fastWrong.flagged.length ? 'Most students are near zero; ' + U.plural(m.fastWrong.flagged.length, 'student does', 'students do') + ' this on a quarter or more of questions.' : 'Very few first answers are both fast and wrong.',
           body: [h('p', { class: 'sub' }, 'Share of each student’s first answers that were wrong and under 5 seconds'),
-            C.strip({ dots: m.fastWrong.dots.map(function (d) { return { sid: d.sid, v: d.v * 100 }; }), min: 0, max: 60, median: m.fastWrong.median * 100, fmt: function (v) { return Math.round(v) + '%'; }, ticks: [0, 20, 40, 60],
-              flag: function (d) { return m.fastWrong.flagged.some(function (f) { return f.sid === d.sid; }); }, label: 'Fast wrong first answers' }),
+            C.fit(function (W) {
+              return C.strip({ w: W, dots: m.fastWrong.dots.map(function (d) { return { sid: d.sid, v: d.v * 100 }; }), min: 0, max: 60, median: m.fastWrong.median * 100, fmt: function (v) { return Math.round(v) + '%'; }, ticks: [0, 20, 40, 60],
+                flag: function (d) { return m.fastWrong.flagged.some(function (f) { return f.sid === d.sid; }); }, label: 'Fast wrong first answers' });
+            }),
             m.fastWrong.flagged.length ? h('p', { class: 'note' }, h('b', null, 'Highest: '), m.fastWrong.flagged.map(function (f, i) { return [i ? ' · ' : '', IL.who(f.sid), ' ' + pct(f.v)]; })) : null],
           guard: 'Questions that can be answered in a few seconds by anyone are left out.' })));
 
@@ -243,7 +249,7 @@
         sort !== 'name' ? h('select', { class: 'sel', 'aria-label': 'Column to sort by', on: { change: function (e) { st.view.sortCol = e.target.value; IL.render(); } } },
           open.map(function (c) { return h('option', { value: c.id, selected: sortCol && sortCol.id === c.id ? 'selected' : null }, c.kind === 'skill' ? c.name : c.label + ' ' + c.name); })) : null],
       body: [h('div', { class: 'crumbs' }, crumbs),
-        h('div', { class: 'ugrid-wrap' }, h('table', { class: 'ugrid' }, h('thead', null, head), h('tbody', null, classRow, rows))),
+        h('div', { class: 'ugrid-wrap' }, h('table', { class: 'ugrid', style: '--cols:' + g.cols.length + ';--cell:' + (level === 'skill' ? 190 : 150) + 'px' }, h('thead', null, head), h('tbody', null, classRow, rows))),
         h('div', { class: 'legend grid-legend' }, level === 'skill' ? marksLegend : legend),
         level === 'skill'
           ? h('div', { class: 'legend grid-legend' }, h('span', { class: 'lg-lab' }, 'Colour and number'), h('span', null, 'right first time, shown once a student has answered three or more questions on the skill'))
@@ -298,7 +304,7 @@
       return h('tr', null, h('td', { class: 'name' }, IL.who(s.id)), grids.map(function (x) { return x.g.cols.map(function (c) { return h('td', null, mini(x.g.cells[s.id + '|' + c.id], c)); }); }));
     });
     el.appendChild(C.card({ id: 'ST-1', title: 'All textbooks', sub: 'Every textbook attached to this section, side by side at chapter level. Each cell: questions by state, and first-try success.',
-      body: [h('div', { style: 'overflow-x:auto' }, h('table', { class: 'ugrid' }, h('thead', null, head1, head2), h('tbody', null, classRow, rows))),
+      body: [h('div', { style: 'overflow-x:auto' }, h('table', { class: 'ugrid', style: '--cols:' + U.sum(grids.map(function (x) { return x.g.cols.length; })) + ';--cell:62px' }, h('thead', null, head1, head2), h('tbody', null, classRow, rows))),
         C.legend([{ cls: 's-done', label: 'correct' }, { cls: 's-bad', label: 'incorrect' }, { cls: 's-grade', label: 'awaiting grading' }, { cls: 's-none', label: 'not started' }, { cls: 's-hatch', label: 'not opened' }])],
       guard: 'Supplemental textbooks appear here and nowhere in the bands.' }));
   }

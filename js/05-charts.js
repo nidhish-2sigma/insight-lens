@@ -34,6 +34,30 @@
   var s = (IL.s = make(function (t) { return doc.createElementNS(NS, t); }));
   var C = (IL.C = {});
 
+  // A chart that fills its column is drawn at that column's width, not stretched from a fixed
+  // viewBox: stretching would scale its type and marks with it. The holder is measured after it
+  // is in the document, and rebuilt on resize.
+  IL._fits = [];
+  C.fit = function (build, opts) {
+    var holder = h('div', { class: 'fit' });
+    holder._build = build; holder._opts = opts || {};
+    IL._fits.push(holder);
+    return holder;
+  };
+  IL.runFits = function () {
+    IL._fits = IL._fits.filter(function (el) { return el.isConnected; });
+    IL._fits.forEach(function (el) {
+      var o = el._opts, box = el.clientWidth || (el.parentNode && el.parentNode.clientWidth) || 0;
+      if (!box) return;
+      var w = Math.round(Math.max(o.min || 360, Math.min(o.max || 1600, box)));
+      if (el._w === w) return;
+      el._w = w; el.textContent = '';
+      add(el, el._build(w));
+    });
+  };
+  var fitTimer = null;
+  root.addEventListener('resize', function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { IL._fits.forEach(function (el) { el._w = null; }); IL.runFits(); }, 150); });
+
   function pct(x) { return x == null ? '–' : Math.round(x * 100) + '%'; }
   IL.pct = pct;
   function names(sids, max) {
@@ -110,7 +134,7 @@
       levels[l] = p.x; p.lvl = l;
     });
     var rows = Math.min(6, levels.length), base = 14 + rows * (2 * r + 1), hh = base + 30;
-    var svg = s('svg', { width: '100%', height: hh, viewBox: '0 0 ' + w + ' ' + hh, preserveAspectRatio: 'xMinYMin meet', role: 'img', 'aria-label': o.label || 'distribution of students' });
+    var svg = s('svg', { class: 'flex', width: w, height: hh, viewBox: '0 0 ' + w + ' ' + hh, preserveAspectRatio: 'xMinYMin meet', role: 'img', 'aria-label': o.label || 'distribution of students' });
     if (o.band) svg.appendChild(s('rect', { x: x(o.band[0]), y: 4, width: Math.max(0, x(o.band[1]) - x(o.band[0])), height: base - 2, fill: '#eef1f6', rx: 3 }));
     svg.appendChild(s('line', { x1: pad, x2: w - pad, y1: base + 4, y2: base + 4, class: 'axis' }));
     (o.ticks || [min, (min + max) / 2, max]).forEach(function (t) {
@@ -169,7 +193,7 @@
     var labW = o.labW || 150, w = o.w || 560, rowH = 26, pad = 34, min = o.min != null ? o.min : 0, max = o.max != null ? o.max : 1;
     var x = function (v) { return labW + pad + ((U.clamp(v, min, max) - min) / (max - min)) * (w - labW - 2 * pad - (o.noteW || 0)); };
     var hh = o.rows.length * rowH + 22;
-    var svg = s('svg', { width: '100%', height: hh, viewBox: '0 0 ' + w + ' ' + hh, preserveAspectRatio: 'xMinYMin meet', role: 'img', 'aria-label': o.label || 'before and after' });
+    var svg = s('svg', { class: 'flex', width: w, height: hh, viewBox: '0 0 ' + w + ' ' + hh, preserveAspectRatio: 'xMinYMin meet', role: 'img', 'aria-label': o.label || 'before and after' });
     var fmt = o.fmt || function (v) { return Math.round(v * 100); };
     if (o.zero != null) svg.appendChild(s('line', { x1: x(o.zero), x2: x(o.zero), y1: 16, y2: hh - 2, class: 'axis' }));
     svg.appendChild(s('text', { x: labW + pad, y: 10, fill: '#7c7f85' }, o.aLabel || 'before'));
@@ -287,9 +311,9 @@
     return svg;
   };
   C.columns = function (o) {
-    var n = o.vals.length, cw = o.cw || 30, gap = 6, padL = 30, w = padL + n * (cw + gap) + 90, hh = o.h || 120, top = 14, base = hh - 20;
+    var n = o.vals.length, cw = o.cw || 30, bw = Math.min(o.bw || 22, cw - 8), gap = 6, padL = 30, w = o.w || (padL + n * (cw + gap) + 90), hh = o.h || 120, top = 14, base = hh - 20;
     var y = function (v) { return base - (v / o.max) * (base - top); };
-    var svg = s('svg', { width: '100%', height: hh, viewBox: '0 0 ' + w + ' ' + hh, preserveAspectRatio: 'xMinYMin meet', role: 'img', 'aria-label': o.label || '' });
+    var svg = s('svg', { class: 'flex', width: w, height: hh, viewBox: '0 0 ' + w + ' ' + hh, preserveAspectRatio: 'xMinYMin meet', role: 'img', 'aria-label': o.label || '' });
     svg.appendChild(s('line', { x1: padL, x2: w - 90, y1: base, y2: base, class: 'axis' }));
     if (o.ref != null) {
       svg.appendChild(s('line', { x1: padL, x2: w - 90, y1: y(o.ref), y2: y(o.ref), stroke: '#1c1e21', 'stroke-width': 1 }));
@@ -298,7 +322,7 @@
     svg.appendChild(s('text', { x: padL - 6, y: base + 4, 'text-anchor': 'end' }, '0'));
     o.vals.forEach(function (v, i) {
       var x0 = padL + i * (cw + gap) + gap / 2, hgt = Math.max(1, base - y(v.v));
-      svg.appendChild(s('rect', { x: x0 + (cw - Math.min(cw, 22)) / 2, y: base - hgt, width: Math.min(cw, 22), height: hgt, rx: 3, fill: v.pale ? '#d9dce2' : '#1864F2', 'data-tip': v.tip, tabindex: 0 }));
+      svg.appendChild(s('rect', { x: x0 + (cw - bw) / 2, y: base - hgt, width: bw, height: hgt, rx: 3, fill: v.pale ? '#d9dce2' : '#1864F2', 'data-tip': v.tip, tabindex: 0 }));
       if (v.label) svg.appendChild(s('text', { x: x0 + cw / 2, y: base + 14, 'text-anchor': 'middle', fill: '#7c7f85' }, v.label));
       if (v.top) svg.appendChild(hgt > 20 ? s('text', { x: x0 + cw / 2, y: base - hgt + 13, 'text-anchor': 'middle', style: 'fill:#fff;font-weight:600' }, v.top) : s('text', { x: x0 + cw / 2, y: base - hgt - 3, 'text-anchor': 'middle' }, v.top));
     });
@@ -307,10 +331,10 @@
 
   // ----- scatter for the activity map -----
   C.scatter = function (o) {
-    var w = 640, hh = 380, padL = 46, padB = 34, padT = 12, padR = 14;
+    var w = o.w || 760, hh = Math.round(Math.max(360, Math.min(520, w * 0.55))), padL = 46, padB = 34, padT = 12, padR = 14;
     var xs = o.dots.map(function (d) { return d.x; }), xmax = Math.max.apply(null, xs) * 1.06 || 1, ymin = 0, ymax = 1;
     var x = function (v) { return padL + (v / xmax) * (w - padL - padR); }, y = function (v) { return hh - padB - ((v - ymin) / (ymax - ymin)) * (hh - padB - padT); };
-    var svg = s('svg', { width: '100%', viewBox: '0 0 ' + w + ' ' + hh, role: 'img', 'aria-label': 'Each student by recorded activity and first-try success' });
+    var svg = s('svg', { class: 'flex', width: w, height: hh, viewBox: '0 0 ' + w + ' ' + hh, role: 'img', 'aria-label': 'Each student by recorded activity and first-try success' });
     svg.appendChild(s('rect', { x: padL, y: padT, width: w - padL - padR, height: hh - padB - padT, fill: '#fafbfc', stroke: '#e7e8ec' }));
     svg.appendChild(s('line', { x1: x(o.medX), x2: x(o.medX), y1: padT, y2: hh - padB, stroke: '#1c1e21', 'stroke-width': 1 }));
     svg.appendChild(s('line', { x1: padL, x2: w - padR, y1: y(o.medY), y2: y(o.medY), stroke: '#1c1e21', 'stroke-width': 1 }));

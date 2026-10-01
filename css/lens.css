@@ -54,7 +54,12 @@ a:hover { text-decoration: underline; }
 .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
 .chip small { opacity: .7; }
 .fresh { margin-left: auto; color: var(--muted); }
-.content { padding: 20px 24px 60px; max-width: 1320px; }
+.content { padding: 20px 24px 60px; }
+/* Charts keep their natural size and only ever shrink: a viewBox stretched to a wide
+   screen would scale its type and marks with it. */
+svg.flex { max-width: 100%; height: auto; }
+/* Prose keeps a readable measure however wide the window gets. Tables and charts do not. */
+.finding, .sub, .note, .guard, .empty, .card > p, .stem { max-width: 104ch; }
 .question { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
 .question b { color: var(--ink); font-weight: 600; font-size: 15px; margin-right: 8px; }
 
@@ -67,6 +72,7 @@ a:hover { text-decoration: underline; }
 .g-12 { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
 .span2 { grid-column: span 2; }
 @media (max-width: 1180px) { .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .g3, .g-21, .g-12 { grid-template-columns: 1fr; } .span2 { grid-column: auto; } }
+@media (min-width: 1700px) { .g-21 { grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr); } }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
 .card + .card.stack, .stack > * + * { margin-top: 14px; }
 .card-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
@@ -240,12 +246,15 @@ svg .mark:hover { stroke: var(--ink); stroke-width: 2; }
 
 /* ---------- unit grid ---------- */
 .ugrid-wrap { overflow: auto; max-height: min(74vh, 820px); border: 1px solid var(--line); border-radius: 8px; padding: 0 6px 6px; }
-.ugrid { border-collapse: separate; border-spacing: 3px; font-size: 12px; }
+/* The matrix spreads into whatever width the card has, up to a cell size past which
+   a bigger cell would say nothing more. */
+.ugrid { border-collapse: separate; border-spacing: 3px; font-size: 12px; width: 100%; table-layout: fixed;
+  max-width: calc(186px + var(--cols, 6) * (var(--cell, 150px) + 6px)); }
 .ugrid thead th { position: sticky; top: 0; z-index: 2; background: var(--surface); box-shadow: 0 1px 0 var(--line); padding: 6px 2px 7px; text-align: left; vertical-align: bottom; }
-.ugrid th.name, .ugrid td.name { text-align: left; position: sticky; left: 0; background: var(--surface); white-space: nowrap; padding-right: 14px; z-index: 1; }
+.ugrid th.name, .ugrid td.name { width: 180px; text-align: left; position: sticky; left: 0; background: var(--surface); white-space: nowrap; padding-right: 14px; z-index: 1; }
 .ugrid thead th.name { z-index: 3; font-size: 11px; font-weight: 600; color: var(--muted); }
 .ugrid th.dim { opacity: .5; }
-.ugrid .ch { width: 96px; display: block; border-radius: 5px; padding: 3px 4px; }
+.ugrid .ch { display: block; border-radius: 5px; padding: 3px 4px; }
 .ugrid .ch b { display: block; font-size: 12px; color: var(--ink); }
 .ugrid .ch span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400; font-size: 11px; line-height: 1.25; color: var(--muted); }
 .ugrid .ch.link { cursor: pointer; position: relative; padding-right: 12px; }
@@ -260,7 +269,7 @@ svg .mark:hover { stroke: var(--ink); stroke-width: 2; }
 .crumbs .sep { color: var(--muted); }
 .sel { font: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; background: var(--surface); color: var(--ink); }
 
-.ucell { width: 96px; height: 40px; border-radius: 6px; border: 1px solid var(--line); position: relative; cursor: pointer; overflow: hidden; padding: 0; background: #fff; display: block; text-align: left; }
+.ucell { width: 100%; min-width: 86px; height: 40px; border-radius: 6px; border: 1px solid var(--line); position: relative; cursor: pointer; overflow: hidden; padding: 0; background: #fff; display: block; text-align: left; }
 .ucell:hover { border-color: var(--ink); }
 .ucell:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
 .ucell.t0 { background: #efefef; } .ucell.t1 { background: #eaf4fe; } .ucell.t2 { background: #cfe4fb; } .ucell.t3 { background: #a8cbf6; } .ucell.t4 { background: #7fb0f0; }
@@ -278,7 +287,7 @@ svg .mark:hover { stroke: var(--ink); stroke-width: 2; }
 .ucell.cls { cursor: default; background: #eef2f8; border-color: #d6ddea; display: flex; flex-direction: column; justify-content: center; padding-left: 8px; line-height: 1.2; }
 .ucell.cls b { font-size: 13.5px; }
 .ucell.cls small { font-size: 10.5px; color: var(--ink-2); }
-.ucell.sk .qmarks { position: absolute; left: 7px; top: 7px; right: 7px; display: flex; flex-wrap: wrap; gap: 3px; }
+.ucell.sk .qmarks { position: absolute; left: 7px; top: 7px; right: 38px; display: flex; flex-wrap: wrap; gap: 3px; }
 .ucell.sk .qmarks .more { font-size: 10px; color: var(--muted); }
 .ucell.sk .val.sm { font-size: 11px; top: auto; bottom: 4px; right: 6px; color: var(--ink-2); }
 .qm { width: 9px; height: 9px; border-radius: 50%; display: inline-block; box-sizing: border-box; }

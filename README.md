@@ -124,6 +124,16 @@ patterns, follow-up outcomes and so on. The data and metric files load in Node a
 well as the browser, so this runs the same code the interface does. Useful for
 checking that a change to the generator still produces a class worth looking at.
 
+## Width
+
+The page has no fixed maximum width: every tab uses the whole window. Charts that
+can fill a column are measured after layout and drawn at that exact width, so
+their type and marks stay the same size whatever the window is — a stretched
+viewBox would have scaled the labels up with the chart. The unit grid spreads its
+cells into the space available, up to a size past which a larger cell would say
+nothing more, and prose keeps a readable line length while tables and charts do
+not. Resizing the window redraws the fitted charts.
+
 ## Files
 
 ```
