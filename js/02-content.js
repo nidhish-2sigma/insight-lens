@@ -1,4 +1,5 @@
-/* Insight Lens mock · content: textbooks, skills, prerequisite links, signature questions and the two sections.
+/* Insight Lens mock · content: textbooks, skills, prerequisite links, signature questions, the two demo sections
+   and five test shapes (tiny, brand-new, self-paced, very large, bare data) that the same rules must survive.
    Everything here is invented for the mock. Chapter and subunit names follow the shape of real CS textbooks. */
 (function (root) {
   'use strict';
@@ -325,4 +326,63 @@
       gradingFailed: 2, feedbackSeen: [9, 16]
     }
   ];
+
+  // ---------- test shapes ----------
+  // Sections that exist to prove the Lens holds up on data it was not tuned for. Each one derives from a demo
+  // section and changes its shape: roster size, how long it has run, whether work is assigned at all, and
+  // which evidence (norms, prerequisite graph, code questions, bands, a second textbook) is missing.
+  var FIRST = ['Ada', 'Bilal', 'Cora', 'Dmitri', 'Esme', 'Farid', 'Gia', 'Hugo', 'Ines', 'Jonah', 'Keiko', 'Luca', 'Mei', 'Nikhil', 'Odile', 'Pablo', 'Quinn', 'Rosa', 'Sami', 'Tova',
+    'Uri', 'Vera', 'Wren', 'Ximena', 'Yusuf', 'Zara', 'Arlo', 'Bea', 'Cyrus', 'Dalia', 'Emil', 'Freya', 'Gabe', 'Halle', 'Idris', 'Juno', 'Kai', 'Leila', 'Milo', 'Nadia'];
+  var LAST = ['Abara', 'Bell', 'Castro', 'Dang', 'Eze', 'Flores', 'Gupta', 'Haddad', 'Ito', 'Joshi', 'Kowalski', 'Lund', 'Mbeki', 'Novak', 'Ortiz', 'Pereira', 'Qureshi', 'Romano', 'Silva', 'Tanaka',
+    'Ulloa', 'Vance', 'Weiss', 'Xu', 'Yilmaz', 'Zhou', 'Amari', 'Boyd', 'Chavez', 'Dube', 'Ekström', 'Fofanah', 'Greene', 'Hoang', 'Ivanov', 'Jung', 'Kaya', 'Lopes', 'Mwangi', 'Nasser'];
+  C.names = function (n, shift) {
+    var out = [];
+    for (var i = 0; i < n; i++) { var k = i + (shift || 0); out.push(FIRST[k % FIRST.length] + ' ' + LAST[(7 * k + 3 * Math.floor(k / FIRST.length)) % LAST.length]); }
+    return out;
+  };
+  function derive(base, over) {
+    var o = {};
+    Object.keys(base).forEach(function (k) { o[k] = base[k]; });
+    Object.keys(over).forEach(function (k) { o[k] = over[k]; });
+    o.group = 'test';
+    return o;
+  }
+  var S1 = C.sections[0], S2 = C.sections[1];
+  C.sections.push(
+    derive(S1, { id: 't1', name: 'Tiny seminar', period: '6 students', shape: 'Tiny class', seed: 4101,
+      textbooks: [{ id: 'csa2', role: 'primary' }, { id: 'labs', role: 'supplemental' }],
+      supp: [{ tb: 'labs', sub: 'Lab 1', day: 18, due: 24, use: 0.9 }],
+      specials: [{ kind: 'quiz', name: 'Unit 2 Test', chapter: '2', day: 68, due: 68, n: 12, use: 0.97 }, { kind: 'review', name: 'Unit 4A Array Review', chapter: '4', day: 80, due: 83, n: 8, frq: 3, use: 0.93 }],
+      actions: [{ type: 'Remediation', title: 'Remediation · Loop bounds', skills: ['Loop bounds and off-by-one'], who: 2, day: 74, n: 5, boost: 1.0, recheckAfter: 7 }],
+      students: ['Imani Okoye', 'Felix Baumann', 'Sana Mirza', 'Theo Lindqvist', 'Paloma Reyes', 'Kenji Mori'],
+      personas: { quiet: [4], grind: [1], coast: [], guess: [2], late: [2], streak: [], slip: [3], rise: [], stuck: [1], ready: [0] },
+      questions: [{ who: 1, sub: '4.4', text: 'Does the loop need to stop at length - 1?' }], gradingFailed: 1, feedbackSeen: [1, 3] }),
+    derive(S2, { id: 't2', name: 'New cohort', period: 'started last week', shape: 'Brand-new class', seed: 4202, startWeek: 11,
+      mode: 'in-class', classDows: [0, 1, 2, 3, 4], classHour: 9, classLen: 50, lessonDows: [0, 2, 4], dueAfter: 2, quietWeeks: [],
+      opened: { '2': 3 }, chapterOrder: ['2'], chapterDecay: {}, supp: [], specials: [], actions: [],
+      students: C.names(20, 3), personas: { quiet: [], grind: [], coast: [], guess: [5], late: [3, 7], streak: [], slip: [], rise: [], stuck: [], ready: [], never: [18] },
+      questions: [], gradingFailed: 0, feedbackSeen: [0, 0] }),
+    derive(S2, { id: 't3', name: 'Self-paced Python', period: 'no assignments', shape: 'Self-paced, nothing assigned', seed: 4303, selfPaced: true,
+      textbooks: [{ id: 'fopp', role: 'primary' }], mode: 'homework', classDows: [], lessonDows: [], quietWeeks: [],
+      opened: { '2': 4, '6': 4, '7': 4, '8': 5, '9': 5, '12': 4 }, chapterOrder: ['2', '6', '7', '8', '9', '12'], chapterDecay: {}, supp: [], specials: [], actions: [],
+      students: C.names(18, 41), personas: { quiet: [5], grind: [2], coast: [9], guess: [7, 11], late: [14, 3], streak: [], slip: [13], rise: [4], stuck: [2], ready: [9] },
+      questions: [], gradingFailed: 0, feedbackSeen: [3, 6] }),
+    derive(S1, { id: 't4', name: 'Lecture cohort', period: '150 students', shape: 'Very large class', seed: 4404,
+      students: C.names(150, 80),
+      actions: [
+        { type: 'Exit Ticket', title: 'Exit Ticket · Chained else-if ranges', skills: ['Chained else-if ranges'], who: 'class', day: 37, n: 3, boost: 1.5, recheckAfter: 3 },
+        { type: 'Remediation', title: 'Remediation · Loop bounds', skills: ['Loop bounds and off-by-one'], who: 30, day: 74, n: 5, boost: 1.0, recheckAfter: 7 },
+        { type: 'Check-in', title: 'Checked in with a student who went quiet', who: 'quiet', day: 77 }],
+      personas: { quiet: [27, 58, 91, 120, 133, 141], grind: [3, 12, 40, 77, 101, 119, 60, 88], coast: [24, 17, 8, 21, 14, 66, 97, 110, 125], guess: [29, 15, 20, 51, 73, 99, 130, 144],
+        late: [29, 6, 22, 10, 45, 69, 83, 107, 126, 139], streak: [27, 19, 54, 92, 113], slip: [13, 5, 25, 18, 62, 80, 104, 136], rise: [9, 1, 16, 47, 71, 95], stuck: [3, 23, 56, 85, 122],
+        ready: [24, 17, 8, 66, 97], never: [149, 64], joined: { 148: 79, 147: 76 } },
+      questions: [{ who: 2, sub: '4.5', text: 'Why does my loop stop one element early?' }, { who: 24, sub: '4.4', text: 'Is an enhanced for loop allowed on the test?' }, { who: 51, sub: '4.3', text: 'Is the last index length or length - 1?' }],
+      gradingFailed: 14, feedbackSeen: [70, 110] }),
+    derive(S1, { id: 't5', name: 'Single textbook', period: 'bare data', shape: 'One textbook, no norms, no skill graph, no code questions, no bands', seed: 4505,
+      textbooks: [{ id: 'csa2', role: 'primary' }], bands: false, norms: false, graph: false, noCode: true, supp: [],
+      specials: [{ kind: 'quiz', name: 'Unit 2 Test', chapter: '2', day: 68, due: 68, n: 12, use: 0.97 }],
+      actions: [{ type: 'Exit Ticket', title: 'Exit Ticket · Chained else-if ranges', skills: ['Chained else-if ranges'], who: 'class', day: 37, n: 3, boost: 1.5, recheckAfter: 3 }],
+      students: C.names(22, 240), personas: { quiet: [6], grind: [2, 9], coast: [3], guess: [4], late: [11], streak: [15], slip: [13], rise: [1], stuck: [], ready: [3] },
+      questions: [], gradingFailed: 0, feedbackSeen: [0, 0] })
+  );
 })(typeof window !== 'undefined' ? window : globalThis);

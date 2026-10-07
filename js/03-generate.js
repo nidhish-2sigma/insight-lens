@@ -1,6 +1,8 @@
 /* Insight Lens mock · world generator.
-   Builds two sections and simulates twelve weeks of student work at attempt level, so every number in the
-   Lens is computed from events (and reconciles across views) rather than typed in. */
+   Builds every section in the content file and simulates twelve weeks of student work at attempt level, so
+   every number in the Lens is computed from events (and reconciles across views) rather than typed in.
+   A section's spec may change its shape: startWeek (a class that began late), selfPaced (work with no
+   assignments or due dates), norms/graph/noCode (evidence that is missing), and any roster size. */
 (function (root) {
   'use strict';
   var IL = root.IL, U = IL.U, T = IL.T, C = IL.content;
@@ -89,7 +91,7 @@
         diligence: U.clamp(0.955 + rng.normal() * 0.03, 0.82, 0.995), finish: U.clamp(0.9 + rng.normal() * 0.06, 0.6, 0.985),
         guess: rng() * 0.3, fast: U.clamp((spec.fastFirst || 0.03) * (0.35 + rng() * 1.5), 0, 0.6),
         quit: 0.02 + rng() * 0.05, late: rng() * 0.22, pace: U.clamp(Math.exp(rng.normal() * 0.38 + 0.42 * theta), 0.45, 2.4),
-        persona: p, rostered: !p.offRoster, never: !!p.never, joined: p.joined || 0, quietFrom: null, skip: {}
+        persona: p, rostered: !p.offRoster, never: !!p.never, joined: p.joined || (spec.startWeek || 0) * 7, quietFrom: null, skip: {}
       };
       if (p.grind) { st.theta = -1.05 - rng() * 0.35; st.pace = 1.75 + rng() * 0.3; st.diligence = 0.992; st.finish = 0.975; st.quit = 0.012; st.fast = 0.01; st.guess = 0.05; }
       if (p.coast) { st.theta = 1.0 + rng() * 0.45; st.pace = 0.58; }
@@ -101,6 +103,12 @@
       if (p.offRoster) st.quietFrom = 23;
       sec.students[st.id] = st;
       sec.all.push(st);
+    });
+    // "First L." must identify one student; where two share it, show enough of the surname to tell them apart
+    var byName = U.groupBy(sec.all, function (s) { return s.name; });
+    byName.forEach(function (list) {
+      if (list.length < 2) return;
+      list.forEach(function (st) { st.name = st.first + ' ' + st.last.slice(0, 3) + '.'; });
     });
     sec.roster = sec.all.filter(function (s) { return s.rostered; });
   }
@@ -178,6 +186,7 @@
       item.code = { tests: o.tests || rng.int(3, 5), hard: 0, err: o.err || fittingError(o.name, tb.lang, stage, rng.pick(errs[stage])), stage: stage, graded: o.graded !== false && (o.tests ? true : rng.chance(0.86)), lang: tb.lang };
       item.code.hard = o.hard || rng.int(2, item.code.tests);
     }
+    if (sec.spec.norms === false) item.norm.n = 0;      // content with no platform history yet
     sec.items[item.id] = item;
     sec.itemList.push(item);
     return item;
@@ -185,16 +194,21 @@
 
   function assessable(sub) { return sub.skills.filter(function (s) { return sub.taughtOnly.indexOf(s) < 0; }); }
 
+  function typeMix(sec, lang) {
+    return sec.spec.noCode ? TYPE_MIX[lang].filter(function (x) { return x[0] !== 'activecode'; }) : TYPE_MIX[lang];
+  }
+
   function itemsForSub(world, sec, rng, tb, sub) {
     var out = [], pool = assessable(sub), sig = C.signature[sub.id] || [];
     sig.forEach(function (s) {
+      if (sec.spec.noCode && s.type === 'activecode') return;
       out.push(newItem(world, sec, rng, { tb: tb.id, chapter: sub.chapter, sub: sub.id, subCode: sub.code, name: s.name, type: s.type, dok: s.dok,
         skills: [tb.set + ':' + s.skill], b: s.b, n: s.n, key: s.key, wrong: s.wrong, dominant: s.dominant, labels: s.labels, stem: s.stem,
         tests: s.tests, hard: s.hard, err: s.err, stage: s.stage }));
     });
     var k = 0;
     while (out.length < tb.perSub) {
-      var type = tb.itemType || pickWeighted(rng, TYPE_MIX[tb.lang]);
+      var type = tb.itemType || pickWeighted(rng, typeMix(sec, tb.lang));
       var dok = 1 + rng.weighted(DOK_MIX[type]);
       var main = pool[k % pool.length];
       var skills = [main];
@@ -234,7 +248,7 @@
       ch.subs.slice(0, spec.opened[num]).forEach(function (s) { sec.openedSubs.push(s); });
     });
     var days = [];
-    for (var w = 0; w < WEEKS; w++) {
+    for (var w = spec.startWeek || 0; w < WEEKS; w++) {
       if (spec.quietWeeks.indexOf(w) >= 0) continue;
       spec.lessonDows.forEach(function (d) { days.push(w * 7 + d); });
     }
@@ -242,6 +256,12 @@
     sec.openedSubs.forEach(function (sub, i) {
       var idx = perChapter[sub.chapterNum] = (perChapter[sub.chapterNum] == null ? 0 : perChapter[sub.chapterNum] + 1);
       var items = itemsForSub(world, sec, rng, primary, sub);
+      // self-paced: the subunit is simply open from the start, with no due date and nothing "assigned"
+      if (spec.selfPaced) {
+        addAssignment(sec, { name: sub.code + ': ' + sub.name, short: sub.code + ' ' + sub.name, kind: 'free', tb: primary.id, chapter: sub.chapter, chapterNum: sub.chapterNum,
+          sub: sub.id, day: 0, dueDay: 9999, items: items.map(function (x) { return x.id; }), eligible: eligibleOn(sec, 0), lessonIdx: i, idxInChapter: idx, points: 0 });
+        return;
+      }
       addAssignment(sec, { name: 'ALPS ' + sub.code + ': ' + sub.name, short: sub.code + ' ' + sub.name, kind: 'lesson', tb: primary.id, chapter: sub.chapter, chapterNum: sub.chapterNum,
         sub: sub.id, day: days[i], dueDay: days[i] + spec.dueAfter, items: items.map(function (x) { return x.id; }), eligible: eligibleOn(sec, days[i]), lessonIdx: i, idxInChapter: idx, points: 10 });
     });
@@ -271,7 +291,7 @@
       for (var i = 0; i < s.n; i++) {
         var pk = pool[(i * 3 + 1) % pool.length];
         var frq = s.frq && i < s.frq;   // written questions come first, so most students reach them
-        var type = frq ? 'shortanswer' : s.kind === 'quiz' ? (rng.chance(0.8) ? 'mchoice' : 'fillintheblank') : pickWeighted(rng, TYPE_MIX[primary.lang]);
+        var type = frq ? 'shortanswer' : s.kind === 'quiz' ? (rng.chance(0.8) ? 'mchoice' : 'fillintheblank') : pickWeighted(rng, typeMix(sec, primary.lang));
         items.push(newItem(world, sec, rng, { tb: primary.id, chapter: chapter.id, sub: pk[0].id, subCode: pk[0].code,
           name: (frq ? 'Free response · ' : s.kind === 'quiz' ? 'Test · ' : 'Review · ') + world.skills[pk[1]].name,
           type: type, dok: frq ? 3 : 1 + rng.weighted(DOK_MIX[type]), skills: [pk[1]] }));
@@ -415,6 +435,11 @@
   function startTime(sec, st, a, rng) {
     var spec = sec.spec, late = st.late, w;
     if (a.kind === 'quiz') return { t: T.at(a.day, spec.classHour, rng.int(2, 8)), inClass: true };
+    // self-paced: each student reaches a subunit at their own rate, at whatever hour suits them
+    if (a.kind === 'free') {
+      var stride = 3.7 * (0.72 + 2.1 * late + 0.25 * (st.pace - 1));
+      return { t: T.at(Math.round(a.lessonIdx * U.clamp(stride, 1.9, 9) + rng.int(0, 2)), rng.int(15, 21), rng.int(0, 59)), inClass: false };
+    }
     if (a.kind === 'action') w = [0.55, 0.3, 0.12, 0.03];
     else if (spec.mode === 'in-class') w = [Math.max(0.1, 0.8 - 0.62 * late), 0.13, 0.04 + 0.3 * late, 0.03 + 0.32 * late];
     else w = [Math.max(0.08, 0.5 - 0.35 * late), 0.26, 0.13 + 0.12 * late, 0.11 + 0.2 * late];
@@ -428,7 +453,7 @@
 
   function nextStart(sec, t, wasInClass, rng) {
     var day = T.day(t);
-    if (wasInClass && rng.chance(0.5)) {
+    if (wasInClass && sec.spec.classDows.length && rng.chance(0.5)) {
       var d = day + 1;
       while (!isClassDay(sec, d)) d++;
       return { t: T.at(d, sec.spec.classHour, rng.int(2, 10)), inClass: true };
@@ -461,7 +486,7 @@
       var all = rng.chance(finishProb(sec, st, a));
       var k = all ? a.items.length : Math.max(1, Math.round(a.items.length * rng.range(0.25, 0.8)));
       var end = sessionEnd(sec, s, rng), inClass = s.inClass;
-      if (a.kind === 'lesson' || a.kind === 'supp') {
+      if (a.kind === 'lesson' || a.kind === 'supp' || a.kind === 'free') {
         var rd = U.clamp(rng.lognormal(3.6, 0.5) * st.pace, 1, 12);
         sec.reads.push({ sid: sid, t: t + rd, dur: Math.round(rd * 60), asg: a.id });
         t += rd;
@@ -530,7 +555,7 @@
       var a = addAssignment(sec, { name: ac.title, short: ac.title, kind: 'action', tb: primary.id, chapter: sub.chapter, chapterNum: sub.chapterNum, sub: sub.id,
         day: ac.day + 1, dueDay: ac.day + 4, items: items.map(function (x) { return x.id; }), eligible: pool, use: ac.who === 'class' ? 0.95 : 0.99,
         audience: ac.who === 'class' ? null : 'group of ' + pool.length, points: 0, action: action.id });
-      while (!isClassDay(sec, a.day)) { a.day++; a.dueDay++; a.dueT = T.at(a.dueDay, 23, 59); }
+      while (sec.spec.classDows.length && !isClassDay(sec, a.day)) { a.day++; a.dueDay++; a.dueT = T.at(a.dueDay, 23, 59); }
       action.asg = a.id;
       var skipOne = ac.who === 'class' ? null : pool[pool.length - 1];
       var flat = ac.who === 'class' ? null : pool[pool.length - 2];
@@ -632,6 +657,7 @@
   function buildSection(world, spec) {
     var rng = IL.rng(spec.seed);
     var sec = { id: spec.id, spec: spec, name: spec.name, period: spec.period, teacher: spec.teacher, set: spec.set, bands: spec.bands, mode: spec.mode,
+      group: spec.group || 'mine', shape: spec.shape || null, graph: spec.graph !== false, selfPaced: !!spec.selfPaced, startWeek: spec.startWeek || 0,
       textbooks: spec.textbooks.map(function (x) { return { tb: world.textbooks[x.id], role: x.role }; }),
       items: {}, itemList: [], assignments: [], records: [], recIndex: new Map(), reads: [] };
     makeStudents(sec, spec, rng);
@@ -640,6 +666,7 @@
     sec.all.forEach(function (st) {
       if (!st.persona.streak) return;
       var last = sec.lessonCount - 1;
+      if (last < 3) return;
       if (st.persona.streak === 1) { st.skip[last] = st.skip[last - 1] = st.skip[last - 2] = true; }
       else { st.skip[last - 1] = st.skip[last - 2] = true; }
     });

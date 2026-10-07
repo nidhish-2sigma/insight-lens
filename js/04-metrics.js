@@ -29,7 +29,10 @@
     var b = {}, now = world.now, today = T.day(now), nowWeek = T.week(now);
     b.roster = sec.roster.filter(function (s) { return s.joined <= today; });
     b.rset = {}; b.roster.forEach(function (s) { b.rset[s.id] = true; });
-    b.minN = Math.max(5, Math.ceil(0.4 * b.roster.length));
+    var N0 = b.roster.length;
+    b.minN = Math.max(3, Math.ceil(0.4 * N0));
+    // "a few students" scales with the class: a share of the roster, never fewer than the floor
+    b.few = function (share, floor) { return Math.max(floor == null ? 2 : floor, Math.ceil(share * N0)); };
     // weekly activity
     b.weekActive = []; b.dayActive = {};
     for (var w = 0; w < nowWeek; w++) b.weekActive.push({});
@@ -43,9 +46,11 @@
     });
     b.classWeek = b.weekActive.map(function (m, wk) {
       var enrolled = b.roster.filter(function (s) { return s.joined <= wk * 7 + 6; }).length;
-      return Object.keys(m).length >= 0.6 * enrolled;
+      return enrolled > 0 && Object.keys(m).length >= 0.6 * enrolled;
     });
     b.classWeeks = []; b.classWeek.forEach(function (c, wk) { if (c) b.classWeeks.push(wk); });
+    // the section's own first week: a class that began late is not "quiet" before it existed
+    b.firstWeek = b.roster.length ? Math.floor(Math.min.apply(null, b.roster.map(function (s) { return s.joined; })) / 7) : 0;
     b.lastClassWeek = b.classWeeks[b.classWeeks.length - 1];
     // inferred class sessions: clock hours where at least 40% of the roster (min 5) were active
     var slot = {};
@@ -57,7 +62,7 @@
     });
     b.sessions = {}; b.sessionDays = {};
     Object.keys(slot).forEach(function (k) {
-      if (slot[k].length >= Math.max(5, 0.4 * b.roster.length)) { b.sessions[k] = slot[k].length; b.sessionDays[k.split(':')[0]] = true; }
+      if (slot[k].length >= Math.max(3, Math.ceil(0.4 * b.roster.length))) { b.sessions[k] = slot[k].length; b.sessionDays[k.split(':')[0]] = true; }
     });
     // per-item class totals (rostered students, graded first tries)
     b.itemAgg = {};
@@ -66,9 +71,31 @@
       var a = b.itemAgg[r.item] || (b.itemAgg[r.item] = { n: 0, ok: 0, ever: 0 });
       a.n++; if (first(r).ok) a.ok++; if (ever(r)) a.ever++;
     });
-    b.live = sec.assignments.filter(function (a) { return Object.keys(sec.asgWork[a.id]).length > 0; });
-    b.zeroStart = sec.assignments.filter(function (a) { return Object.keys(sec.asgWork[a.id]).length === 0 && a.dueT < now; });
+    // "free" work is self-paced practice with no due date: it is real work, never an assignment
+    b.live = sec.assignments.filter(function (a) { return a.kind !== 'free' && Object.keys(sec.asgWork[a.id]).length > 0; });
+    b.zeroStart = sec.assignments.filter(function (a) { return a.kind !== 'free' && Object.keys(sec.asgWork[a.id]).length === 0 && a.dueT < now; });
+    b.lessons = sec.assignments.filter(function (a) { return a.kind === 'lesson' || a.kind === 'free'; });
     b.primary = sec.textbooks[0].tb;
+    // first day each student touched each subunit (used for the frontier order)
+    b.firstTouch = {};
+    sec.records.forEach(function (r) {
+      var k = r.sid + '|' + sec.items[r.item].sub, d = T.day(first(r).t);
+      if (b.firstTouch[k] == null || d < b.firstTouch[k]) b.firstTouch[k] = d;
+    });
+    // what this section's data can support; every insight declares which of these it needs
+    var its = sec.itemList.filter(function (it) { return !it.action; });
+    b.caps = {
+      bands: !!sec.bands,
+      norms: its.some(function (it) { return it.norm.n >= NORM_MIN_LEARNERS; }),
+      graph: sec.graph !== false,
+      assignments: b.live.some(function (a) { return a.kind !== 'action'; }),
+      code: its.some(function (it) { return it.type === 'activecode' && it.code.graded; }),
+      multiTb: sec.textbooks.length > 1,
+      weeks2: b.classWeeks.length >= 2,
+      weeks4: b.classWeeks.length >= 4,
+      sessions: Object.keys(b.sessions).length > 0,
+      work: sec.records.length > 0
+    };
     sec._b = b;
     return b;
   }
@@ -80,9 +107,13 @@
     if (win === '1w') return cw.length ? cw[cw.length - 1] * 7 * 1440 : 0;
     if (win === '30d') return world.now - 30 * 1440;
     if (win === 'unit') {
-      var lessons = sec.assignments.filter(function (a) { return a.kind === 'lesson'; });
-      var cur = lessons[lessons.length - 1].chapter;
-      return T.at(lessons.filter(function (a) { return a.chapter === cur; })[0].day, 0, 0);
+      var lessons = b.lessons;
+      if (!lessons.length) return 0;
+      var cur = lessons[lessons.length - 1].chapter, inCur = {};
+      lessons.forEach(function (a) { if (a.chapter === cur) inCur[a.sub] = true; });
+      // the unit starts when the class first touched it (a self-paced unit has no assigned day)
+      var firsts = Object.keys(b.firstTouch).filter(function (k) { return inCur[k.split('|')[1]]; }).map(function (k) { return b.firstTouch[k]; });
+      return firsts.length ? T.at(Math.min.apply(null, firsts), 0, 0) : 0;
     }
     return cw.length >= 2 ? cw[cw.length - 2] * 7 * 1440 : 0;
   }
@@ -112,7 +143,9 @@
     var recs = sec.records.filter(function (r) { return b.rset[r.sid] && inTb(items[r.item]); });
     var winRecs = recs.filter(function (r) { return first(r).t >= from; });
     var gradedRecs = recs.filter(graded), gradedWin = winRecs.filter(graded);
-    var m = { scope: scope, from: from, roster: roster, minN: b.minN, b: b };
+    var m = { scope: scope, from: from, roster: roster, minN: b.minN, b: b, caps: b.caps };
+    var graphOn = b.caps.graph;
+    var prereqsOf = function (sk0) { return graphOn ? sk0.prereqs : []; }, dependentsOf = function (sk0) { return graphOn ? sk0.dependents : []; };
     var recsByStudent = U.groupBy(recs, function (r) { return r.sid; });
     var winByStudent = U.groupBy(winRecs, function (r) { return r.sid; });
     var name = function (sid) { return byId[sid].name; };
@@ -235,7 +268,7 @@
         var firstDays = [];
         if (open.length) roster.forEach(function (s) {
           var d = null;
-          sec.records.forEach(function (r) { if (r.sid === s.id && u.subs.some(function (sb) { return sb.id === items[r.item].sub; })) { var dd = T.day(first(r).t); if (d == null || dd < d) d = dd; } });
+          u.subs.forEach(function (sb) { var dd = b.firstTouch[s.id + '|' + sb.id]; if (dd != null && (d == null || dd < d)) d = dd; });
           if (d != null) firstDays.push(d);
         });
         lane.units.push({ id: u.id, num: u.num, name: u.name, subsOpen: open.length, subsAll: u.subs.length,
@@ -298,10 +331,11 @@
       active: { n: Object.keys(act).length, of: N, dots: roster.map(function (s) { return { sid: s.id, on: !!act[s.id] }; }),
         spark: weeks8.map(function (wk) { return Object.keys(b.weekActive[wk]).length; }), sparkClass: weeks8.map(function (wk) { return b.classWeek[wk]; }) },
       work: { onTime: U.sum(dueWin.map(function (x) { return x.onTime.length; })), late: U.sum(dueWin.map(function (x) { return x.lateStart.length; })),
-        none: U.sum(dueWin.map(function (x) { return x.notStarted.length; })), cells: U.sum(dueWin.map(function (x) { return x.eligible.length; })), assignments: dueWin.length },
+        none: U.sum(dueWin.map(function (x) { return x.notStarted.length; })), cells: U.sum(dueWin.map(function (x) { return x.eligible.length; })), assignments: dueWin.length,
+        completed: U.sum(dueWin.map(function (x) { return x.completed.length; })) },
       fts: { p: rate(gradedWin.filter(function (r) { return first(r).ok; }).length, gradedWin.length), n: gradedWin.length,
         norm: normWin.length ? U.mean(normWin.map(function (r) { return items[r.item].norm.p; })) : null,
-        classOnNorm: normWin.length ? rate(normWin.filter(function (r) { return first(r).ok; }).length, normWin.length) : null,
+        classOnNorm: normWin.length ? rate(normWin.filter(function (r) { return first(r).ok; }).length, normWin.length) : null, nn: normWin.length,
         spark: weeks8.map(function (wk) { return ftsWeek(wk).p; }) },
       waiting: m.waiting
     };
@@ -356,13 +390,25 @@
     m.skill = sk;
     var weak = Object.keys(sk).filter(function (sid) { return sk[sid].solid && sk[sid].p < WEAK; });
     var weakSet = {}; weak.forEach(function (s) { weakSet[s] = true; });
-    m.gaps = { weak: weak.length, solid: Object.keys(sk).filter(function (s) { return sk[s].solid; }).length, roots: [] };
+    m.gaps = { weak: weak.length, solid: Object.keys(sk).filter(function (s) { return sk[s].solid; }).length, roots: [], graph: graphOn };
+    // A dependent skill only "waits" on a gap if the class will reach it: it sits in an attached textbook,
+    // in a unit the class has not skipped. Skills in a skipped unit are counted apart, never in the rank.
+    var skippedUnits = {}, attachedSubs = {};
+    m.frontier.forEach(function (lane) { lane.units.forEach(function (u) { if (u.skipped) skippedUnits[u.id] = true; }); });
+    sec.textbooks.forEach(function (x) { Object.keys(x.tb.subs).forEach(function (id) { attachedSubs[id] = x.tb.subs[id]; }); });
+    function reachState(skillId) {
+      var s0 = world.skills[skillId], subs = s0.taught.concat(s0.assessed).map(function (id) { return attachedSubs[id]; }).filter(Boolean);
+      if (!subs.length) return 'absent';
+      return subs.some(function (sb) { return !skippedUnits[sb.chapter] && !skippedUnits[sb.id]; }) ? 'ahead' : 'skipped';
+    }
     weak.forEach(function (sid) {
-      var s = world.skills[sid];
-      if (s.prereqs.some(function (p) { return weakSet[p]; })) return;
-      var blocked = s.dependents.filter(function (d) { return !sk[d]; });
+      var s = world.skills[sid], deps = dependentsOf(s);
+      if (prereqsOf(s).some(function (p) { return weakSet[p]; })) return;
+      var waiting = deps.filter(function (d) { return !sk[d]; });
+      var blocked = waiting.filter(function (d) { return reachState(d) === 'ahead'; });
+      var inSkipped = waiting.filter(function (d) { return reachState(d) === 'skipped'; });
       var hop2 = {};
-      s.dependents.forEach(function (d) { world.skills[d].dependents.forEach(function (d2) { if (!sk[d2]) hop2[d2] = true; }); });
+      deps.forEach(function (d) { dependentsOf(world.skills[d]).forEach(function (d2) { if (!sk[d2] && reachState(d2) === 'ahead') hop2[d2] = true; }); });
       blocked.forEach(function (d) { hop2[d] = true; });
       var below = [];
       roster.forEach(function (st) {
@@ -370,11 +416,11 @@
         (recsByStudent.get(st.id) || []).forEach(function (r) {
           if (!graded(r)) return;
           var its = items[r.item].skills;
-          if (its.indexOf(sid) >= 0 || its.some(function (x) { return s.dependents.indexOf(x) >= 0; })) { n++; if (first(r).ok) ok++; }
+          if (its.indexOf(sid) >= 0 || its.some(function (x) { return deps.indexOf(x) >= 0; })) { n++; if (first(r).ok) ok++; }
         });
         if (n >= 3 && ok / n < WEAK) below.push({ sid: st.id, n: n, ok: ok });
       });
-      m.gaps.roots.push({ skill: s, stat: sk[sid], blocked: blocked, hop2: Object.keys(hop2), dependents: s.dependents, below: below,
+      m.gaps.roots.push({ skill: s, stat: sk[sid], blocked: blocked, inSkipped: inSkipped, hop2: Object.keys(hop2), dependents: deps, below: below,
         items: Object.keys(sk[sid].items).map(function (id) { return items[id]; }) });
     });
     m.gaps.roots.sort(function (x, y) { return (y.blocked.length - x.blocked.length) || (y.hop2.length - x.hop2.length) || (x.stat.p - y.stat.p); });
@@ -444,7 +490,8 @@
       g.forEach(function (r) { picks[first(r).pick].push(r.sid); });
       var correct = picks[it.opts.key].length, wrong = g.length - correct, top = -1;
       picks.forEach(function (p, idx) { if (idx !== it.opts.key && (top < 0 || p.length > picks[top].length)) top = idx; });
-      var tier = picks[top].length >= correct && picks[top].length >= 3 ? 1 : (picks[top].length >= 3 && picks[top].length / wrong >= 0.5 && wrong / g.length >= 0.3) ? 2 : 0;
+      var fewPick = b.few(0.09, 2);
+      var tier = picks[top].length >= correct && picks[top].length >= fewPick ? 1 : (picks[top].length >= fewPick && picks[top].length / wrong >= 0.5 && wrong / g.length >= 0.3) ? 2 : 0;
       if (tier) m.reteach.push({ item: it, n: g.length, correct: correct, wrong: wrong, picks: picks, top: top, tier: tier, day: T.day(U.median(g.map(function (r) { return first(r).t; }))) });
     });
     m.reteach.sort(function (x, y) { return (x.tier - y.tier) || (y.picks[y.top].length / y.n - x.picks[x.top].length / x.n); });
@@ -478,9 +525,9 @@
       var it = items[itemId];
       if (it.type !== 'activecode' || !it.code.graded || !inWindow(itemId)) return;
       var g = rs.filter(graded);
-      if (g.length < Math.max(5, b.minN - 4)) return;
+      if (g.length < Math.max(3, Math.round(0.27 * N))) return;
       var o = codeStat(it, g);
-      if (o.failing.length >= 3 && o.failing.length / o.n >= 0.25) m.code.push(o);
+      if (o.failing.length >= b.few(0.09, 2) && o.failing.length / o.n >= 0.25) m.code.push(o);
     });
     m.code.sort(U.by(function (x) { return x.failing.length / x.n; }, true));
 
@@ -575,7 +622,7 @@
       for (var d = 3; d < series.length; d++) {
         var trail = U.mean(series.slice(Math.max(0, d - 4), d).map(function (x) { return x.gap; }));
         series[d].trail = trail;
-        if (series[d].n >= 150 && series[d].gap <= trail - 0.08) series[d].dip = true;
+        if (series[d].n >= Math.max(30, Math.round(4.7 * N)) && series[d].gap <= trail - 0.08) series[d].dip = true;
       }
       var lastS = series[series.length - 1], prevS = series[series.length - 2];
       var hit = lastS.dip ? lastS : prevS && prevS.dip ? prevS : null;
@@ -583,7 +630,7 @@
         var wkRecs = gradedRecs.filter(function (r) { return T.week(first(r).t) === hit.week && items[r.item].norm.n >= NORM_MIN_LEARNERS; });
         var bySub = U.groupBy(wkRecs, function (r) { return items[r.item].sub; }), fell = [];
         bySub.forEach(function (rs, subId) {
-          if (rs.length < 30) return;
+          if (rs.length < Math.max(10, Math.round(0.95 * N))) return;
           fell.push({ sub: world.textbooks[items[rs[0].item].tb].subs[subId], n: rs.length, gap: U.mean(rs.map(function (r) { return (first(r).ok ? 1 : 0) - items[r.item].norm.p; })) });
         });
         m.dip.flagged = { point: hit, fell: fell.sort(U.by(function (x) { return x.gap; })).slice(0, 3) };
@@ -591,7 +638,7 @@
     }
 
     // ----- engagement -----
-    m.rhythm = { weeks: b.weekActive.map(function (wkMap, wk) { return { week: wk, active: Object.keys(wkMap).length, classWeek: b.classWeek[wk] }; }), days: [] };
+    m.rhythm = { weeks: b.weekActive.map(function (wkMap, wk) { return { week: wk, active: Object.keys(wkMap).length, classWeek: b.classWeek[wk] }; }).filter(function (x) { return x.week >= b.firstWeek; }), days: [], firstWeek: b.firstWeek };
     for (var dd = 0; dd < b.weekActive.length * 7; dd++) m.rhythm.days.push(Object.keys(b.dayActive[dd] || {}).length);
     m.quiet = [];
     roster.forEach(function (s) {
@@ -631,10 +678,12 @@
     m.when.sessDaysWin = sessDaysWin.sort(function (x, y) { return x - y; });
     // activity map
     var medMin = m.medianMinutes, medF = m.medianFts;
-    m.map = { medMin: medMin, medFts: medF, dots: [], low: [], quads: { tl: [], tr: [], bl: [], br: [] } };
+    m.map = { medMin: medMin, medFts: medF, dots: [], low: [], away: [], quads: { tl: [], tr: [], bl: [], br: [] } };
     roster.forEach(function (s) {
       var x = stu[s.id];
       if (x.never) return;
+      // no recent activity or too little evidence: not placed, rather than placed somewhere flattering
+      if (x.quietRun >= 2) { m.map.away.push(s.id); return; }
       if (x.n < MIN_STUDENT_N) { m.map.low.push(s.id); return; }
       var q = (x.fts >= medF ? 't' : 'b') + (x.minutes >= medMin ? 'r' : 'l');
       m.map.dots.push({ sid: s.id, x: x.minutes, y: x.fts, q: q });
@@ -685,7 +734,7 @@
           span: (last.t - (first(r).t - first(r).dur / 60)), err: prevErr });
       }
     });
-    m.stuck.sort(U.by(function (x) { return x.runs; }, true));
+    m.stuck.sort(function (x, y) { return (x.lastOk - y.lastOk) || (y.runs - x.runs); });
     m.help = { feedback: sec.feedback.filter(function (f) { return b.rset[f.sid]; }), questions: m.waiting.questions };
     m.help.seen = m.help.feedback.filter(function (f) { return f.seen; }).length;
     m.markers = sec.markers;
@@ -710,10 +759,13 @@
     if (mainLane && !mainLane.tb.supplemental) {
       var allSubs = [], lastIdx = -1;
       mainLane.tb.chapters.forEach(function (c) { c.subs.forEach(function (s) { allSubs.push(s); }); });
-      var lastLesson = sec.assignments.filter(function (a) { return a.kind === 'lesson'; }).slice(-1)[0];
-      allSubs.forEach(function (s, i) { if (s.id === lastLesson.sub) lastIdx = i; });
-      var nxt = allSubs[lastIdx + 1];
-      if (nxt) {
+      // the furthest subunit at least half the class has touched (assigned or self-paced)
+      var touchedBy = {};
+      Object.keys(b.firstTouch).forEach(function (k) { var p = k.split('|'); if (b.rset[p[0]]) touchedBy[p[1]] = (touchedBy[p[1]] || 0) + 1; });
+      var lastLesson = b.lessons.filter(function (a) { return (touchedBy[a.sub] || 0) >= 0.5 * N; }).slice(-1)[0];
+      if (lastLesson) allSubs.forEach(function (s, i) { if (s.id === lastLesson.sub) lastIdx = i; });
+      var nxt = lastLesson ? allSubs[lastIdx + 1] : null;
+      if (nxt && graphOn) {
         var pre = {};
         nxt.skills.forEach(function (sid) { world.skills[sid].prereqs.forEach(function (p) { if (nxt.skills.indexOf(p) < 0) pre[p] = true; }); });
         var rows = Object.keys(pre).map(function (sid) {
@@ -733,7 +785,7 @@
 
     // ----- follow-ups: what happened after each action -----
     m.followups = (sec.actions || []).concat(IL.state && IL.state.actions ? IL.state.actions.filter(function (a) { return a.sec === sec.id; }) : []).map(function (ac) {
-      var o = { action: ac, rows: [], improved: 0, same: 0, noWork: 0 };
+      var o = { action: ac, rows: [], improved: 0, same: 0, firstEvidence: 0, noWork: 0 };
       var a = ac.asg ? sec.assignments.filter(function (x) { return x.id === ac.asg; })[0] : null;
       if (ac.kind === 'check-in') {
         ac.students.forEach(function (sid) { var x = stu[sid]; o.rows.push({ sid: sid, state: x && x.lastDay != null && x.lastDay > ac.day ? 'active' : 'quiet', lastDay: x ? x.lastDay : null }); });
@@ -750,7 +802,7 @@
           else if (!it.action && first(r).t < ac.t && it.skills.some(function (s) { return ac.skills.indexOf(s) >= 0; })) { before.n++; if (first(r).ok) before.ok++; }
         });
         var state = after.n < 3 ? 'none' : before.n < 2 ? 'new' : after.ok / after.n - before.ok / before.n >= 0.15 ? 'improved' : 'same';
-        if (state === 'improved') o.improved++; else if (state === 'none') o.noWork++; else o.same++;
+        if (state === 'improved') o.improved++; else if (state === 'none') o.noWork++; else if (state === 'new') o.firstEvidence++; else o.same++;
         o.rows.push({ sid: sid, before: before, after: after, state: state });
       });
       var bb = { n: 0, ok: 0 }, aa = { n: 0, ok: 0 };
@@ -791,12 +843,23 @@
   M.BANDS = ['Beginning', 'Attempted', 'Familiar', 'Proficient', 'Mastered'];
   M.ENG = ['Pending', 'Low', 'Medium', 'High', 'Very high'];
 
-  // Tint channel for a grid cell: the band when one exists, otherwise first-try success.
+  // Tint channel for a grid cell. Colour and the printed number are the same quantity, first-try success,
+  // in every section; where a band exists it is given in the tooltip and the drawer, never as the colour.
   M.FTS_BANDS = ['under 35%', '35 to 50%', '50 to 65%', '65 to 80%', '80% and over'];
   M.tint = function (c) {
-    if (c.band && c.band.state === 'scored') return c.band.level;
     if (c.n >= 3) return c.fts < 0.35 ? 0 : c.fts < 0.5 ? 1 : c.fts < 0.65 ? 2 : c.fts < 0.8 ? 3 : 4;
     return null;
+  };
+
+  // One definition of "against typical", used by every tile, card and sentence that makes the comparison.
+  // p and norm are both first-try rates on the same questions.
+  M.vsTypical = function (p, norm) {
+    if (p == null) return { gap: null, word: 'no work yet', tone: '', points: null };
+    if (norm == null) return { gap: null, word: 'no typical results to compare with yet', tone: '', points: null };
+    var gap = p - norm, pts = Math.round(Math.abs(gap) * 100);
+    var word = gap <= -0.12 ? 'well below typical' : gap <= -0.05 ? 'below typical' : gap >= 0.05 ? 'above typical' : 'near typical';
+    return { gap: gap, points: pts, word: word, tone: gap <= -0.12 ? 'bad' : gap <= -0.05 ? 'warn' : gap >= 0.05 ? 'good' : '',
+      phrase: pts === 0 ? 'level with typical' : pts + (pts === 1 ? ' point ' : ' points ') + (gap < 0 ? 'below' : 'above') + ' typical' };
   };
 
   // student × column grid for one textbook.
@@ -876,20 +939,52 @@
       banded: sec.bands && level === 'chapter' };
   };
 
+  // Names for the four groups on the activity map. The same words are used wherever a group is named.
+  M.QUAD = { tl: 'Getting it without spending long', tr: 'On track', bl: 'Little recorded work', br: 'Putting in the time, not landing it' };
+
+  // One-line reading of a grid cell. It is built on first-try success against the class, the same quantity
+  // the cell's colour and number show; a band, where one exists, is reported alongside and never decides it.
   M.verdict = function (cell, classFts) {
     var low, busy = cell.eng >= 3, perf;
     if (!cell.n && !cell.correct && !cell.error && !cell.pending) return null;
-    if (cell.band.state === 'scored') { low = cell.band.level <= 2; perf = M.BANDS[cell.band.level]; if (low && cell.band.coverage < 50) return { tone: 'info', title: 'Early in the unit', body: cell.band.coverage + '% of this unit scored so far, at ' + M.ENG[cell.eng].toLowerCase() + ' activity. The band is ' + perf.toLowerCase() + '; it reflects how far the student is as well as how well.' }; }
-    else if (cell.n >= 5 && classFts != null) { low = cell.fts <= classFts - 0.08; perf = Math.round(cell.fts * 100) + '% first try'; }
-    else return null;
-    var eng = M.ENG[cell.eng].toLowerCase();
-    if (low && busy) return { tone: 'warn', title: 'Putting in the time, not landing it', body: eng.charAt(0).toUpperCase() + eng.slice(1) + ' recorded activity, ' + perf.toLowerCase() + '. The work is being done and it is not converting.' };
-    if (low && !busy) return { tone: 'muted', title: 'Little recorded work in this unit', body: eng.charAt(0).toUpperCase() + eng.slice(1) + ' recorded activity, ' + perf.toLowerCase() + '. Few wrong answers to review, because little was attempted.' };
-    if (!low && !busy) return { tone: 'good', title: 'Getting it without spending long', body: perf + ' on ' + eng + ' recorded activity. May be ready to move on.' };
-    return { tone: 'info', title: 'On track', body: perf + ', ' + eng + ' recorded activity.' };
+    if (cell.n < 5 || classFts == null) return null;
+    low = cell.fts <= classFts - 0.08; perf = Math.round(cell.fts * 100) + '% right first time (class ' + Math.round(classFts * 100) + '%)';
+    var eng = M.ENG[cell.eng].toLowerCase(), Eng = eng.charAt(0).toUpperCase() + eng.slice(1);
+    if (cell.band.state === 'scored' && low && cell.band.coverage < 50) return { tone: 'info', title: 'Early in the unit', body: perf + ' with ' + cell.band.coverage + '% of the unit scored so far. Too early to read much into it.' };
+    if (low && busy) return { tone: 'warn', title: M.QUAD.br, body: Eng + ' recorded activity, ' + perf + '. The work is being done and it is not converting.' };
+    if (low && !busy) return { tone: 'muted', title: 'Little recorded work in this unit', body: Eng + ' recorded activity, ' + perf + '. Few wrong answers to review, because little was attempted.' };
+    if (!low && !busy) return { tone: 'good', title: M.QUAD.tl, body: perf + ' on ' + eng + ' recorded activity. May be ready to move on.' };
+    return { tone: 'info', title: M.QUAD.tr, body: perf + ', ' + eng + ' recorded activity.' };
   };
 
   // evidence for one student in one grid cell (the cell inspector), at any of the three levels
+  // Progress through one textbook at any level of its outline: who is done (80% or more of the work, weighted
+  // by time, exactly as the chapter level counts it), in progress, or not started.
+  // path: [] chapters · [chapterId] subunits · [chapterId, subId] the skills of that subunit
+  M.progress = function (world, sec, tbId, path) {
+    var b = basics(world, sec), g = M.grid(world, sec, tbId, path), out = {};
+    var opened = {}; sec.openedSubs.forEach(function (s) { opened[s.id] = true; });
+    g.cols.forEach(function (col) {
+      var its, total;
+      if (col.kind === 'skill') { its = col.its; total = U.sum(its.map(function (it) { return it.est; })); }
+      else {
+        var open = col.subs.filter(function (s) { return opened[s.id]; }), set = {};
+        open.forEach(function (s) { set[s.id] = true; });
+        its = sec.itemList.filter(function (it) { return set[it.sub] && !it.action; });
+        var w = U.sum(its.map(function (it) { return it.est; }));
+        total = w + (col.subs.length - open.length) * (open.length ? w / open.length : 0);
+      }
+      var o = { done: [], inProgress: [], notStarted: [] };
+      b.roster.forEach(function (s) {
+        var solved = 0, touched = 0;
+        its.forEach(function (it) { var r = sec.recIndex.get(s.id + ':' + it.id); if (r) { touched++; if (ever(r)) solved += it.est; } });
+        (touched === 0 ? o.notStarted : total && Math.round((100 * solved) / total) >= 80 ? o.done : o.inProgress).push(s.id);
+      });
+      out[col.id] = o;
+    });
+    return { grid: g, by: out };
+  };
+
   M.cell = function (world, sec, sid, tbId, colId, path) {
     var tb = world.textbooks[tbId], items = sec.items;
     if (path == null) {
