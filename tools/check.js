@@ -199,7 +199,8 @@ check('all sections', 'class sizes span under 10 to over 100', Math.min(...sizes
 
 // Static rules for the screen: no text under 12px, and text colours meet 4.5:1 on the surfaces they sit on
 const root = path.join(__dirname, '..'), css = fs.readFileSync(path.join(root, 'css', 'lens.css'), 'utf8');
-const sources = { 'css/lens.css': css };
+const sources = {};
+fs.readdirSync(path.join(root, 'css')).forEach(f => { sources['css/' + f] = fs.readFileSync(path.join(root, 'css', f), 'utf8'); });
 fs.readdirSync(path.join(root, 'js')).forEach(f => { sources['js/' + f] = fs.readFileSync(path.join(root, 'js', f), 'utf8'); });
 Object.keys(sources).forEach(f => {
   const small = [];
@@ -216,6 +217,75 @@ const col = k => k.startsWith('#') ? k : vars[k];
   const a = col(pair[0]), b = col(pair[1]);
   check('css/lens.css', `text ${pair[0]} on ${pair[1]} meets 4.5:1`, !!a && !!b && ratio(a, b) >= 4.5, a && b ? ratio(a, b).toFixed(2) : 'colour not found');
 });
+
+// The Course Atlas screens (index.html) answer their colour names from the same theme: the same two rules, on its stylesheet
+const atlas = sources['css/atlas.css'], av = {};
+atlas.replace(/(--[a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})\b/g, (all, k, v) => { av[k] = v; return all; });
+const acol = k => k.startsWith('#') ? k : av[k];
+[['--ink', '--surface'], ['--ink-2', '--surface'], ['--muted', '--surface'], ['--muted', '--page'], ['--muted', '--wash'], ['--muted', '--surface-2'], ['--muted', '--accent-soft'], ['--link', '--surface'],
+  ['#ffffff', '--link'], ['#ffffff', '--ink'], ['--blue-ink', '--blue-tint'], ['--red-ink', '--red-tint'], ['--red-ink', '--surface'], ['--amber-ink', '--amber-tint'], ['--green-ink', '--green-tint'],
+  ['#ffffff', '--ink-2'], ['#ffffff', '--blue'], ['--blue-ink', '--surface'],
+  ['--ct4', '--c4'], ['--ct3', '--c3'], ['--ft1', '--f1'], ['--ft2', '--f2'], ['--ft3', '--f3'], ['--ft4', '--f4'], ['--ft5', '--f5'], ['--on-mas', '--m-mas']].forEach(pair => {
+  const a = acol(pair[0]), b = acol(pair[1]);
+  check('css/atlas.css', `text ${pair[0]} on ${pair[1]} meets 4.5:1`, !!a && !!b && ratio(a, b) >= 4.5, a && b ? ratio(a, b).toFixed(2) : 'colour not found');
+});
+['lens.css tokens match'].forEach(() => {
+  ['--ink', '--ink-2', '--muted', '--line', '--axis', '--surface', '--page', '--wash', '--blue', '--blue-ink', '--link', '--blue-tint', '--red', '--amber', '--amber-ink', '--amber-tint', '--green', '--green-ink', '--green-tint', '--grey', '--part', '--prog']
+    .forEach(k => check('css/atlas.css', `theme token ${k} is the one in lens.css`, !!vars[k] && !!av[k] && vars[k].toLowerCase() === av[k].toLowerCase(), `${vars[k]} / ${av[k]}`));
+});
+
+// The Course Atlas runs on data/class.js, the export of one real class: the export must be whole, hold facts only and point only at things that exist
+const atlasData = (() => { try { const w = {}; new Function('window', fs.readFileSync(path.join(root, 'data/class.js'), 'utf8'))(w); return w.ATLAS_DATA; } catch (e) { return null; } })();
+check('data/class.js', 'the class export is present and loads', !!atlasData, 'run tools/export-atlas.py');
+if (atlasData) {
+  const A = atlasData, nS = A.students.length, nI = A.items.length, nJ = A.subs.length, nK = A.skills.length, whole = n => Number.isInteger(n) && n >= 0;
+  check('data/class.js', 'it has students, units, subunits, questions and skills', nS > 0 && A.units.length > 0 && nJ > 0 && nI > 0 && nK > 0, `${nS} / ${A.units.length} / ${nJ} / ${nI} / ${nK}`);
+  check('data/class.js', 'every subunit belongs to a unit and every unit lists its own subunits', A.subs.every((s, j) => A.units[s.u] && A.units[s.u].subs.includes(j)));
+  check('data/class.js', 'every question sits in the subunit that lists it', A.items.every((it, ix) => A.subs[it.sub] && A.subs[it.sub].items.includes(ix)));
+  check('data/class.js', 'every skill a subunit or question names exists', A.subs.every(s => s.skills.every(k => k[0] < nK)) && A.items.every(it => it.skills.every(k => k < nK)));
+  check('data/class.js', 'every result points at a student and a question', A.att.every(a => a[0] < nS && a[1] < nI && whole(a[5]) && whole(a[6])));
+  check('data/class.js', 'a result that was right first time was also right within three tries and ever', A.att.every(a => (!a[2] || a[3]) && (!a[3] || a[4])));
+  check('data/class.js', 'one result per student and question', new Set(A.att.map(a => a[0] + ':' + a[1])).size === A.att.length);
+  check('data/class.js', 'it holds names only for students: no ids, emails or account fields', A.students.every(s => typeof s === 'string' && !/@/.test(s)));
+  check('tools/export-atlas.py', 'the export reads its password from the environment and opens a read-only session',
+    (src => /os\.environ\['PGPASSWORD'\]/.test(src) && /default_transaction_read_only = on/.test(src) && !/password\s*=\s*['"]/.test(src))(fs.readFileSync(path.join(root, 'tools/export-atlas.py'), 'utf8')));
+  check('css/atlas.css', 'status colours are semantic: good is green, bad is red, watch is amber', /--good:var\(--green\)/.test(atlas) && /--bad:var\(--red\)/.test(atlas) && /--watch:var\(--amber\)/.test(atlas));
+  check('css/atlas.css', 'stacked bars use the red, amber and light green set that stays apart for red-green colour blindness', (av['--ok-fill'] || '').toUpperCase() === '#81C784' && /--hd-ny:var\(--red\)/.test(atlas) && /--hd-dv:var\(--amber\)/.test(atlas));
+  check('css/atlas.css', 'mastery in the grid is one colour that only gets darker: not yet, developing, secure', (m => m.every(Boolean) && lum(m[0]) > lum(m[1]) && lum(m[1]) > lum(m[2]) && ratio(m[0], m[1]) >= 1.5 && ratio(m[1], m[2]) >= 1.5)([av['--ms-n'], av['--ms-d'], av['--ms-s']]), `${av['--ms-n']} ${av['--ms-d']} ${av['--ms-s']}`);
+  // data/sample.js is the one place with invented numbers: it must say so, and the screen must mark every row that comes from it
+  const sampleSrc = (() => { try { return fs.readFileSync(path.join(root, 'data/sample.js'), 'utf8'); } catch (e) { return null; } })();
+  if (sampleSrc) {
+    const w = {}; new Function('window', sampleSrc)(w); const iv = (w.ATLAS_SAMPLE || {}).interventions || [], script = fs.readFileSync(path.join(root, 'js/atlas.js'), 'utf8');
+    check('data/sample.js', 'the sample file says its numbers are invented', /INVENTED/.test(sampleSrc));
+    check('data/sample.js', 'every sample row has an estimate inside its range', iv.length > 0 && iv.every(d => d.lo <= d.est && d.est <= d.hi));
+    check('data/sample.js', 'every student a sample row names is in the class', iv.every(d => d.who === 'all' || d.who.every(n => A.students.includes(n))));
+    check('js/atlas.js', 'rows from the sample file are marked as sample on screen', /sample:true/.test(script) && /· sample/.test(script) && /<span class=\\?"pill\\?">Sample<\/span>/.test(script));
+  }
+  check('index.html', 'the page loads the class export before the script', /data\/class\.js[^]*js\/atlas\.js/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')));
+  // a chart is never stretched across a wide page: it is handed its width, and shares its row with the panel that explains it or with a second chart
+  const atlasJs = fs.readFileSync(path.join(root, 'js/atlas.js'), 'utf8');
+  check('js/atlas.js', 'no chart takes the full page width by itself: each is drawn to the width it is handed', !/[,{(\s]W=VW\(\)/.test(atlasJs));
+  check('js/atlas.js', 'every chart view pairs its chart with a panel, and the pace view is two charts side by side', (atlasJs.match(/\bduo\(/g) || []).length >= 8 && /class="duo even"/.test(atlasJs));
+  check('js/atlas.js', 'the fading view opens on the faded skills only, with a tick to show all, and with no skill picked', /v10:\{u:'all',all:false,k:-1/.test(atlasJs) && /id="v10all"/.test(atlasJs) && /if\(!rows\.some\(o=>o\.k===Z\.k\)\)Z\.k=-1/.test(atlasJs));
+  check('js/atlas.js', 'the grid has a summary of each student and the class over time, and leaves unstarted columns empty', /function trendN\(/.test(atlasJs) && /const sum2=/.test(atlasJs) && !/fill="url\(#hatch\)" opacity="\.6"\/><\/g>`;return\}/.test(atlasJs));
+  check('js/atlas.js', 'the overview shows the class\'s latest three units, not every started unit, and its headline and next step read the same ones',
+    /const OVN=3,OVU=TAUGHT\.slice\(\)\.sort\(\(a,b\)=>TB0\[a\]\.mid-TB0\[b\]\.mid\)\.slice\(-OVN\)/.test(atlasJs) && /function ovStep\(i\)\{const n=NM\[i\],g=OVU\.map/.test(atlasJs) && /OVU\.some\(u=>cell2\(i,KS2\.u\(u\)\)\.g==='stuck'\)/.test(atlasJs) && !/\$\{TAUGHT\.map\(\(u,x\)=>/.test(atlasJs));
+  // the lesson replay ("Attention now") is gone: no page, no rows in the export, nothing in the data file
+  const exportSrc = fs.readFileSync(path.join(root, 'tools/export-atlas.py'), 'utf8');
+  check('js/atlas.js', 'there is no lesson replay page, and nothing reads replay rows', !/s:'Attention now'/.test(atlasJs) && !/D\.replay|replayDay|LIVE\[/.test(atlasJs) && !/replay/.test(exportSrc) && A.replay === undefined && A.meta.replayDay === undefined);
+  check('js/atlas.js', 'there is no item health page, and the export holds no first answers', !/s:'Item health'/.test(atlasJs) && !/D\.mc|function v9\(|S\.v9\b/.test(atlasJs) && !/\bmc\b/.test(exportSrc) && A.mc === undefined && A.items.every(it => !('ans' in it) && !('opts' in it)));
+  check('js/atlas.js', 'a practice set still leaves out questions that are broken or misleading', /const okIt=it=>zone9\(it\)==='ok';/.test(atlasJs) && /use=bank\.filter\(okIt\)/.test(atlasJs));
+  // the look follows Material UI: Roboto, a 4px corner, the elevation shadows, and selection in the primary colour
+  check('css/atlas.css', 'the stylesheet follows Material UI: Roboto, 4px corners, elevation, selection in the primary colour',
+    /--font:"Roboto"/.test(atlas) && /--radius:4px/.test(atlas) && /--e1:0 2px 1px -1px rgba\(0,0,0,\.2\)/.test(atlas) && /--accent:var\(--blue\)/.test(atlas) && /family=Roboto/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')));
+  check('js/atlas.js', 'shared weak skills are drawn as pale areas with a thin line, not as solid bands', /style="fill:\$\{col\};opacity:\.16"\/><polyline/.test(atlasJs));
+  // every page has one priority number, and that number is what the tabs, the overview's flags and the bar for a followed student show
+  const priIds = ((atlasJs.match(/const PRI=\[([^;]*)\];/) || [])[1] || '').match(/\[(\d+),'/g) || [], priSet = priIds.map(t => +t.slice(1).split(',')[0]);
+  check('js/atlas.js', 'every page has exactly one priority, 1 to 10', priSet.length === 10 && new Set(priSet).size === 10 && [0, 2, 3, 4, 5, 6, 7, 9, 10, 11].every(k => priSet.includes(k)), priSet.join(' '));
+  check('js/atlas.js', 'the tabs, the overview\'s flags and the bar for a followed student show the priority number, not a page id',
+    /priority \$\{PN\[k\]\} of \$\{PRI\.length\}"/.test(atlasJs) && /aria-hidden="true">\$\{PN\[k\]\}<\/span>/.test(atlasJs) && />\$\{PN\[v\]\}<\/button>/.test(atlasJs) && /\$\{PN\[f\.v\]\}<\/span>/.test(atlasJs) && !/'view '\+v/.test(atlasJs));
+  check('css/atlas.css', 'a paired chart may be narrower than a lone one, and a rule runs between the pair', /\.duo \.viz\{min-width:0\}/.test(atlas) && /\.duo::before\{/.test(atlas));
+}
 
 console.log('\nCHECKS');
 shapes.forEach(l => console.log(l));

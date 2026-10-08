@@ -1,5 +1,281 @@
 # Insight Lens — interactive mock
 
+Two mocks live here. Both are plain HTML, CSS and JavaScript with no build, no
+server and no dependencies, and both run from `file://`.
+
+| Open | What it is |
+|---|---|
+| `index.html` | **The current mock.** The Course Atlas for one real class, read from the database: a table of every student, student profiles and nine views, in Material UI's design language on the Insight Lens colours. |
+| `lens.html` | The earlier mock, on invented sections: a Brief and six tabs. Everything from "The earlier mock" down describes it. |
+
+## The current mock (`index.html`)
+
+```
+open index.html
+```
+
+The screens and their logic came from `Class 7B Course Atlas.html` (kept here
+as the source they were taken from). The look is this project's theme. The
+numbers are no longer invented: they are worked out from one class in the
+`anonymized-prod` database.
+
+**The class on screen**: section 218, "APCS 25-26", 36 students on CS Awesome
+2.0 (13 units, 230 subunits), with work from 1 September to 21 December 2025.
+The class has started three units (1, 2 and 4) and met 100 skills. Student
+names are the anonymised ones the database holds.
+
+### Where the data comes from
+
+```
+pip install pg8000
+PGPASSWORD=… python3 tools/export-atlas.py [section_id]     # default 218
+```
+
+`tools/export-atlas.py` reads one section through the Cloud SQL proxy
+(`127.0.0.1:5434`, database `anonymized-prod`, user `postgres`; override with
+`PGHOST`, `PGPORT`, `PGUSER`, `PGDATABASE`) and writes `data/class.js`. The
+password comes from the environment and is written nowhere. The session is
+read-only.
+
+`data/class.js` holds facts only: the students, every unit, subunit and
+question in textbook order, the skills each subunit teaches and each question
+checks, each student's result on each question (right first time, tries, when),
+daily activity, assigned
+sets and who finished them, bug reports, and the practice sets the teacher
+targeted. It is a script, not JSON, so the page can load it from `file://`.
+
+`js/atlas.js` works out every figure from those facts, so another class needs
+only another export. Nothing is assumed about the plan: the database holds no
+course plan and no term dates, so "now" is the last week in which half the
+class worked, a unit's weeks are the weeks the class worked on it, and no unit
+is treated as next.
+
+### How the figures are defined
+
+| Term | Meaning |
+|---|---|
+| Credit | For one question: a quick question (multiple choice, fill in the blank, click, drag) counts 1 when right first time and ½ on the second try; a code or Parsons task counts 1 when right within three tries and ½ within six. |
+| Mastery of a skill | The student's average credit on questions tagged with the skill. When they meet the skill again three or more weeks later, the later checks weigh 60%. Secure is 80% or more, developing 60% or more, and it takes two checks to count. |
+| A subunit's skills | Up to three skills the subunit gives most teaching weight to (`unit_skill_coverage`), preferring ones three or more of its questions check (`item_skill`). A review or test subunit lists what it checks most. |
+| Started | A quarter of the class has tried one of the subunit's questions. A unit is started when one of its subunits is. |
+| The class's questions | Questions a quarter of the class tried. "Practice done" is the share of them a student tried. |
+| Weekly activity | The share of that week's class work (questions a quarter of the class first tried that week, plus work in a targeted set) the student had tried by the end of the week. Weeks with fewer than five such questions are breaks. |
+| Drifting | Two weeks running below the student's own normal range (from the first weeks of class work), still below it on average since, and below it in the latest week. |
+| No working check | Eight or more students tried the question and nobody's answer was ever marked right. It is listed as broken and left out of mastery. |
+| Shared weak skill | A taught skill on which a fifth of the class or more is "not yet" at the same time: mastery under 60% on two or more checks. Still weak, improving (down 40% or more from its peak) or recovered (under 8% of the class). |
+
+### What is real, what is approximate, what is missing
+
+| Page | Status |
+|---|---|
+| Overview, profiles, Effort and mastery, Hardest content, Stall points, Fading skills | Real, by the definitions above. |
+| Drifting | Real. Attendance is not recorded, so the signals are class days with no work, assigned sets unfinished and the change in accuracy. |
+| On pace | Real counts. The course length is assumed (36 weeks) and the plan is the class's own rate continued. The goal starts at the class's median projection. |
+| Shared weak skills | Real. It began as "Misconceptions", but the item bank does not tag wrong answers with the misconception behind them. The view now shows the skills many students are weak in at once, week by week, and who they are. |
+| Stall points | Questions only. An open is recorded for only about one in eight of the readings and videos students worked past, so they are left out. |
+| Ready for a unit | Approximate. The skill graph lives outside the database, so what a unit builds on is taken from coverage weights: skills an earlier unit teaches that this unit uses most. There is no second level of roots. |
+| What worked | One real row: the array review of 8 December, which has too little later work to judge. The other six rows are **invented** (`data/sample.js`) so the chart has something to show; each is marked "sample" on screen. Delete that file, or its script tag, to see the real data alone. |
+| Drafted questions in practice sets | Removed. Sets are built only from questions in the item bank. |
+
+The same table, with the database tables behind each page, is at the foot of
+every page ("Where the numbers come from"). The action log, which the top bar
+opens, is on the What worked page.
+
+Two pages were removed. "Attention now" replayed the last busy lesson minute
+by minute; it went with its replay rows in the export and the flags and
+profile moments that came from it. "Item health" mapped every question by how
+many got it right and how well it separated students; it went with the rows
+of first answers in the export. Which questions are broken or misleading is
+still worked out, because a practice set leaves those out.
+
+### What is on screen
+
+* **Top bar**: the ALPS frame, the class, and the action log (everything you
+  log in any view). Nothing is saved or sent.
+* **Pages down the left**, in three groups, each tab with a small number:
+  its priority (see the table below). Students opens with the overview:
+  one row per student, with their weekly work and skills secure as small
+  trend lines, where they stand in the class's latest three units (the unit
+  it is on and the two it worked on before; a class far into the course has
+  too many started units for one row, and Effort and mastery has them all), their pace, the pages
+  that flag them (by the number on their tab), and one next step. Headings sort the table; a name opens
+  the profile.
+* **No header above the view.** The top bar names the class; the weeks the
+  data covers are in the footer. Which units the class has started shows in
+  the pages themselves (the grid, and the lists in Hardest content and Stall points).
+* **Following a student**: click a name on any page, or a flag number or unit
+  cell in the overview, and that student is picked out on every page. A bar
+  at the top lists what flags them; "Stop following" or Esc ends it. There is
+  no strip of student names across the pages: the overview is the list.
+* **One page at a time**: the question, the answer in one line, then the chart,
+  the drill-down, and what to do. "How to read" opens beside each question.
+* **A chart shares its row.** On a wide window a chart is not stretched across
+  the page: it sits on the left, with the panel that explains it on the right.
+  That is the scatter beside the three groups to act on (Effort and mastery),
+  the outline beside the picked skill or question (Hardest content, Stall
+  points), the weak-skill rows, the fading rows and the effect ranges beside
+  the picked row (Shared weak skills, Fading skills, What worked), the
+  readiness tree beside its
+  plan (Ready for a unit), and a student's timeline beside their moments. On
+  pace is two charts side by side on one scale, half the class in each. On a
+  narrower window the two stack and the chart takes the full width. The grid
+  and the tables always take the full width.
+* **Little text.** The screens carry labels, numbers and names. Explanations
+  sit in "How to read" and in tooltips; evidence is a bar, a chip or a small
+  figure, not a sentence; the action is the label on its button.
+* Units, subunits and skills that the class has not started are still there:
+  an empty column under a grey heading in the grid, and one line of names ("Not started · 1.1 1.2 …")
+  under the lists in Hardest content and Stall points. Those lists open closed.
+* **Drilling down.** In Effort and mastery the grid shows one level at a time: every unit,
+  then the subunits of the unit you click, then the skills of the subunit you
+  click. The trail above it ("All units › Selection and Iteration › 2.7 While
+  Loops") takes you back up, and the chart underneath follows where you are.
+  A page holds ten columns, with arrows beside the trail for the rest; a
+  level opens on the first page the class has started, and going back up
+  returns to the page you came from.
+  In Hardest content and Stall points units open into subunits, and subunits
+  into skills or questions, as rows.
+* **The grid (Effort and mastery) is a calm table.** A row is a student and a column a
+  unit, with white space around every cell. A cell is one small bar whose
+  green says how secure, a thin line under it for practice done (red when
+  under your line), and a red dot for stuck despite effort. Column names are
+  written on a slant, so none is cut short, with the unit's number under
+  each. The Class row shows how the class divides in each column. At the
+  right, one bar per student divides the skills taught so far into secure,
+  developing and not yet, with the number secure. At the foot, each column
+  has the class's share of secure standings week by week, and where it is
+  now. A student the Drifting page flags is marked "drifting" beside the name. With
+  only a few columns (the skills of one subunit) the table is narrower and
+  sits in the middle of the page.
+* **Fading skills opens on the answer.** It lists only the skills
+  that faded, as one chart in the middle of the page. "Show all" brings in
+  every skill that was checked again. Nothing is picked to begin with:
+  click a skill and the chart of every student appears beside the rows;
+  click it again, or the cross, and it goes.
+* **Shared weak skills is one calm row a skill.** A small pale area shows the
+  share of the class not yet secure week by week, with a thin line on top; a
+  bar and a count beside it say how many students are not yet secure now. It
+  replaced thick red bands, which made the page a wall of red.
+
+### The pages, by priority
+
+The small number on each tab is the page's priority: how much its question
+helps a teacher who is teaching the class, 1 the most. It is a judgement, not
+a measurement, and it lives in one list (`PRI` in `js/atlas.js`): change the
+order there and the tabs, the "Flagged in" numbers in the overview and the
+bar for a followed student all follow. The first three stand out. Hovering a
+tab gives the reason.
+
+| Priority | Page | Question it answers | Why it ranks there |
+|---|---|---|---|
+| 1 | Overview | How is each student doing? | Every student at a glance, with one next step each |
+| 2 | Shared weak skills | Which skills are many students weak in, and is that changing? | What to reteach to the whole class |
+| 3 | Effort and mastery | Who is doing the work, and is it turning into mastery? | Who needs a reteach, and who needs a nudge |
+| 4 | Drifting | Who is drifting, and since when? | Catches a student who is slipping away, early |
+| 5 | Ready for a unit | Is the class ready for each unit, and what first? | What to shore up before the next unit |
+| 6 | Stall points | Where do students stall, skip or give up? | Where the material loses students |
+| 7 | Hardest content | Which units, subunits and skills are hardest? | Where to spend more class time |
+| 8 | Fading skills | Which skills fade after they're taught? | What to bring back in warm-ups |
+| 9 | On pace | Is each student on pace to reach the goal? | Who will fall short by the end of the year |
+| 10 | What worked | Did what I did work? | Whether to keep doing what you tried |
+
+The tabs stay in their three groups (Students, Content, Act and check), each
+group listed most helpful first.
+
+Links name the page: `index.html#overview`, `#weak-skills`, `#effort`,
+`#drifting`, `#ready`, `#stall-points`, `#hardest`, `#fading`, `#pace`,
+`#worked`, and `index.html#s-Mariah` for a student's profile. (In
+the script each page also has a fixed id, used by flags and the action log;
+the ids are not shown anywhere.)
+
+### The theme
+
+`css/atlas.css` follows Material UI's design language, on the colour tokens of
+`css/lens.css` (a Material palette with the ALPS blue as primary):
+
+* **Type**: Roboto, loaded from Google Fonts by `index.html` (without a
+  connection the page falls back to Helvetica or Arial). 14px body, 20px
+  medium for a page's answer, 16px medium for a section, 12px for captions.
+  Emphasis is medium weight (500), in charts too. Nothing is under 12px.
+* **Surfaces**: a white app bar and drawer with hairlines; each page is one
+  sheet of paper with Material's first elevation; cards inside it are
+  outlined. Corners are 4px; chips are full pills.
+* **Controls**: contained, outlined and text buttons in sentence case; a
+  connected toggle group; an outlined select; a slider with a filled track;
+  a checkbox that fills with the primary colour. Students are outlined chips,
+  filled once followed; a status is a small tinted chip.
+* **Spacing** steps by 8px; a page has 24px of padding.
+
+One colour, one meaning:
+
+| Colour | Meaning |
+|---|---|
+| Green | right, done, secure, finished, worked |
+| Pale green | got there after retries |
+| Amber | needs a look: developing, guessing, idle, skipped, coasting |
+| Red | wrong or failing: not yet, stuck, gave up, broken, drifting |
+| Blue | primary: links, buttons, the page you are on, and the student or row you picked |
+| Grey | recorded, and neutral |
+| Hatching | cannot be seen: not in the lesson, not started |
+
+Status colours keep their usual meaning everywhere. Mastery in the effort and
+mastery grid, and in the overview's "By unit" cells, is a level and not a
+verdict, so it is one colour that only gets darker: pale green is not yet, mid
+green developing, dark green secure. Red is left there for the two problem
+marks: the practice bar under a cell when it is under the line, and the dot
+for stuck despite effort. Filled areas that sit side
+by side (grid cells, stacked bars) use red `#D3302F`, amber `#E9A400` and a
+light green `#81C784`: that set stays apart for red-green colour blindness (it
+passes the palette check at every pairing). Thin marks, text and borders use
+the theme's darker green, always beside a label or a position that says the
+same thing.
+
+The page uses the whole window, and every chart is drawn to the width it is
+given, so its text stays the size of the text around it; charts are drawn
+again when the window changes size. A chart is given the full width only when
+that suits it: the grid's ten columns share the row (the last page steps back
+so it is full too, "4–13 of 13 units"), and so do the tables. Every other
+chart takes about three fifths of the row beside its panel, or half of it
+beside a second chart, once the window is wide enough for both (`duoW` in
+`js/atlas.js` decides; below that they stack). The rows in Shared weak skills run
+from week 1 to today: nothing is drawn after it, so the rest of the year is
+left off.
+
+The script asks for colours by its own names (`--good`, `--bad`, `--watch`,
+`--accent` …). The second half of `:root` in `css/atlas.css` answers those
+names from the theme, so the script carries no colour of its own: to restyle,
+change that block.
+
+### Files
+
+```
+index.html             the frame: top bar, views rail, one view
+css/atlas.css          its styles, in the Insight Lens theme
+data/class.js          the class, exported from the database (facts only)
+data/sample.js         invented rows for What worked only, marked as sample on screen
+js/atlas.js            the data layer, the overview, the nine views, profiles, events
+tools/export-atlas.py  writes data/class.js from the database
+```
+
+`node tools/check.js --checks` also checks this mock: no text under 12px in
+`css/atlas.css`, text colours at 4.5:1, theme tokens identical to
+`css/lens.css`, and that `data/class.js` is whole (every result points at a
+student and a question that exist, one result per pair, names only for
+students), that the export takes its password from the environment, and that
+no chart takes the full page width by itself (each is handed its width and
+paired with its panel or a second chart).
+
+The asset links carry a version (`?v=24`). Raise it when the stylesheet, the
+script or the data changes, so a normal reload never pairs a new script with
+an old stylesheet.
+
+`data/class.js` holds per-student records. They come from the anonymised copy,
+but decide before committing whether the file belongs in the repository.
+
+---
+
+# The earlier mock (`lens.html`)
+
 A clickable mock of the Insight Lens design in
 `insight-lens/research/insight-lens-information-architecture.md`. Two demo sections
 and five test shapes, a full term of simulated student work, and every insight
@@ -10,24 +286,19 @@ seconds, and knows what to do next.
 
 ## Open it
 
-Double-click `index.html`, or:
-
 ```
-open index.html
+open lens.html
 ```
-
-No build, no server, no dependencies. It is plain HTML, CSS and ES5 JavaScript and
-runs from `file://`.
 
 Deep links work and are shareable:
 
 ```
-index.html#/s1/understanding               a section and a tab
-index.html#/s2/students?view=signal        a sub-view
-index.html#/s1/students/s1-14              one student
-index.html#/s1/understanding?win=1w        a time window
-index.html#/s1/followups?focus=fu-s1-act3  one item on a tab, scrolled to and outlined
-index.html#/s1/understanding?path=csa2:4,csa2:4.4   a place in the outline: chapter, then subunit
+lens.html#/s1/understanding               a section and a tab
+lens.html#/s2/students?view=signal        a sub-view
+lens.html#/s1/students/s1-14              one student
+lens.html#/s1/understanding?win=1w        a time window
+lens.html#/s1/followups?focus=fu-s1-act3  one item on a tab, scrolled to and outlined
+lens.html#/s1/understanding?path=csa2:4,csa2:4.4   a place in the outline: chapter, then subunit
 ```
 
 ## The sections
@@ -171,9 +442,9 @@ next step. *Each student* opens under the row. Thresholds are folded away at
 the bottom.
 
 The earlier Brief is no longer a tab; it still opens at
-`index.html#/s1/briefOld`.
+`lens.html#/s1/briefOld`.
 
-The asset links in `index.html` carry a version (`?v=4`). Raise it when the
+The asset links in `lens.html` carry a version (`?v=4`). Raise it when the
 stylesheet or a script changes, so a normal reload never pairs new scripts
 with an old stylesheet.
 
@@ -288,7 +559,7 @@ Below 900px the side rail collapses and everything is one column, Brief first.
 ## Files
 
 ```
-index.html           loads the scripts in order
+lens.html            loads the scripts in order
 css/lens.css         all styling; one light theme
 js/01-util.js        seeded random numbers, time helpers
 js/02-content.js     textbooks, chapters, skills, named questions, the demo sections and test shapes
