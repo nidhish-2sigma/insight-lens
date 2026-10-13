@@ -5,7 +5,7 @@
      amber   needs a look: developing, skipped, coasting  red         wrong or failing: not yet, stuck, gave up, drifting
      blue    primary: links, buttons, the page you are on, and the student or row you picked
      grey    recorded but neutral                         hatch       cannot be seen: not started
-   Mastery in the grid is one green that only gets darker.
+   Standing (not yet, developing, proficient, mastered) is one green that only gets darker.
 
    Shape, depth, type and spacing are Material UI's defaults: Roboto at 14px with medium (500) for emphasis, a 4px corner on
    surfaces and controls and a full pill on chips, the Material elevation shadows, an 8px spacing step, and the usual three
@@ -48,8 +48,8 @@
   --c0:#f1f2f5; --c1:#F9DE9C; --c2:#F0B93A; --c3:#E9A400; --c4:#C77700;
   /* stacked bars, whose parts sit side by side, use red, amber and a light green: that set stays apart for red-green colour blindness */
   --ok-fill:#81C784;
-  /* mastery in the grid is a level, not a verdict: one colour, pale to dark, so the eye reads "darker is more secure" and red is left for the two problem marks */
-  --ms-n:#CFE8D1; --ms-d:#7DC383; --ms-s:#2E7D32;
+  /* a standing is a level, not a verdict: one colour, pale to dark (not yet, developing, proficient, mastered), so the eye reads "darker is better" and red is left for the two problem marks */
+  --ms-n:#CFE8D1; --ms-d:#7DC383; --ms-s:#2E7D32; --ms-m:#1B5E20;
   --hd-ny:var(--red); --hd-dv:var(--amber);
   --st-gu:var(--red); --st-sk:var(--amber); --st-rt:#C8E6C9;
   --ct0:#1c1e21; --ct1:#1c1e21; --ct2:#1c1e21; --ct3:#1c1e21; --ct4:#1c1e21;
@@ -91,18 +91,13 @@ h1,h2,h3,h4{margin:0;font-weight:500;text-wrap:balance}
 .rail{position:sticky;top:var(--bar);height:calc(100vh - var(--bar));overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:2px;padding:8px;background:var(--surface);border-right:1px solid var(--rule)}
 .rg{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0;padding:16px 12px 8px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .rg:first-child{padding-top:8px}
-.rp{font-weight:400}
 .rail button{display:grid;grid-template-columns:24px minmax(0,1fr) auto;column-gap:16px;align-items:center;min-height:40px;padding:0 12px;border:0;border-radius:4px;background:transparent;color:var(--ink);font-size:14px;text-align:left;cursor:pointer;transition:background-color .15s}
 .rail button:hover{background:var(--hover)}
 .rail button[aria-current="page"]{background:var(--blue-tint);color:var(--blue-ink);font-weight:500}
 .glyph{color:var(--ink-3)}
 .rail button[aria-current="page"] .glyph{color:var(--blue)}
 .rq{line-height:1.3}
-/* the small number on a tab is the page's priority for a teacher, 1 the most helpful (PRI in js/atlas.js); the first three stand out */
-.rn{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--surface-2);color:var(--ink-2);font-size:12px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
-.rn.top{background:var(--ink-2);color:#ffffff}
-.rail button[aria-current="page"] .rn{background:var(--surface);color:var(--blue-ink)}
-.rail button[aria-current="page"] .rn.top{background:var(--blue);color:#ffffff}
+/* the rail carries no numbers: the order of the pages is their priority (PRI in js/atlas.js), and a first-time teacher read the numbers as counts */
 
 /* ---------- the page: one sheet of paper, answer first ---------- */
 .page{display:grid;gap:16px;padding:24px 24px 48px;min-width:0}
@@ -153,10 +148,15 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .seg button:only-child{border-radius:4px}
 .seg button:hover{background:var(--page)}
 .seg button[aria-pressed="true"]{position:relative;z-index:1;border-color:var(--outline);background:var(--blue-tint);color:var(--blue-ink)}
-.sel{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-3)}
-.sel select{height:36px;padding:0 32px 0 12px;border:1px solid var(--axis);border-radius:4px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%235f636a'/%3E%3C/svg%3E") no-repeat right 6px center/22px;color:var(--ink);font-size:14px;-webkit-appearance:none;appearance:none;cursor:pointer}
+.sel{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;max-width:100%;font-size:14px;color:var(--ink-3)}
+.sel select{max-width:100%;height:36px;padding:0 32px 0 12px;border:1px solid var(--axis);border-radius:4px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z' fill='%235f636a'/%3E%3C/svg%3E") no-repeat right 6px center/22px;color:var(--ink);font-size:14px;-webkit-appearance:none;appearance:none;cursor:pointer}
 .sel select:hover{border-color:var(--ink)}
-.sel select:focus-visible{outline:0;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.sel input[type=date]{height:36px;padding:0 12px;border:1px solid var(--axis);border-radius:4px;background:var(--surface);color:var(--ink);font-size:14px;font-family:inherit}
+.sel input[type=date]:hover{border-color:var(--ink)}
+.sel select:focus-visible,.sel input[type=date]:focus-visible{outline:0;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.pace-skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px 32px}
+.pace-skills h3{font-size:14px;font-weight:500;margin:16px 0 8px}
+.pace-skills ul{padding-left:20px;margin:0 0 16px;font-size:14px;color:var(--ink-2);line-height:1.6}
 /* the slider: a 4px track, filled in the primary colour up to the thumb (the script keeps --p at the thumb's position) */
 .rng{display:grid;grid-template-columns:auto auto;align-items:center;gap:0 12px;font-size:14px;color:var(--ink-3)}
 .rng output{font-size:14px;font-weight:500;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
@@ -178,6 +178,7 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:2px;flex:none}
 .ln{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:2px}
+.sw.hatch{background:repeating-linear-gradient(-45deg,var(--hatch) 0 1.5px,var(--surface-2) 1.5px 4.5px)}
 .mleg{align-items:center;width:fit-content;max-width:100%;padding:8px 12px;border:1px solid var(--rule);border-radius:4px}
 .mleg .lt{font-size:12px;font-weight:500;color:var(--ink-3)}
 .mleg .lt:not(:first-child){margin-left:8px}
@@ -256,6 +257,15 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .duo.even{justify-content:center}
 .duo.stick>.duo-b{position:sticky;top:calc(var(--bar) + 16px)}
 .duo-a>.detail:first-child,.duo-b>.detail:first-child{margin-top:0;padding-top:0;border-top:0}
+/* the first section of a page sits straight under the controls */
+.detail.lead{margin-top:0;padding-top:0;border-top:0}
+/* a part of a page one click away: the grid under the chart, the sample rows, the readiness line */
+details.fold{margin-top:20px;padding-top:12px;border-top:1px solid var(--rule)}
+details.fold>summary{display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:0 12px 0 8px;border-radius:4px;color:var(--link);font-size:14px;font-weight:500;letter-spacing:.02em;list-style:none;cursor:pointer;transition:background-color .15s}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"";width:7px;height:7px;margin:0 2px 2px 0;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;flex:none}
+details.fold[open]>summary::before{margin:0 2px 0 0;transform:rotate(45deg)}
+details.fold>summary:hover{background:var(--blue-tint)}
 .duo-a>.hint{margin-top:8px}
 .duo-b .ags,.duo-b .plan{grid-template-columns:minmax(0,1fr)}
 .duo-b .ev{grid-template-columns:auto minmax(0,1fr)}
@@ -310,21 +320,6 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .tbl th{font-size:14px;font-weight:500;color:var(--ink)}
 .tbl td:first-child{font-weight:500;white-space:nowrap}
 .tbl tbody tr:last-child td{border-bottom:0}
-/* the students overview: a table to scan down, so cells sit on one line and line up */
-.ovt table{min-width:880px}
-.ovt th,.ovt td{padding:8px 12px;vertical-align:middle}
-.ovt th{white-space:nowrap}
-.ovt tbody tr{transition:background-color .15s}
-.ovt tbody tr:hover{background:var(--hover)}
-.ovt tr.on,.ovt tr.on:hover{background:var(--accent-soft)}
-.ths{border:0;background:none;padding:0;font:inherit;color:inherit;white-space:nowrap;cursor:pointer}
-.ths:hover{color:var(--link)}
-.ovc{display:inline-flex;align-items:center;gap:8px}
-.ovc b{min-width:38px;font-size:14px;font-weight:500;font-variant-numeric:tabular-nums}
-.ovc b.neg{color:var(--bad-ink)}
-.ovus{display:flex;margin:2px 0 0}
-.ovus i{display:block;width:34px;padding-right:4px;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);text-align:center}
-.ovt .vchips{justify-content:flex-start;flex-wrap:nowrap}
 .nmx{border:0;background:none;padding:0;color:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer}
 .nmx:hover{color:var(--link);text-decoration:underline}
 /* the action log */
@@ -407,6 +402,14 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .nsrow i{height:22px;line-height:20px;padding:0 8px;border:1px dashed var(--axis);border-radius:11px;font-style:normal;font-size:12px}
 .hc ul .nsrow{padding-left:32px}
 
+/* where a skill was first introduced: a card to check at a glance, and the way to the grid there */
+.intro{display:grid;gap:2px;width:100%;padding:12px 16px;border:1px solid var(--rule);border-left:4px solid var(--blue);border-radius:4px;background:var(--page);color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;transition:background-color .15s}
+.intro:hover{background:var(--blue-tint)}
+.intro .l{font-size:12px;letter-spacing:.03em;color:var(--ink-3)}
+.intro b{font-size:18px;font-weight:500;line-height:1.4}
+.intro .j{font-size:14px;color:var(--ink-2)}
+.intro .m{font-size:12px;color:var(--ink-3)}
+
 /* ---------- ready for a unit: the plan ---------- */
 .plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
 .pcard{display:grid;gap:8px;align-content:start;padding:13px 16px 16px;border:1px solid var(--rule);border-top:3px solid var(--neutral);border-radius:4px;background:var(--surface)}
@@ -431,7 +434,7 @@ button.usnap{cursor:pointer;transition:background-color .15s} button.usnap:hover
 .usnap span{color:var(--ink-3)}
 .usnap.next{border-style:dashed}
 .moms{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:8px}
-.moms li{display:grid;grid-template-columns:48px 12px minmax(0,1fr);gap:8px;align-items:center;font-size:14px}
+.moms li{display:grid;grid-template-columns:auto 12px minmax(0,1fr);gap:8px;align-items:center;font-size:14px}
 .mw{font-size:12px;font-variant-numeric:tabular-nums;color:var(--ink-3)}
 .mk{width:10px;height:10px;border-radius:50%;background:var(--bad)}
 .mk.iv{border-radius:1px;transform:rotate(45deg) scale(.85);background:var(--good)} .mk.mis{background:var(--watch)} .mk.good{background:var(--good)}
@@ -465,11 +468,19 @@ button.usnap{cursor:pointer;transition:background-color .15s} button.usnap:hover
 .lvl{flex:none;width:8px;height:8px;border-radius:50%;background:var(--neutral)}
 .lvl.bad{background:var(--bad)} .lvl.watch{background:var(--watch)} .lvl.good{background:var(--good)}
 
-/* ---------- textbook tabs, shown only when a class uses more than one ---------- */
-.tbtabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--rule)}
-.tbtabs button{display:grid;gap:0;padding:6px 12px;border:1px solid var(--axis);border-radius:4px;background:var(--surface);color:inherit;text-align:left;cursor:pointer}
-.tbtabs button span{font-size:12px;color:var(--ink-3)}
-.tbtabs button[aria-pressed="true"]{border-color:var(--outline);background:var(--accent-soft);color:var(--blue-ink)}
+/* ---------- more than one book ----------
+   The filter under the answer: each book carries its letter, which is what the compact places (a column heading, a lesson code) show.
+   An outline under "All books" has a heading a book; a profile has a label a book before its unit chips; the top bar has the way to the example and back */
+.bkbar{margin-bottom:12px}
+.bkbar .bl{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--surface-2);color:var(--ink-2);font-size:12px;font-weight:500;line-height:1}
+.bkbar .seg button[aria-pressed="true"] .bl{background:var(--blue);color:#ffffff}
+.hc>li.hg{padding:14px 0 2px}
+.hgr{min-height:0;padding-top:0;padding-bottom:4px}
+.hgr .hn,.hgr .hn b{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.usnap.lbl{border:0;padding-left:0;color:var(--ink-3);font-weight:500}
+.bkrow{flex-basis:100%}
+.bkrow .bkl{min-width:150px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.foot .fsw .lnk{font-size:12px;letter-spacing:.03em}
 
 /* ---------- tooltip and snackbar ---------- */
 #tip{position:fixed;left:0;top:0;z-index:80;pointer-events:none;max-width:min(300px,calc(100vw - 16px));padding:6px 10px;border-radius:4px;background:rgba(97,97,97,.94);color:#ffffff;font-size:12px;font-weight:400;line-height:1.5;letter-spacing:.02em}

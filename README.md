@@ -5,7 +5,7 @@ server and no dependencies, and both run from `file://`.
 
 | Open | What it is |
 |---|---|
-| `index.html` | **The current mock.** The Course Atlas for one real class, read from the database: a table of every student, student profiles and nine views, in Material UI's design language on the Insight Lens colours. |
+| `index.html` | **The current mock.** The Course Atlas for one real class, read from the database: the students who need a step first, student profiles and seven more pages, in Material UI's design language on the Insight Lens colours. |
 | `lens.html` | The earlier mock, on invented sections: a Brief and six tabs. Everything from "The earlier mock" down describes it. |
 
 ## The current mock (`index.html`)
@@ -20,9 +20,34 @@ numbers are no longer invented: they are worked out from one class in the
 `anonymized-prod` database.
 
 **The class on screen**: section 218, "APCS 25-26", 36 students on CS Awesome
-2.0 (13 units, 230 subunits), with work from 1 September to 21 December 2025.
+2.0 (13 units, 230 subunits), with work from 1 September 2025 to 5 February
+2026; the export is dated 13 October 2026, and that is "today" on the pages.
 The class has started three units (1, 2 and 4) and met 100 skills. Student
 names are the anonymised ones the database holds.
+
+**A class with more than one book.** A section can list several books
+(`section_curriculum`), and the export writes every one of them. The real
+class has one, so its pages say nothing about books. To see the pages with
+several, open `index.html?books`, or press "See an example with three more
+books" in the top bar: the same class with three more books, whose outlines
+are real and whose work is invented (`data/example.js`); the page says
+"Example" while it is on. With work in two or more books, every page and a
+profile start their controls with one filter, **Book**: all the books, or one
+of them (`?book=java-short-labs` in the address). `reports/more-than-one-book.md`
+has what the database shows about such classes and the rules the pages follow.
+
+**What a teacher sees first.** On 13 October 2026 every component of every
+page was reviewed as a teacher seeing it for the first time
+(`reports/first-time-teacher-review.md`), with the budget of two to three
+minutes for all the pages together. The pages were then cut to what fits that
+look: one question, one answer in a sentence, one picture with its key on the
+page, the names, and the button; everything else one click away. The report's
+afterword has the before and after, and which of its open decisions were
+taken.
+
+Run `node tools/check-pace.js` for the target scope, date-dependent estimates,
+controls, narrow and wide chart markup, and multiple-book behavior. These
+checks also run as part of `node tools/check.js --checks`.
 
 ### Where the data comes from
 
@@ -33,9 +58,26 @@ PGPASSWORD=… python3 tools/export-atlas.py [section_id]     # default 218
 
 `tools/export-atlas.py` reads one section through the Cloud SQL proxy
 (`127.0.0.1:5434`, database `anonymized-prod`, user `postgres`; override with
-`PGHOST`, `PGPORT`, `PGUSER`, `PGDATABASE`) and writes `data/class.js`. The
-password comes from the environment and is written nowhere. The session is
-read-only.
+`PGHOST`, `PGPORT`, `PGUSER`, `PGDATABASE`) and writes `data/class.js`
+(`ATLAS_OUT=path` writes it elsewhere). The password comes from the
+environment and is written nowhere. The session is read-only. It writes every
+book the section lists, the primary ones first, gives each a short name for
+the places with little room, and marks each unit and each assignment with its
+book (`tb`). A class with one book is written exactly as it was before the
+export knew about books. Two items or two lessons that share a position come
+in the order of their ids, so two runs give the same file.
+
+```
+PGPASSWORD=… python3 tools/make-example.py
+```
+
+`tools/make-example.py` builds `data/example.js`, the example with three more
+books. It reads `data/class.js` and the outlines of Java Short Labs, Be
+Prepared and Java Methods from the database (real), and invents the class's
+work in the first two, following what the few real sections with several
+books show and each student's own real record. It says so at the top of the
+file, and the same seed gives the same file. Run it again after every new
+export.
 
 `data/class.js` holds facts only: the students, every unit, subunit and
 question in textbook order, the skills each subunit teaches and each question
@@ -46,40 +88,55 @@ targeted. It is a script, not JSON, so the page can load it from `file://`.
 
 `js/atlas.js` works out every figure from those facts, so another class needs
 only another export. Nothing is assumed about the plan: the database holds no
-course plan and no term dates, so "now" is the last week in which half the
-class worked, a unit's weeks are the weeks the class worked on it, and no unit
-is treated as next.
+course plan, no term dates and no timetable, so today is the export date (an
+"As of" date picker under the answer on every page re-reads them as of
+another day, `index.html?today=YYYY-MM-DD`), a unit's days are the days the class worked on it, nothing
+is counted in weeks, no class day is assumed, and no unit is treated as next.
+Students may work on any part at any time: all of it counts as work, and a
+profile says when a student is catching up on an earlier unit or working
+ahead. For the demo, the Drifting page opened without a day in the address
+moves to the latest day it can judge (the class working, fewer than half of
+it low); the address shows that day and "Back to today" returns to the
+export date.
 
 ### How the figures are defined
 
 | Term | Meaning |
 |---|---|
 | Credit | For one question: a quick question (multiple choice, fill in the blank, click, drag) counts 1 when right first time and ½ on the second try; a code or Parsons task counts 1 when right within three tries and ½ within six. |
-| Mastery of a skill | The student's average credit on questions tagged with the skill. When they meet the skill again three or more weeks later, the later checks weigh 60%. Secure is 80% or more, developing 60% or more, and it takes two checks to count. |
+| Mastery of a skill | The student's average credit on questions tagged with the skill. When they meet the skill again 21 days or more later, the later checks weigh 60%. Secure is 80% or more, developing 60% or more, and it takes two checks to count. |
+| A unit's key skills | The skills its own summary, test, exercise and practice lessons check that are also carried forward: named by two or more lessons and checked by three or more questions, or needed by a later unit. The hard ones are the bottom third of those by the class's share secure. In the product this list would be the teacher's to edit; here it is worked out from the book. |
+| Standing in a unit | From the key skills the class has been checked on so far: mastered (secure on 90% or more, and on every hard one), proficient (secure on 60% or more and not yet on 25% or fewer), developing (secure on 30% or more, or not yet on half or fewer), not yet; too early to tell with fewer than two checked. The grid's cells and a profile's chips read the same function. A subunit's standing is read the same way on its own skills. Pace counts secure skills in the selected goal instead. |
+| Pace | The teacher picks a target unit and a calendar date. The goal is secure on all of that unit's key skills plus the earlier skills its lessons use, counted once. Unrelated earlier skills and later units are excluded. Each student's net increase on this set in the 30-day period ending at their latest recorded check sets their rate. The projection adds gains from the selected "As of" date to the deadline, capped at the goal, assuming learning continues or resumes at that observed pace. The unrecorded gap before "As of" is not extrapolated; a flat or declining observed rate adds no gains. Fewer than two checked skills (one for a one-skill goal), or checks on only one day with skills still to learn, means too early to estimate. The dotted line spreads the goal evenly from the class's first encounter with a required skill to the deadline; it is a reference, not a recorded timetable. |
 | A subunit's skills | Up to three skills the subunit gives most teaching weight to (`unit_skill_coverage`), preferring ones three or more of its questions check (`item_skill`). A review or test subunit lists what it checks most. |
 | Started | A quarter of the class has tried one of the subunit's questions. A unit is started when one of its subunits is. |
 | The class's questions | Questions a quarter of the class tried. "Practice done" is the share of them a student tried. |
-| Weekly activity | The share of that week's class work (questions a quarter of the class first tried that week, plus work in a targeted set) the student had tried by the end of the week. Weeks with fewer than five such questions are breaks. |
-| Drifting | Two weeks running below the student's own normal range (from the first weeks of class work), still below it on average since, and below it in the latest week. |
+| Work in five days | The questions a student first tried in a five-day block, on any unit: a student catching up on an earlier unit, or working ahead, is working. Blocks count back from today, so the latest block is always the last five days. A block in which nobody in the class worked is a break, read from the data, and is left out. A student's normal is the middle of their earlier blocks, the latest two left out. |
+| Drifting | Under half their own normal in the last five days and in the live block before, judged only while classmates are not low too: when the class as a whole has stopped (no work by anyone in the last five days) or slowed (half the class or more under half their normal), the page says so and singles out nobody. |
 | No working check | Eight or more students tried the question and nobody's answer was ever marked right. It is listed as broken and left out of mastery. |
-| Shared weak skill | A taught skill on which a fifth of the class or more is "not yet" at the same time: mastery under 60% on two or more checks. Still weak, improving (down 40% or more from its peak) or recovered (under 8% of the class). |
+| Shared weak skill | A taught skill on which a fifth of the class or more is "not yet" at the same time: mastery under 60% on two or more checks. Getting worse (up 10 points or more in 30 days), still weak, improving (down 40% or more from its peak) or recovered (under 8% of the class). |
+| The class's books | The section's list: one or more primary ("main") and any number supplemental. A unit, a lesson and a question belong to one book. A skill is shared: the books of one subject tag their questions from one skill set. The main book sets where the class is. A book with no work yet is named in the footer and nowhere else. |
+| The book filter | With work in two or more books, the first control on every page and on a profile: "All books", or one book with work. "All books" puts the books together: a page that offers units groups them by book, each with a letter the filter keys. One book narrows the page to its units, lessons and questions, the skills its lessons use, and the work done in it. A student's level on a skill does not change with the filter: the evidence stays every question on the skill, in every book. |
+| A lab | A question in a book of labs, where nine in ten questions are coding tasks. A lab is work done, never a check on a skill: it counts in practice done and in five days' work, and is left out of every level. A unit of labs is drawn as one gray bar, the share of its labs tried. On a page about a book of labs, "gave up" reads "not right yet", in gray. |
 
 ### What is real, what is approximate, what is missing
 
 | Page | Status |
 |---|---|
-| Overview, profiles, Effort and mastery, Hardest content, Stall points, Fading skills | Real, by the definitions above. |
+| Overview, profiles, Effort and mastery, Skills (by unit and faded), Stall points | Real, by the definitions above. |
 | Drifting | Real. Attendance is not recorded, so the signals are class days with no work, assigned sets unfinished and the change in accuracy. |
-| On pace | Real counts. The course length is assumed (36 weeks) and the plan is the class's own rate continued. The goal starts at the class's median projection. |
-| Shared weak skills | Real. It began as "Misconceptions", but the item bank does not tag wrong answers with the misconception behind them. The view now shows the skills many students are weak in at once, week by week, and who they are. |
+| On pace | Real skill evidence, with a conditional projection if learning resumes at each student's latest observed pace. The evidence dates are shown in the row's tooltip, and older evidence is labeled on the page. The target's earlier skills are inferred from textbook coverage, rather than a skill dependency graph. The default deadline is 30 days after the selected "As of" date; the teacher can choose any date on or after the "As of" date. All relevant lessons count even before the class starts them; the earlier-skill list is not truncated to the readiness tree's top four. |
+| Skills (weak now) | Real. It began as "Misconceptions", but the item bank does not tag wrong answers with the misconception behind them. The view now shows the skills many students are weak in at once, five days at a time, and who they are. |
 | Stall points | Questions only. An open is recorded for only about one in eight of the readings and videos students worked past, so they are left out. |
 | Ready for a unit | Approximate. The skill graph lives outside the database, so what a unit builds on is taken from coverage weights: skills an earlier unit teaches that this unit uses most. There is no second level of roots. |
-| What worked | One real row: the array review of 8 December, which has too little later work to judge. The other six rows are **invented** (`data/sample.js`) so the chart has something to show; each is marked "sample" on screen. Delete that file, or its script tag, to see the real data alone. |
+| My actions | The log is what you did in this session. One real practice set: the array review of 8 December, with too little later work to judge. Six more rows are **invented** (`data/sample.js`), fenced off under "Sample rows", marked sample, counted in no headline and attached to no student. Delete that file, or its script tag, to see the real data alone. |
 | Drafted questions in practice sets | Removed. Sets are built only from questions in the item bank. |
+| The book filter | Real arithmetic on whatever the export holds. The days a student worked are not split by book, so under a picked book the five-day blocks are the whole class's. |
+| The example with three more books (`?books`) | The class and its work in CS Awesome 2.0: real. The outlines of Java Short Labs, Be Prepared and Java Methods: real, from the database. The work in the first two: **invented** (`data/example.js`), and the page says so while it is on. |
 
 The same table, with the database tables behind each page, is at the foot of
-every page ("Where the numbers come from"). The action log, which the top bar
-opens, is on the What worked page.
+every page ("Where the numbers come from"). The log of everything you did,
+which the top bar opens, is the My actions page.
 
 Two pages were removed. "Attention now" replayed the last busy lesson minute
 by minute; it went with its replay rows in the export and the flags and
@@ -90,103 +147,169 @@ still worked out, because a practice set leaves those out.
 
 ### What is on screen
 
-* **Top bar**: the ALPS frame, the class, and the action log (everything you
-  log in any view). Nothing is saved or sent.
-* **Pages down the left**, in three groups, each tab with a small number:
-  its priority (see the table below). Students opens with the overview:
-  one row per student, with their weekly work and skills secure as small
-  trend lines, where they stand in the class's latest three units (the unit
-  it is on and the two it worked on before; a class far into the course has
-  too many started units for one row, and Effort and mastery has them all), their pace, the pages
-  that flag them (by the number on their tab), and one next step. Headings sort the table; a name opens
-  the profile.
-* **No header above the view.** The top bar names the class; the weeks the
-  data covers are in the footer. Which units the class has started shows in
-  the pages themselves (the grid, and the lists in Hardest content and Stall points).
-* **Following a student**: click a name on any page, or a flag number or unit
-  cell in the overview, and that student is picked out on every page. A bar
-  at the top lists what flags them; "Stop following" or Esc ends it. There is
-  no strip of student names across the pages: the overview is the list.
-* **One page at a time**: the question, the answer in one line, then the chart,
-  the drill-down, and what to do. "How to read" opens beside each question.
+Every page is built for a teacher's first look: one question, one answer in a
+sentence, one picture with its key on the page, the names, and the button that
+does the thing. What the first look does not need is one click away, in a
+fold that remembers whether it is open. The budget behind this, and the
+measurements, are in `reports/first-time-teacher-review.md`.
+
+Every button is one of the four things a teacher can do in the product: a
+reteach (to everyone, or in a small group), coursework (a practice set built
+from the item bank), content to practice (the unit's own work, assigned), or
+a group. Nothing is sent, launched, marked or changed in the course, and a
+page offers a button only where one of the four fits: a drifting student
+gets none, because none of the four answers that.
+
+* **Top bar**: the ALPS frame, the class, and My actions (everything you log
+  on any page). Nothing is saved or sent. The way to the example with more
+  books is in the footer, with the rest of what is said about the data.
+* **Pages down the left**, in three groups, in order of how much each helps
+  a teacher (no numbers: a first-time reader took them for counts). Students
+  opens with the overview: the students who need a step first, one line
+  each, with the worst thing a page found about them (why), where they stand
+  in the class's latest three units (the unit it is on and the two before;
+  the key is above the table), and one next step. The others are folded
+  ("Show the other 12 students"). Headings sort the table; a name opens the
+  profile.
+* **No header above the view.** The top bar names the class; the day the data
+  runs to (today, the export date) and the day of the latest work are in the
+  footer.
+* **Following a student**: click a name on any page, or a unit cell in the
+  overview, and that student is picked out on every page. A bar at the top
+  lists what flags them, each flag naming its page on hover; "Stop following"
+  or Esc ends it. There is no strip of student names across the pages: the
+  overview is the list.
+* **One page at a time**: the question, the answer in one line, then the
+  picture, the names, and what to do. "How to read" opens beside each
+  question, in fifty words or so.
 * **A chart shares its row.** On a wide window a chart is not stretched across
   the page: it sits on the left, with the panel that explains it on the right.
   That is the scatter beside the three groups to act on (Effort and mastery),
-  the outline beside the picked skill or question (Hardest content, Stall
+  the worst questions or the outline beside the picked question (Stall
   points), the weak-skill rows, the fading rows and the effect ranges beside
-  the picked row (Shared weak skills, Fading skills, What worked), the
-  readiness tree beside its
-  plan (Ready for a unit), and a student's timeline beside their moments. On
-  pace is two charts side by side on one scale, half the class in each. On a
-  narrower window the two stack and the chart takes the full width. The grid
-  and the tables always take the full width.
+  the picked row (Skills, My actions), the readiness tree beside its plan
+  (Ready for a unit), and a student's timeline beside their moments. On a
+  narrower window the two stack and the chart takes the full width. The pace
+  table and the overview take the full width.
 * **Little text.** The screens carry labels, numbers and names. Explanations
   sit in "How to read" and in tooltips; evidence is a bar, a chip or a small
   figure, not a sentence; the action is the label on its button.
-* Units, subunits and skills that the class has not started are still there:
-  an empty column under a grey heading in the grid, and one line of names ("Not started · 1.1 1.2 …")
-  under the lists in Hardest content and Stall points. Those lists open closed.
-* **Drilling down.** In Effort and mastery the grid shows one level at a time: every unit,
-  then the subunits of the unit you click, then the skills of the subunit you
-  click. The trail above it ("All units › Selection and Iteration › 2.7 While
-  Loops") takes you back up, and the chart underneath follows where you are.
-  A page holds ten columns, with arrows beside the trail for the rest; a
-  level opens on the first page the class has started, and going back up
-  returns to the page you came from.
-  In Hardest content and Stall points units open into subunits, and subunits
-  into skills or questions, as rows.
-* **The grid (Effort and mastery) is a calm table.** A row is a student and a column a
-  unit, with white space around every cell. A cell is one small bar whose
-  green says how secure, a thin line under it for practice done (red when
+* **What the class has not started is counted, not shown**: "+10 not started"
+  beside the unit buttons on Effort and mastery, under the outlines, and on a
+  profile, with the names on hover. Only Ready for a unit lists every unit,
+  because there the future is the point.
+* **Effort and mastery opens on one unit's chart**: everyone placed by the
+  share of its questions they tried (across) and the share of its key skills
+  they are secure on (up), with the three groups to act on beside it and a
+  button each. A select picks the unit, among the started ones. The
+  grid of every student is folded under the chart ("Every student, by unit"):
+  a row a student, a column a started unit, each cell one small bar whose
+  green is the standing, a thin line under it for practice done (red when
   under your line), and a red dot for stuck despite effort. Column names are
-  written on a slant, so none is cut short, with the unit's number under
-  each. The Class row shows how the class divides in each column. At the
-  right, one bar per student divides the skills taught so far into secure,
-  developing and not yet, with the number secure. At the foot, each column
-  has the class's share of secure standings week by week, and where it is
-  now. A student the Drifting page flags is marked "drifting" beside the name. With
-  only a few columns (the skills of one subunit) the table is narrower and
-  sits in the middle of the page.
-* **Fading skills opens on the answer.** It lists only the skills
-  that faded, as one chart in the middle of the page. "Show all" brings in
-  every skill that was checked again. Nothing is picked to begin with:
-  click a skill and the chart of every student appears beside the rows;
-  click it again, or the cross, and it goes.
-* **Shared weak skills is one calm row a skill.** A small pale area shows the
-  share of the class not yet secure week by week, with a thin line on top; a
-  bar and a count beside it say how many students are not yet secure now. It
-  replaced thick red bands, which made the page a wall of red.
+  written on a slant, with the unit's number under each, and the Class row
+  shows how the class divides. A unit heading opens its subunits, a subunit
+  its skills; the trail above takes you back up. The line and the sort are
+  inside the fold with the grid. A student the Drifting page flags is marked
+  "drifting" beside the name.
+* **Drifting is in dates, five days at a time.** The line is the questions a
+  student tried per five days, on any unit, against their own normal; the
+  stretches in which nobody in the class worked are hatched and the line does
+  not run through them. The figure names its dates ("9 Oct to 13 Oct: 0
+  questions, normal 23"). When the class as a whole is idle or slowing, the
+  page says that and names nobody. Students under half their normal in the
+  last five days only are one line of names. A profile's timeline is drawn
+  the same way, and the profile says when a student is catching up on an
+  earlier unit or working ahead.
+* **On pace keeps `main`'s tracks**: a solid bar for each student's required
+  skills secure now, a dashed continuation to the selected date, the goal
+  line and the dotted share due today. Status groups and the sort by status,
+  projection or name remain; a wide page uses two charts on the same scale.
+  The teacher picks a **Target unit** and a **By** date in a calendar field.
+  "Skills in this goal" opens the exact list, split into target key skills
+  and earlier skills used here. Profiles and followed-student flags use the
+  same selected goal. An older export uses each student's latest recorded
+  learning period and labels the forecast as assuming work resumes at that
+  pace. Hover for the period's dates. A flat observed pace stays flat;
+  missing history is shown as "Too early to tell".
 
-### The pages, by priority
+* **Skills is one page with three views.** *Weak now* lists the skills a fifth
+  of the class or more is weak in, under a heading a status (getting worse,
+  still weak, improving, recovered), worst first, with a filter for the
+  skills introduced through a unit (a time axis carries dates only, never
+  units, because a student may redo an earlier unit's work at any time), with "faded: 71% → 10%"
+  under a skill that was once higher; the panel opens with a card naming the
+  unit and subunit where the skill was introduced, the day the class met it
+  and the questions on it (click it to open the grid there), then names who
+  and offers a reteach. *By unit* is the outline of the book with a bar a row (what was
+  Hardest content). *Faded* is the before-and-after of every skill that was
+  checked again (what was Fading skills); nothing is picked to begin with,
+  and a click on a skill opens the chart of every student beside the rows.
+  The old links still open their view.
+* **Stall points opens on the worst questions**: the eight where the most
+  students gave up or skipped, as one ranked list with the lesson code; the
+  outline of the book is the second view, and a "Where they stall" link from
+  the Skills page opens the outline at the lesson.
+* **Ready for a unit asks which unit is next** and picks the first one not
+  started after the unit the class is in; one select holds every unit, with
+  "done" and "now" on the started ones. The readiness line is folded under
+  the plan.
+* **A picker with many options is one select, never a row of buttons**: the
+  unit on Effort and mastery, the next unit on Ready for a unit, the unit
+  filters on the Skills page, the goal unit on On pace, and the Book filter.
+  With several books the units are grouped by book inside the select.
+* **My actions opens on the log** of everything you did today, then the
+  practice sets you targeted, judged on later work. The invented sample rows
+  sit in a fold of their own, marked invented, counted in no headline and
+  attached to nobody.
+* **More than one book.** With one book nothing on any page says "book".
+  With more, the top bar counts them ("CS Awesome 2.0 + 3 books") and the
+  footer names every one, a book with no work yet among them. Every page and
+  a profile then start their controls with the Book filter, one select, which
+  keys each book to a letter: A, B, C. Under "All books" the grid has a label
+  over each book's columns, the outlines (Skills by unit, Stall points) group
+  by book, every unit select groups its units by book, and the overview's
+  unit columns carry the letter. A unit or lesson of another book says its book
+  wherever the page is not about that book. The main book's units are the
+  bands of time, the units a standing is read in, and the units pace is read
+  against.
+* **A book of labs** is drawn as work, not as a level: a gray bar for the
+  share of its labs tried, red when under your line. Under "All books" the
+  labs are named under the outlines and not ranked in them; under the labs
+  book, Stall points shows which labs the class has not got to run yet. A
+  unit of labs has no standing and is never a unit a student is behind in. A
+  book with work in fewer than four five-day blocks gives too little to judge
+  drifting: the page says so, and the figures go blank rather than read as
+  zero.
 
-The small number on each tab is the page's priority: how much its question
-helps a teacher who is teaching the class, 1 the most. It is a judgement, not
-a measurement, and it lives in one list (`PRI` in `js/atlas.js`): change the
-order there and the tabs, the "Flagged in" numbers in the overview and the
-bar for a followed student all follow. The first three stand out. Hovering a
-tab gives the reason.
+### The pages, in order
 
-| Priority | Page | Question it answers | Why it ranks there |
+The rail lists the pages in order of how much each question helps a teacher
+who is teaching the class. It is a judgement, not a measurement, and it lives
+in one list (`PRI` in `js/atlas.js`): change the order there and the rail and
+the order of a student's flags follow. No number is shown: a first-time
+teacher read the numbers on the tabs as counts. Hovering a tab gives the
+reason.
+
+| Order | Page | Question it answers | Why it ranks there |
 |---|---|---|---|
 | 1 | Overview | How is each student doing? | Every student at a glance, with one next step each |
-| 2 | Shared weak skills | Which skills are many students weak in, and is that changing? | What to reteach to the whole class |
+| 2 | Skills | Which skills are many students weak in, and which first? | What to reteach to the whole class |
 | 3 | Effort and mastery | Who is doing the work, and is it turning into mastery? | Who needs a reteach, and who needs a nudge |
 | 4 | Drifting | Who is drifting, and since when? | Catches a student who is slipping away, early |
-| 5 | Ready for a unit | Is the class ready for each unit, and what first? | What to shore up before the next unit |
+| 5 | Ready for a unit | Which unit do you teach next, and is the class ready for it? | What to shore up before the next unit |
 | 6 | Stall points | Where do students stall, skip or give up? | Where the material loses students |
-| 7 | Hardest content | Which units, subunits and skills are hardest? | Where to spend more class time |
-| 8 | Fading skills | Which skills fade after they're taught? | What to bring back in warm-ups |
-| 9 | On pace | Is each student on pace to reach the goal? | Who will fall short by the end of the year |
-| 10 | What worked | Did what I did work? | Whether to keep doing what you tried |
+| 7 | On pace | Will each student reach the target unit's key skills by the goal date? | Who is projected to miss the selected unit goal |
+| 8 | My actions | What have I done, and did it work? | What you did, and whether it worked |
 
 The tabs stay in their three groups (Students, Content, Act and check), each
 group listed most helpful first.
 
-Links name the page: `index.html#overview`, `#weak-skills`, `#effort`,
-`#drifting`, `#ready`, `#stall-points`, `#hardest`, `#fading`, `#pace`,
-`#worked`, and `index.html#s-Mariah` for a student's profile. (In
-the script each page also has a fixed id, used by flags and the action log;
-the ids are not shown anywhere.)
+Links name the page: `index.html#overview`, `#skills` (`#hardest` and
+`#fading` open its other two views), `#effort`, `#drifting`, `#ready`,
+`#stall-points`, `#pace`, `#actions`, and `index.html#s-Mariah` for a
+student's profile; the older names `#weak-skills` and `#worked` still open
+the page they named. (In the script each page also has a fixed id, used by
+flags and the log; the ids are not shown anywhere.)
 
 ### The theme
 
@@ -218,10 +341,10 @@ One colour, one meaning:
 | Grey | recorded, and neutral |
 | Hatching | cannot be seen: not in the lesson, not started |
 
-Status colours keep their usual meaning everywhere. Mastery in the effort and
-mastery grid, and in the overview's "By unit" cells, is a level and not a
-verdict, so it is one colour that only gets darker: pale green is not yet, mid
-green developing, dark green secure. Red is left there for the two problem
+Status colours keep their usual meaning everywhere. A standing (in the grid,
+the overview's cells, the pace table and a profile's chips) is a level and not
+a verdict, so it is one colour that only gets darker: pale green is not yet,
+then developing, proficient, and the darkest green mastered. Red is left there for the two problem
 marks: the practice bar under a cell when it is under the line, and the dot
 for stuck despite effort. Filled areas that sit side
 by side (grid cells, stacked bars) use red `#D3302F`, amber `#E9A400` and a
@@ -233,13 +356,13 @@ same thing.
 The page uses the whole window, and every chart is drawn to the width it is
 given, so its text stays the size of the text around it; charts are drawn
 again when the window changes size. A chart is given the full width only when
-that suits it: the grid's ten columns share the row (the last page steps back
-so it is full too, "4–13 of 13 units"), and so do the tables. Every other
+that suits it: the grid's columns share the row (ten at a time, with the last
+page stepping back so it is full too), and so do the tables. Every other
 chart takes about three fifths of the row beside its panel, or half of it
 beside a second chart, once the window is wide enough for both (`duoW` in
-`js/atlas.js` decides; below that they stack). The rows in Shared weak skills run
-from week 1 to today: nothing is drawn after it, so the rest of the year is
-left off.
+`js/atlas.js` decides; below that they stack). The rows of the Skills page run
+from the first day of work to a little after the latest: nothing is drawn
+after that, so an idle stretch is left off.
 
 The script asks for colours by its own names (`--good`, `--bad`, `--watch`,
 `--accent` …). The second half of `:root` in `css/atlas.css` answers those
@@ -252,9 +375,12 @@ change that block.
 index.html             the frame: top bar, views rail, one view
 css/atlas.css          its styles, in the Insight Lens theme
 data/class.js          the class, exported from the database (facts only)
-data/sample.js         invented rows for What worked only, marked as sample on screen
-js/atlas.js            the data layer, the overview, the nine views, profiles, events
-tools/export-atlas.py  writes data/class.js from the database
+data/sample.js         invented rows for My actions only, fenced off and marked as sample on screen
+data/example.js        the example with three more books: real outlines, invented work, and it says so
+js/atlas.js            the data layer, the overview, the pages, profiles, events
+tools/export-atlas.py  writes data/class.js from the database, every book the section lists
+tools/make-example.py  writes data/example.js from data/class.js and the database
+reports/               the multi-book write-up, and the first-time-teacher review with its afterword on what was built
 ```
 
 `node tools/check.js --checks` also checks this mock: no text under 12px in
@@ -263,9 +389,19 @@ tools/export-atlas.py  writes data/class.js from the database
 student and a question that exist, one result per pair, names only for
 students), that the export takes its password from the environment, and that
 no chart takes the full page width by itself (each is handed its width and
-paired with its panel or a second chart).
+paired with its panel or a second chart). It also holds the rules for a
+class with several books: a class with one is drawn as it always was, every
+page has the same filter, a level does not change with the book, a lab is
+never a check, and the example keeps real and invented apart and was built
+for this very export. And the rules behind what a teacher sees first: one
+standing everywhere, read from a unit's key skills; pace by standing against
+the finished units, with nothing projected; the overview opening on the
+students with a step first; sample rows attached to nobody; no priority
+numbers; the skills pages as one; every "How to read" at fifty words or so;
+every action one of the four a teacher can take; and time in dates, with
+today the export date, recent the last five days, and no class day assumed.
 
-The asset links carry a version (`?v=24`). Raise it when the stylesheet, the
+The asset links carry a version (`?v=26`). Raise it when the stylesheet, the
 script or the data changes, so a normal reload never pairs a new script with
 an old stylesheet.
 
