@@ -308,9 +308,13 @@ gets none, because none of the four answers that.
 * **Ready for a unit asks which unit is next** and picks the first one not
   started after the unit the class is in; one select holds every unit, with
   "done" and "now" on the started ones. Under it is the **readiness line**
-  ("Level needed"): ALPS's levels from attempted up as four stops on one line,
+  ("Level needed"): ALPS's levels from attempted up as four stops on one track,
   each with its battery and what the class is at it for this unit (ready,
-  groups first, not ready). The teacher picks the level the unit needs, proficient
+  groups first, not ready). A stop's node takes ALPS's status colour for its
+  verdict (green, yellow, red) on a gray track, so the nodes read green as far
+  as the class is ready; the picked stop's node is ringed in the primary colour. Under it, the key keeps
+  its groups apart with a hairline, and v4 keys its levels in ALPS's underline
+  legend. The teacher picks the level the unit needs, proficient
   to begin with, and the tree, the plan and the answer read it. Under the line
   is a tree two levels deep: the top row is what the unit's skills need, the
   row under it what those need, each a ring of the share of the class at the
@@ -556,7 +560,7 @@ colours and Noto Sans, its five levels at its cuts, a level drawn as its
 battery or its stacked bar, and none of the old words (secure, not yet,
 developing, effort and mastery) on screen.
 
-The asset links carry a version (`?v=41`). Raise it when the stylesheet, the
+The asset links carry a version (`?v=43`). Raise it when the stylesheet, the
 script or the data changes, so a normal reload never pairs a new script with
 an old stylesheet.
 

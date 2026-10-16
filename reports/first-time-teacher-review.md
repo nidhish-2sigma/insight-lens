@@ -723,6 +723,12 @@ v4's key lost "Not checked twice", since the ring no longer draws them, and its 
 
 Pictures: `reports/img/after-ready.png`, `ready-v1.png` to `ready-v4.png` and `after-ready-group.png`, taken again.
 
+### Ready for a unit, the level line and its key redrawn
+
+Asked the same day, with a screenshot of the level line and v4's key: "Make this better as well." The stops sat on a gray line, each verdict a dot beside its word, and the picked stop was a boxed outline. Now each stop's node, and the track into it, take the verdict's colour (green ready, amber groups first, red not ready), so the line itself reads green as far as the class is ready, then turns: on Selection and Iteration it is green to proficient and red into mastered. The level's battery sits beside its name, the verdict under it, and the picked stop is a soft tint with its node ringed in the primary colour. The key keeps its groups apart with a hairline (the rings' shares now say "Under 60%", "60 to 79%", "80% or more"), and v4 keys its levels in ALPS's own underline legend, Beginning to Mastered, with "% inside: share mastered" beside it.
+
+Then, the same day, on the redrawn line: "use correct colors... mayeb the ones used in alps-react-app". The nodes were already ALPS's status colours (`--green` #408B4D, `--yellow` #E19F01, `--red` #DC3545 in its `src/App.css`), but the track between them was those colours at 45% opacity, a pink and a pale green that ALPS does not use. The track is now ALPS's line gray (#E0E0E0) and the nodes carry the colour at full strength; the picked node keeps ALPS's primary blue ring and hover tint (#1864F2, #E8F1FE).
+
 ### What is still open
 
 - The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's now, but read on this mock's score, not ALPS's.

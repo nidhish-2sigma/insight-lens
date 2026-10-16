@@ -448,7 +448,6 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 /* ready for a unit: the key in two short lines, each led by what it keys */
 .legend.rdkey{margin-bottom:6px}
 .legend.rdkey+.legend.rdkey{margin-bottom:14px}
-.rdkey .lt:not(:first-child){margin-left:12px}
 /* a plan group shown on the tree: its card is ringed, its button pressed, and the tree says whose it is */
 .rdfor{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 8px;scroll-margin-top:calc(var(--bar) + 12px)}
 .pill.acc{background:var(--blue-tint);color:var(--blue-ink)}
@@ -457,19 +456,27 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .pcard.on{box-shadow:0 0 0 2px var(--accent)}
 .plan-none{margin:0 0 12px}
 /* the readiness line on Ready for a unit: four stops strung on one line, each the level's battery, its name, and what the class is at it */
-.lvline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;margin:0 0 12px}
-.lvlab{flex:none;margin:0;font-size:13px;color:var(--ink-2)}
-.lvstops{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex:1 1 440px;max-width:640px}
-.lvstops::before{content:"";position:absolute;left:12.5%;right:12.5%;top:16px;height:2px;background:var(--line)}
-.lvstop{position:relative;display:grid;justify-items:center;align-content:start;gap:4px;padding:12px 4px 8px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--ink-2);font-size:13px;line-height:1.3;text-align:center;cursor:pointer}
-.lvstop svg{padding:0 4px;background:var(--surface);box-sizing:content-box}
-.lvstop:hover,.lvstop:hover svg{background:var(--page)}
-.lvstop[aria-pressed="true"]{border-color:var(--outline);background:var(--blue-tint)}
-.lvstop[aria-pressed="true"] svg{background:var(--blue-tint)}
-.lvstop .lvn{font-weight:500;color:var(--ink)}
-.lvstop[aria-pressed="true"] .lvn{color:var(--blue-ink)}
+.lvline{display:flex;flex-wrap:wrap;align-items:flex-start;gap:4px 16px;margin:0 0 14px}
+.lvlab{flex:none;margin:0;padding-top:9px;font-size:13px;color:var(--ink-2)}
+.lvstops{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex:1 1 440px;max-width:640px}
+.lvstop{position:relative;display:grid;justify-items:center;align-content:start;gap:6px;padding:4px 4px 8px;border:0;border-radius:8px;background:transparent;color:var(--ink-2);font-size:13px;line-height:1.3;text-align:center;cursor:pointer}
+/* the track between the stops: ALPS's line gray; the colour is on the nodes */
+.lvstop::before{content:"";position:absolute;top:15px;right:50%;width:calc(100% + 4px);height:2px;border-radius:1px;background:var(--line)}
+.lvstop:first-child::before{display:none}
+.lvdot{position:relative;z-index:1;width:14px;height:14px;margin-top:5px;border-radius:50%;background:var(--vc);box-shadow:0 0 0 3px var(--surface)}   /* ALPS's green, yellow or red, full strength */
+.lvstop .lvn{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px 6px;font-weight:500;color:var(--ink)}
 .lvstop .lvv{font-size:12px;color:var(--ink-2)}
-.lvstop .dot{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:50%;vertical-align:0}
+.lvstop:hover{background:var(--page)}
+.lvstop:hover .lvdot{box-shadow:0 0 0 3px var(--page)}
+.lvstop[aria-pressed="true"]{background:var(--blue-tint)}
+.lvstop[aria-pressed="true"] .lvdot{box-shadow:0 0 0 3px var(--blue-tint),0 0 0 5px var(--accent)}
+.lvstop[aria-pressed="true"] .lvn{color:var(--blue-ink)}
+/* the keys under the line: groups set apart by a hairline; v4's levels in ALPS's underline legend */
+.legend.rdkey{align-items:center}
+.ksep{display:inline-block;width:1px;height:16px;background:var(--line)}
+@media (max-width:600px){.ksep{display:none}}   /* where the key wraps, a hairline would start a line */
+.rdkey .ul{padding:7px 2px 2px;border-bottom:5px solid var(--c)}   /* as much above the word as the underline takes below, so it lines up with the rest */
+.rdkey .ul.pale{box-shadow:0 1px 0 var(--lv-f)}
 .ck-r .ck-g .hint.sbline{display:flex;align-items:center;gap:8px}
 
 /* where a skill was first introduced: a card to check at a glance, and the way to the grid there */

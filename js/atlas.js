@@ -1273,17 +1273,19 @@ const noRing=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" style="fill:none;str
 const NOEV=`<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" style="fill:none;stroke:var(--neutral);stroke-width:1.6;stroke-dasharray:2 2"/></svg>Too few checks</span>`;
 /* the key's marks are the tree's: a ring in its colour */
 const rk=col=>`<svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" style="fill:none;stroke:${col};stroke-width:3"/></svg>`;
-/* the readiness line: ALPS's levels from attempted up, each stop its battery, its name and what the class is at it for this unit. The
-   teacher picks the level the unit needs, and the rings, the plan and the answer follow it */
+/* the readiness line: ALPS's levels from attempted up as stops on one gray track. A stop's node is in ALPS's status colour for what the class
+   is at that level for this unit (green ready, yellow groups first, red not ready), so the nodes read green as far as the class is ready;
+   under the node, the level's battery and name, then the verdict. The teacher picks the level the unit needs: its node is ringed in the primary
+   colour, and the rings, the plan and the answer follow it */
 const rdLine=R=>`<div class="lvline"><p class="lvlab" id="v11lvl">Level needed</p><div class="lvstops" role="group" aria-labelledby="v11lvl">${RDLV.map(L=>{const v=rdVerdict(L),on=S.v11.lv===L;
-  return `<button type="button" class="lvstop" data-act="v11lv" data-f="${L}" aria-pressed="${on}" aria-label="At least ${SL[L].toLowerCase()}: ${v.t.toLowerCase()}">${batt(L)}<span class="lvn">${SL[L]}</span><span class="lvv"><i class="dot" style="background:var(--${v.c})"></i>${v.t}</span></button>`}).join('')}</div></div>`;
+  return `<button type="button" class="lvstop" data-act="v11lv" data-f="${L}" aria-pressed="${on}" aria-label="At least ${SL[L].toLowerCase()}: ${v.t.toLowerCase()}" style="--vc:var(--${v.c})"><span class="lvdot" aria-hidden="true"></span><span class="lvn">${batt(L)}<span>${SL[L]}</span></span><span class="lvv">${v.t}</span></button>`}).join('')}</div></div>`;
 function v11(){const L=S.v11.lv,R=rdSel(),Tb=TB[R.tb];
   /* one select, every unit of every book in it, grouped by book under "All books" */
   const unitSeg=pickCtl('v11unit',R.u,unitOpts(Tb.units.map((U,u)=>u)),'Next unit');
   const out=S.stu!==null&&!R.ids.includes(S.stu),ks=R.pre.flatMap(q=>[q.k].concat(q.cs||[])),noev=ks.some(k=>!rdOK(k));
   const note=[R.ids.length<NM.length?`${R.ids.length} of ${NM.length} students use ${Tb.n}.`:'',out?`${NM[S.stu]} doesn’t use it.`:''].filter(Boolean).join(' ');
   return `${note?`<p class="hint" style="margin:0 0 10px">${note}</p>`:''}<div class="controls">${unitSeg}${pickCtl('v11ver',S.v11.ver,RDV,'Version')}</div>${R.pre.length?rdLine(R):''}
-  ${R.pre.length?(S.v11.ver==='4'?`<div class="legend rdkey">${[4,3,2,1,0].map(b=>`<span>${lsw(b)}${LV[b]}</span>`).join('')}<span class="lt">Inside: % ${lvAt(L)}</span>${TAKEY}</div>`:`<div class="legend rdkey"><span class="lt">Share ${lvAt(L)}</span><span>${rk('var(--bad)')}Under 60%</span><span>${rk('var(--watch)')}Under 80%</span><span>${rk('var(--good)')}Ready</span>${noev?NOEV:''}${TAKEY}${S.v11.ver==='3'?'<span class="lt">Size: how much the unit leans on it</span>':''}</div>`):''}<div id="v11c"></div>`}
+  ${R.pre.length?(S.v11.ver==='4'?`<div class="legend rdkey">${[0,1,2,3,4].map(b=>`<span class="ul${b===1?' pale':''}" style="--c:${LVCOL[b]}">${LV[b]}</span>`).join('')}<i class="ksep" aria-hidden="true"></i><span>% inside: share ${lvAt(L)}</span><i class="ksep" aria-hidden="true"></i>${TAKEY}</div>`:`<div class="legend rdkey"><span class="lt">Share ${lvAt(L)}</span><span>${rk('var(--bad)')}Under 60%</span><span>${rk('var(--watch)')}60 to 79%</span><span>${rk('var(--good)')}80% or more</span>${noev?NOEV:''}<i class="ksep" aria-hidden="true"></i>${TAKEY}${S.v11.ver==='3'?'<i class="ksep" aria-hidden="true"></i><span>Size: how much the unit leans on it</span>':''}</div>`):''}<div id="v11c"></div>`}
 function v11draw(){const c=$('#v11c');if(!c)return;
   const V=S.v11.ver,L=S.v11.lv,P=planNow(),R=P.R,an=$('#ans');
   /* the tree is about the whole class, or about one of the plan's groups once the teacher picks it on its card; the plan stays the class's */
