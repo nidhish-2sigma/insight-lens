@@ -1,4 +1,4 @@
-/* Insight Lens mock · styles. Colours are ALPS tokens; see the design document, section 6.6.
+/* Insight Lens mock · styles. Colours are the ALPS app's own (alps-react-app, src/App.css :root); see the design document, section 6.6.
 
    One colour, one meaning:
      blue         done, right, active (a positive recorded state)       mid blue  got there with more tries
@@ -9,10 +9,10 @@
    Scales that run from weak to strong (grid cells, learning bands) go amber → neutral → blue, so the cells
    that need attention carry the most colour. No text is smaller than 12px, and text meets 4.5:1. */
 :root {
-  --ink: #1c1e21; --ink-2: #4d4f53; --muted: #5f636a; --line: #e7e8ec; --axis: #c9ccd3; --surface: #ffffff; --page: #f5f6f8; --wash: #fafbfc;
-  --blue: #1864F2; --blue-ink: #0b3fa8; --link: #1257d6; --blue-tint: #EFF4FE; --red: #D3302F; --amber: #E9A400; --amber-2: #F3CF73; --amber-ink: #7a5200; --amber-tint: #FDF6E6;
-  --green: #2E7D32; --green-ink: #256b29; --green-tint: #F1F8F2; --grey: #BDBDBD; --purple: #7B3FB5; --purple-ink: #6a33a1; --purple-tint: #F3E5F5;
-  --part: #7ea6f5; --prog: #b9cdf7;
+  --ink: #212121; --ink-2: #424242; --muted: #666666; --line: #E0E0E0; --axis: #BDBDBD; --surface: #ffffff; --page: #FAFAFA; --wash: #FAFAFA;
+  --blue: #1864F2; --blue-ink: #0E4CC0; --link: #1864F2; --blue-tint: #E8F1FE; --red: #DC3545; --amber: #E19F01; --amber-2: #FDD836; --amber-ink: #B45309; --amber-tint: #FDF7EC;
+  --green: #408B4D; --green-ink: #2E7D32; --green-tint: #F1F6F2; --grey: #BDBDBD; --purple: #9C27B0; --purple-ink: #6A1B9A; --purple-tint: #F3E5F5;
+  --part: #4D8AF5; --prog: #90CAF9;
   /* weak → strong, with a neutral midpoint */
   --b0: #C77700; --b1: #F0B93A; --b2: #CBD0DA; --b3: #6C9BF0; --b4: #1447B8;
   --t0: #F0B93A; --t1: #F9DE9C; --t2: #ECEEF2; --t3: #BBD3FA; --t4: #86AEF4;

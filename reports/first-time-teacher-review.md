@@ -426,9 +426,9 @@ What the numbers say, and what they do not:
 - **Effort and mastery.** A row of buttons for the started units ("+10 not started" beside them), the key, then the unit's scatter (the share of its key skills secure, up; the share of its questions tried, across) with the three cards and their buttons beside it. The grid is a fold under that ("Every student, by unit"), started units only, with the line and the sort inside the fold; the per-student summary bars and the trend row are gone. The grid's cells, the overview's cells and a profile's chips now show the same standing.
 - **Drifting.** The weeks with no class work are hatched and the line stops at the last week that had some; the dashed week-8 line is gone; "Doing less each week" became "Week 15: 0% of class work, normal 63–100%"; the three "one low week" students are one line of names. A profile's timeline is drawn the same way.
 - **On pace.** "Goal: proficient through [Unit 4 · Data Collections (now)] by [4 May (week 36)]", two selects, with a sentence on when the class's own pace reaches it. One row a student, a cell a unit of the goal in the standing's green with the number of key skills still to close, sorted by units behind; the class divided at the foot. The answer: "6 on pace · 10 behind in one finished unit · 20 behind in two." A finished unit is one before the unit the class is in, in the main book; a unit of labs is never one; too early to tell is not behind.
-- **Skills.** One page, three views. *Weak now*: the answer names the skill to reteach first ("Class Instantiation in Java first: 27 of 36 not yet secure"), the rows run under a heading a status (getting worse, still weak, improving, recovered) with no status word on each row, a skill that faded says what it fell from ("faded: 71% → 10%"), empty statuses have no tab, and the panel opens with a card a teacher can check at a glance, "Introduced in · Unit 1 · Using Objects and Methods · 1.20 Unit Summary 1b (1.7-1.15) · First met on 9 Sep · 30 questions check it", which opens the grid at that subunit with the skill picked (added later the same day on request; the by-unit and faded views have the same card). *By unit* is the old Hardest content without the ▲ marks and with the not-started units as one count. *Faded* is the old Fading skills with "Needed in Unit 4" as the last column, no left bars and no sort. `#hardest` and `#fading` still open their view.
+- **Skills.** One page, three views. *Weak now*: the answer names the skill to reteach first ("Class Instantiation in Java first: 27 of 36 not yet secure"), the rows run under a heading a status (getting worse, still weak, improving, recovered) with no status word on each row, a skill that faded says what it fell from ("faded: 71% → 10%"), empty statuses have no tab, each row's line is the share of the students checked on the skill who are secure, drawn upward so a hard skill sits low or falls, and a row's status comes from that line over the last 30 days of class work (changed later on request, so that lower reads as worse; the earlier "getting worse", read from the share of the whole class not yet secure, mostly flagged skills the class had only just met), a day picked on a line lists who was where then, a second day on the same skill sorts the class by change (lost it, reteach group, still developing, got it, held) and a day on another skill gives who is not yet on both (added on request; buttons only on today's lists, and a past day offers "Compare with now"); a day also lists the questions its struggling students are getting wrong, and two days list what the students who were doing better got wrong in between (on Class Instantiation, 18 of the 22 who were better on 10 Sep got the Unit 4 question "Community Class Object Array" wrong: the skill broke when it met arrays), and the panel opens with a card a teacher can check at a glance, "Introduced in · Unit 1 · Using Objects and Methods · 1.20 Unit Summary 1b (1.7-1.15) · First met on 9 Sep · 30 questions check it", which opens the grid at that subunit with the skill picked (added later the same day on request; the by-unit and faded views have the same card). *By unit* is the old Hardest content without the ▲ marks and with the not-started units as one count. *Faded* is the old Fading skills with "Needed in Unit 4" as the last column, no left bars and no sort. `#hardest` and `#fading` still open their view.
 - **Stall points.** Opens on the eight questions where the most students gave up or skipped, ranked, each with its lesson code; the outline is the second view, with "+10 not started" as one line.
-- **Ready for a unit.** Asks "Which unit do you teach next, and is the class ready for it?", picks the first unit not started after the one the class is in (Unit 5 here) and says so, marks the started units "done" and "now", and folds the readiness line under the plan.
+- **Ready for a unit.** Asks "Which unit do you teach next, and is the class ready for it?", picks the first unit not started after the one the class is in (Unit 5 here) and says so, marks the started units "done" and "now", and folds the readiness line under the plan. Later, on request, the tree became two levels deep, from the learner model's skill graph, with a taught symbol under each skill (see below).
 - **My actions.** Opens on the log of everything done today, then "Did the practice sets work?" for the real set, with the headline counting real sets only ("Too early to tell for the one set you targeted"). The six sample rows sit in a fold of their own, marked invented, with no names in their panel; they reach no headline, no profile moment, no flag and no "did this" mark.
 - **A profile.** "Proficient or better: 2 of 3 units", "Class work, week 15", "Pace: Behind in 1 unit · 6 key skills to close in Unit 1"; the unit chips carry the standing words; the moments have no sample rows.
 - **Across the pages.** The rail has no numbers (its order is the priority); the "Mock · real class data" chip is gone and the example link lives in the footer; the following bar's flags name their page on hover; the footer says "the latest class work is from week 15"; the example with three more books still works on every page.
@@ -496,12 +496,242 @@ So on this class the page names students only while the class is in full swing (
 
 Later the same day, on request, the Overview page was removed. The rail opens on Effort and mastery, and an old link to `#overview` lands there. What the Overview carried lives on elsewhere: a student's flags in the bar for a followed student (each opening its page), the one next step and the practice set on the profile, and the names with a button on each page's cards. The before-and-after table above keeps the Overview's row as a record of what was measured; `reports/img/after-overview.png` was removed with the page.
 
+### What a unit builds on, from the skill graph
+
+Asked on 15 October: on Ready for a unit, show the skills that the skills of the unit need, up to two levels back, from the database.
+
+**Where the edges are.** The database holds no edges. Its `knowledge_graph` table names, for each skill set, a graph file that the learner model keeps in its cloud bucket; `skill_graph` lists the older files, and `skill.parent_id` is empty. CS Awesome 2.0 uses skill set 19, "Java Programming 2": 2,566 skills and 6,842 edges, built in mid-September 2026, with no cycles. An LLM judged each pair, and the weight on an edge, 4 or 5, is its confidence. All 406 skills of this class are in it, with 1,125 edges into them. `tools/export-prereqs.py` reads the database through the export's read-only session and the file from the bucket with an application-default token, and writes `data/prereqs.js`.
+
+**What the page draws.** For the picked unit, the skills its graded questions are tagged with at more than 50% relevance. The top row is what those skills need that the unit's questions do not check themselves, ranked by the edge's confidence times how many of the unit's questions check the skill. The row under it is what each of those needs. There are up to four on top and two under each, and no skill is drawn twice.
+
+**Evidence first.** The skill set is shared by several books, so many of the strongest prerequisites are near-copies of this class's skills from other books, which no question here checks. The tool ranks first the skills that three or more of this class's questions check. The page draws a ring only when eight or more students have two or more checks on the skill, and its share is of those students. Any other prerequisite is a dashed ring with a "?", gives the reason on hover, is counted under the tree, and never colours the answer. A unit with nothing readable says it is too early to tell, never that the class is ready.
+
+**Only tags above 50% relevance.** Asked later the same day: "only use the skills that have more than 50% relevance score". The score is on each question's skill tag (`item_skill.relevance_score`: 25%, 50%, 75% or 100%). Every tag on this class's questions scores 75% or 100%, so the cut removes no tag here, and `data/class.js` and the example come out the same. What changed is that the lessons' teaching weights, which carry no relevance score, no longer make a skill one of the unit's; they had added 41 skills to Inheritance and 106 to Selection and Iteration. Inheritance now draws If-Else Statements in Java in place of Trace Variable Changes in Loops. Selection and Iteration no longer draws Index-Based Looping, which only a lesson's weight had put there. Stories, none of whose questions carries a tag, has no tree, and the page says so. The export applies the same threshold (`MIN_RELEVANCE` in `tools/export-atlas.py`), so another class gets it too.
+
+**Taught and assessed.** Asked the same day: "include taught and accessed symbol to quickly see this detail", read as taught and assessed. Under each skill of the tree a book says it was taught and a tick in a circle says it was assessed, filled for yes and hollow for no, keyed beside the rings. Taught: a lesson that a quarter of the class worked on has a teaching weight for it. Assessed: a quarter of the class answered a question that checks it. The hover names the lessons and counts the students. The symbols explain rings that would otherwise puzzle. On Selection and Iteration, Integer vs Floating-Point Division (42%) and Java Logical Type (91%) are assessed but not taught: the lessons that teach them, 1.5 and 1.2, are ones no student in this class worked on. Output Statements (81%) is assessed, and no lesson in the book has a teaching weight for it. The old "Not taught yet" under a dashed ring now says what it meant: "No student has answered its questions yet".
+
+**The tick, dropped.** Asked next: "What is accessed on hover showing? It is almost 36/36 in all cases." It counted the students who had answered at least one question on the skill, at any time. On the skills the tree draws that is nearly everyone: 30 to 36 of 36 on every skill with a question, and none on the skills with no question, which the dashed ring already shows. The database's own assessment weight would not have varied either: 35 of the 44 skills drawn have one in a lesson the class worked on. What does vary is how deep and how old the evidence is, from 1 question to 39, a median student with 1 check or 20, last asked from September to December. So the tick went, on request, and the book stayed. The hover's line is now, for Methods in Classes, "13 questions check it · 17 of 36 students answered two or more · last asked 15 Dec": its 18% rests on half the class.
+
+What it shows on this class:
+
+| Unit | Top row, share of the class secure | Under it |
+|---|---|---|
+| Unit 5 · Inheritance (the next unit, the default) | Methods in Classes 18%, Arithmetic Operators 58%, If-Else Statements in Java 58%, Construct and Utilize Objects (too few checks) | Compound Boolean Expressions 28% and Java If Statement 58% under If-Else, so the reteach card says "Start with Compound Boolean Expressions" |
+| Unit 3 · Class Creation | Arithmetic Operators 58%, If-Else Statements in Java 58%, Produce Console Output 69%, Output Statements 81% | The same two under If-Else |
+| Unit 2 · Selection and Iteration | Integer vs Floating-Point Division 42%, Arithmetic Operators 58%, Operator Precedence 75%, Java Logical Type 91% | Too few checks to tell under both |
+
+**Read it with care.** The edges are a model's judgement, and a tree is only as good as the tags it starts from. Getting Started, the book's first unit, is drawn as building on If-Else Statements and Boolean Expressions, which the book teaches in Unit 2: its questions are the course pretest, tagged with skills from the whole course. Without the file, and for the units of the example's other books, the page falls back on the coverage weights, as before. My choices, unconfirmed: three questions to rank a skill first, eight students to draw a ring, four on top and two under each, and a quarter of the class as the bar for both taught and assessed.
+
+### A picked day, drawn
+
+Asked on 15 October, on the panel that opens when a day is picked on the Skills page: "Make the visualization for this part on skills page better." The panel was mostly words. Its one bar had no key and left out the students too early to tell, the cards had no colour to tie them to it, and each question was a line like "10 wrong · 4 retries · of 16 who tried".
+
+Now the class that day is one bar of every student (not yet, developing, secure, and too early to tell, hatched), with the counts inside and the key under it. Two days are two such bars on one scale. The Not yet and Developing cards, the Secure fold and the too-early line carry the bar's colours. Each question is a bar of the students its list is about, in Stall points' colours (got it wrong, needed retries, right first time), with an empty part for those who did not try and the counts inside; a click still opens Stall points at it.
+
+| Class Instantiation in Java | Words in the panel, before and after | Pictures, before and after |
+|---|---|---|
+| One day, 3 Sep | 178 and 162 | one bar with no key, then seven keyed bars |
+| Two days, 8 Sep to now | 223 and 222 | none, then nine keyed bars |
+
+Picture: `reports/img/after-skills-two-days.png`, the two days from 10 September as of 19 November 2025.
+
+### Ready for a unit, tidied
+
+Asked on 15 October: "Make the presentation of ready for a unit better. Keep it similar but better." The layout stayed: the unit, the tree under it, the three cards. What changed:
+
+- **The rings run weakest first, left to right**, and so does each second row. On Data Collections they had run 81%, 69%, 58%, 18%, so the skill the answer names sat last. On a phone the tree now opens on the first ring, not the middle.
+- **The rows are named beside the tree**, "Builds on" and "Which build on", where the key used to say "top row, bottom row". A narrow screen keeps a line above the tree instead.
+- **The key is drawn with the tree's marks**, in two lines each led by what it keys: rings in their colours, the ring with your line's tick and the dashed ring, then the book. The squares are gone.
+- **A name is darker when its ring needs something** (under 80%) and lighter when it is ready or cannot tell.
+- **The small group holds only students checked on the skill and not secure.** On Selection and Iteration it had listed 21 for Operator Precedence, 16 of whom no question had checked on it; it now lists 5, with "+16 not checked on it yet" and their names on hover.
+- **An empty card says why**: "None: no skill is between your line and 80%", "Nobody yet: no student is secure on all of these". "Nobody left" is kept for a card whose names you removed.
+
+The words on the page are about the same (266 before, 282 after on the default unit): the key's two leads and the empty cards' reasons add a few, the shorter line under the unit takes some away. Picture: `reports/img/after-ready.png`.
+
+### Students as lists, not chips
+
+Asked on 16 October: "On the all the pages where students are showing in chips format. Change them to some readable format like a table or something so that they look clean and easy to scan." Nine lists on six pages drew students as rounded chips that wrapped in ragged rows: the three groups on Effort and mastery, the students under half their normal on Drifting, the panels of the Skills views and of a picked day, the outcomes on Stall points, the groups of the plan on Ready for a unit, and "Who did it" on My actions.
+
+Each is now the same list: a row a student, in alphabetical order, a hairline under each, in columns that run down then across once a list is longer than six. Where the page knows why a student is in the list, the number sits at the right of the row and a short caption over the list names it:
+
+| Page | The number on each row |
+|---|---|
+| Effort and mastery | Stuck despite effort: key skills secure ("1 of 9"); the other groups: questions tried |
+| Drifting | Questions tried in the last five days, of their normal ("0 of 14") |
+| Skills, weak now and by unit | Mastery of the skill now |
+| Skills, faded | Mastery when taught and later ("82% → 0%") |
+| Ready for a unit | How many of the group's skills they need, when more than one |
+
+Lists in a panel stack, each across the panel, so a long one splits into two columns instead of running down one narrow one: "Gave up" on Stall points had run to 29 rows, and is now two columns of 15. A name still opens the student, and a group on Ready keeps its button to take a student out.
+
+### Ready for a unit, four other versions of the tree
+
+Asked on 16 October: "Analyze ready for a unit page. I want 4 totally different mocks for that page. Connect them in that page as version v1-4." The page answers one question, which unit to teach next and whether the class is ready for it, from four facts per skill it builds on: the share of the class secure, which students are secure, where the book teaches it, and how deep and recent the checks are. Two rounds of mocks were replaced the same day on request. The first (a grid, a checklist, lanes of students, a course map) gave way to "use only tree kind of visualizations", and the second (an outline, a left-to-right tree of cards, a treemap, an icicle) to "similar to what we have in the current version". So each version now keeps the current tree's language, a ring a skill with its share and your line, the links, the books, the key and the same plan cards, and changes one thing:
+
+| Version | What changes | What a teacher gets from it |
+|---|---|---|
+| Current | The tree top down: the unit, the skills it builds on, what those build on | Which skill is weakest, and what it rests on |
+| v1 · Left to right | The same tree across the page, the names beside the rings | Long names read whole; a deep tree fits the width |
+| v2 · Radial | The unit in the middle, its skills around it, what those build on further out | The unit as the centre of what it needs; every branch at the same distance |
+| v3 · Weighted | Each ring and link sized by how much the unit's questions lean on the skill, from the skill graph | Which skill matters most to the unit, beside how secure it is |
+| v4 · Class split | Each ring the students checked on the skill, by ALPS level, mastered first (it read secure, developing, not yet until the ALPS change below, and showed the students not checked twice as an empty part until "the tree redrawn") | How far from mastered the rest of the class is |
+
+On the default unit, Inheritance, all agree that Methods in Classes comes first, at 18% of 17 checked. v3 draws its ring and link the largest, since the unit leans on it far more than on anything else; v4 shows that half the class has not been checked on it twice.
+
+Pictures: `reports/img/ready-v1.png` to `ready-v4.png`, Inheritance at 1440 wide. Which version to keep, or which parts to combine, is open.
+
+### The ALPS app's theme and names
+
+Asked on 16 October: "Review the names and theme used in alps-react-app and use same theme (colours) and names in /Users/nidhishkumar/2Sigma/insight-lens3." ALPS was read, not changed: its colours and theme (`src/App.css`, `src/utils/colors.js`, `src/utils/mui-theme.js`), its levels (`src/utils/performance-data-processing.js`, `src/contexts/SectionContext.jsx`), and the screens that show them (the class bar, the student's battery, the level legend, Student Breakdown, the class overview's cards).
+
+**The theme.** ALPS's primary blue `#1864F2`, its status green `#408B4D`, yellow `#E19F01` and red `#DC3545`, its text colours (`#212121`, `#666666`), Noto Sans, and a 10px corner on buttons. A level takes ALPS's performance ramp (gray `#D7D7D7`, then `#E3F2FD`, `#90CAF9`, `#1876D2`, `#0D47A1`) and is drawn as ALPS draws it: a battery of four blocks for one student, a stacked bar, mastered first, for a class, hatched pale gray in a dashed outline when there is no level yet (unavailable), empty in a solid outline when nobody was checked twice. `css/lens.css`, the theme file the checker compares against, carries the same tokens.
+
+**The names.**
+
+| ALPS's word | Was |
+|---|---|
+| Performance; Beginning, Attempted, Familiar, Proficient, Mastered | mastery; secure, developing, not yet |
+| Engagement | effort, practice done |
+| Engagement and performance (the page; `#effort` still opens it) | Effort and mastery |
+| Struggling | Stuck despite effort |
+| Low engagement | Not doing the work |
+| Unavailable | Too early (one check) |
+| Textbook | book |
+
+Where a page acts on a group of levels it names them: mastered; familiar or proficient (a practice set); beginning or attempted (a reteach). On track, keep going, coasting, too early to tell, and the pace and weak-skill statuses have no ALPS word and keep theirs; so do the buttons.
+
+**The cuts moved with the names.** ALPS's names on the old cuts would call students familiar who are not familiar in ALPS. So a skill's level is now ALPS's band of its score (40, 55, 65, 80), and the line between the two lower groups moved from 60% to 55%. A unit's level is ALPS's unit band: the band of the student's mean score on the unit's key skills they have a level on, capped by the share of those key skills that is (under 25% at most attempted, under 50% at most familiar, under 80% at most proficient). It replaces the standing of section 4 (a share of key skills secure, the hard third gating mastered). The score itself is still this mock's average credit; ALPS reads its learner model's score, so a student can sit a band apart in the two apps.
+
+**Before and after, on the real class** (36 students, as of 13 October 2026):
+
+| Unit | On track | Keep going | Struggling (was stuck) | Low engagement (was not doing the work) | Coasting |
+|---|---|---|---|---|---|
+| Using Objects and Methods | 7 → 18 | 15 → 3 | 4 → 5 | 9 → 5 | 1 → 5 |
+| Selection and Iteration | 14 → 33 | 20 → 2 | 2 → 1 | 0 → 0 | 0 → 0 |
+| Data Collections | 9 → 24 | 19 → 3 | 1 → 2 | 6 → 1 | 1 → 6 |
+
+The unit band is kinder than the old standing: a student whose key skills average 70% is proficient in ALPS, where the old standing called them proficient only when 60% of those skills were each at 80% or more. Most of the old "keep going" are now on track, and a student under your line is now coasting more often than low on engagement. Skills weak for a fifth of the class: 31 → 28 (still weak or getting worse: 29 → 25). On a skill, 39 student-skill pairs moved from beginning or attempted to familiar or proficient with the 55% line.
+
+**Decisions taken** (mine, unconfirmed):
+
+1. ALPS's cuts and unit band came with ALPS's names, rather than ALPS's names on the old rule.
+2. The unit band's coverage is counted over the key skills the class has been checked on so far; ALPS counts the unit's whole weight, which would cap everyone in a unit still in progress.
+3. One check is "unavailable" (ALPS's word for practised but not levelled); "too early to tell" stays as a group and a verdict.
+4. Engagement stays the plain share of the class's questions tried, with your line; ALPS's engagement is a percentile of time and attempts, so its levels (low to very high) are not used.
+5. One page is renamed. ALPS's Student Breakdown and Performance Dashboard together are this page, so it took their words, not one of their names; the other pages have no ALPS counterpart and keep theirs.
+6. Attempted's one pale block keeps a thin outline in the next blue (not in ALPS): on the picked column's tint it vanished and the battery read as beginning.
+7. On the scatter, a student whose level the coverage holds down is drawn at the top of that level's band, not at their mean score, so the dot sits in its group's region; the hover says why.
+
+Pictures: `reports/img/after-*.png` (the set of 16 October), `after-skills-two-days.png` and `ready-v1.png` to `ready-v4.png` were taken again with the ALPS theme; the pictures of 13 October and `books-*.png` show the old theme.
+
+### Ready for a unit, the readiness line in levels
+
+Asked on 16 October: "Let's have the readiness line with mastery level. Instead of having it continuous, lets have different levels on it and teacher can select a level and quickly decide whether to teach or not a particular unit in ready for a unit page."
+
+Before, the line was a share of the class: a slider from 40% to 80%, folded under the plan, with a ring the share mastered and a tick where the line fell. Now the line is ALPS's levels from attempted up, four stops on one line under the unit picker. Each stop shows the level's battery and what the class is at it for this unit: ready, small groups first or not ready. The teacher picks the level the unit needs, and everything else reads it. A ring is the share of the students checked on the skill who are at that level or above, the plan's groups are the students below it, and the answer names it ("Not ready for Inheritance (optional) at proficient. Reteach Methods in Classes first.").
+
+What the stops say on the real class:
+
+| Unit | Attempted | Familiar | Proficient | Mastered |
+|---|---|---|---|---|
+| Using Objects and Methods (done) | ready | small groups first | not ready | not ready |
+| Selection and Iteration (done) | ready | ready | ready | not ready |
+| Data Collections (now) | small groups first | not ready | not ready | not ready |
+| Class Creation | ready | ready | ready | not ready |
+| Inheritance (optional), the page's default | small groups first | not ready | not ready | not ready |
+| Mixed Up Code, Free Response | ready | small groups first | not ready | not ready |
+
+A higher level never says the class is more ready, and the checker holds that on every unit.
+
+**Decisions taken** (mine, unconfirmed):
+
+1. The line starts at proficient, the level a profile counts ("Proficient or better") and the one the user named on 13 October for knowing a unit ("proficient or have mastered the hard skills").
+2. The shares are fixed: under 60% of the checked, reteach to everyone (the old line's default); under 80%, small groups; 80% or more, ready. Only the level is the teacher's.
+3. Beginning is not a stop: every student with a level is at least beginning.
+4. A ring has lost its tick: the line is the stops above the tree now, and the ring's colour reads the fixed shares.
+5. Going further stays for the students who have mastered every skill shown, whatever the level: a stretch set is for mastery, not for the bar.
+6. The line is open on the page, no longer folded: it is how the page is read now.
+7. The rings re-order with the level, weakest first at the picked level, so the first ring is still where to start.
+
+Pictures: `reports/img/after-ready.png` and `ready-v1.png` to `ready-v4.png` were taken again at proficient.
+
+### Ready for a unit, cleaned, and a group on the tree
+
+Asked on 16 October, with a screenshot of the page as of 19 November 2025 on Class Creation at attempted: "Review the content of this page and make it cleaner. Remove things that are not needed. Also, for groups, add a click feather which on click start showing data for only that group in the tree diagrams."
+
+What went, what changed, and why:
+
+| Part | Change | Why |
+|---|---|---|
+| "The first unit not started after Unit 4. Pick another if you teach another next." | Removed | The select names the unit. Once a teacher picked another unit, the line was wrong: it still said "after Unit 4" over Unit 3. |
+| Version: five buttons | One select | Five buttons for a design comparison were the loudest control on the page. |
+| "Ready when the class is at least" | Beside the stops, not above them | One row less. |
+| The key, two lines | One line: the rings, then "Under it: taught, not taught" | The book's long label ("Taught in a lesson the class worked on") is on each skill's hover. |
+| "Top row: what the unit builds on · under each: what that builds on" | Removed | The links draw it; How to read says it. |
+| Dashed "?" rings on the second row | Not drawn | Two steps back and with no evidence, they gave a teacher nothing to act on. The ones on the top row stay, since the unit needs them directly. |
+| The line under the tree | Shorter ("8 more not shown, 6 with too few checks to tell") | The hover still lists them. |
+| Empty plan cards ("Nothing under 60%", "None: no skill is between 60% and 80%") | Left out; one line says what is empty | Two of the three cards on the screenshot said there was nothing. |
+| A remove button on every name | Shown on the row under the pointer | Twelve × on the screenshot; they stay on a touch screen. |
+| Accept plan | Hidden when there is nothing to log | |
+
+Measured in the screenshot's state (1666px wide): words 315 → 252, rows above the tree 9 → 6, dashed rings 3 → 0, plan cards 3 → 1, page height 1,141 → 1,031px (2,396 → 2,017px at phone width).
+
+**A group on the tree.** The small group's card and the ready-to-go-further card each have a "Show on the tree" button. Pressed, the tree shows that group alone: each ring is the share of the group's students at the picked level, and a ring for a skill none of them was checked on twice says so. The tree says whose it is above it ("Small group · 4 students"), with "Show the whole class" beside it, and the card is ringed. The plan, the stops and the answer stay the class's, since the groups come from them. Picking a new unit starts on the whole class again; on a phone, where the plan sits under the tree, the page scrolls up to the tree. On Inheritance at attempted the small group's tree shows why it is a group: 0% on Methods in Classes, 100% on the rest.
+
+Found on the way: the page's How to read still described the old share line ("red below your line"). It now reads the level, and says what a group's button does.
+
+**Decisions taken** (mine, unconfirmed): the versions stay, in a select; "Reteach to everyone" has no button, since it is the whole class; the group view keeps the class's ring order, so nothing moves when a group is shown.
+
+Pictures: `reports/img/after-ready.png`, `ready-v1.png` to `ready-v4.png`, and `after-ready-group.png` (the small group on Inheritance at attempted).
+
+### Ready for a unit, minimal text
+
+Asked on 16 October, with a screenshot of Class Creation at mastered: "More clean with very minimal texts. Only keep the most important things." What stays is what the decision needs: the answer, the unit, the level stops, the tree with its key, and the plan's skills, names and buttons. Cut:
+
+| Part | Before | Now |
+|---|---|---|
+| The level line's label | Ready when the class is at least | Level needed |
+| A stop's middle verdict | Small groups first | Groups first |
+| The key | A ring: the share mastered … Under it: Taught, Not taught | Share mastered, the three ring colours, Taught, Not taught |
+| A dashed ring in the key | Too few checks in this class to tell | Too few checks |
+| The unit box | Its name and "Not started" (or the dates worked) | Its name |
+| The rows | "Builds on", "Which build on" beside the tree when it fits | Not named: the links show them |
+| Under the tree | From the learner model's skill graph. 8 more not shown, 6 with too few checks to tell. | +8 more prerequisites (names and reasons on hover); where the graph comes from is in "Where the numbers come from" |
+| A plan card's skill | Arithmetic Operators · 58% mastered. Start with Compound Boolean Expressions (17%). | Arithmetic Operators, and under it "Start with Compound Boolean Expressions": the rings show the shares |
+| Not checked, in a small group | +20 not checked on it yet | +20 not checked |
+| Empty cards, said | Nothing to reteach: no skill is under 60%. | Nothing to reteach. |
+| A group's button, and the way back | Show on the tree · Show the whole class | Show on tree · Whole class |
+
+Measured in the screenshot's state (1668px wide), visible words outside the footer with the names counted apart: 157 → 119. The parts this page owns (the answer, the controls, the line, the key, the tree, the plan) went from 144 to 106. On a phone, where the group's names now run in two columns, the page went from 2,566 to 2,191px.
+
+Kept on purpose: the question over the answer, as on every page; the version select, which is how the versions are compared; the "What to do first" heading; the books, asked for on 15 October.
+
+### Ready for a unit, the tree redrawn
+
+Asked on 16 October, with a screenshot of v4 on Selection and Iteration: "make these graph more cleaner and good looking". Changed in every version:
+
+| Part | Before | Now |
+|---|---|---|
+| A ring | An 11px band, butt ends, a pale track | A 9px band with round ends on a light track (`--track`); the arc is shortened by its caps so it still ends at the share |
+| v4's ring | The whole class: the levels, then the students not checked twice as an empty tube between two hairlines; the figure inside was of the checked only, so "100%" could sit on a ring three-quarters empty | The students checked on the skill, by level, mastered first, a white gap between levels, so the arcs agree with the figure; attempted's pale arc keeps a hairline in the next blue, as the battery does; the hover counts the ones not checked twice |
+| The share inside | 82% at 15px | 82 at 17px with a 12px % sign |
+| The unit | A gray box with a dark border | A box in the primary tint, the name in the primary's dark blue: the unit picked |
+| The links | Four curves bundled where they leave the unit; v1 the same across | Thin right-angled elbows: a trunk, one rail, a drop to each ring, round where they turn (across for v1); in v3 every branch turns on the same rail so the widths read as one bus |
+| v2's labels | On a diagonal they ran over their own ring | Set off by the ring's radius plus a margin, clear of the ring and of the links out to the second row |
+
+v4's key lost "Not checked twice", since the ring no longer draws them, and its How to read says the ring is the checked students.
+
+Pictures: `reports/img/after-ready.png`, `ready-v1.png` to `ready-v4.png` and `after-ready-group.png`, taken again.
+
 ### What is still open
 
-- The key-skill rule, the thresholds and the gate are the mock's; they are the first thing to try on a second class.
+- The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's now, but read on this mock's score, not ALPS's.
+- Whether the unit band (ALPS's) or the old standing (a share of key skills secure) is the right test of a unit for this page: the band calls most of the class proficient.
+- Whether the readiness line should also let the teacher move the shares (60% and 80%), which are fixed now.
 - Which flag is a student's "why" when several fire, and whether "behind in one unit" belongs above the fold.
 - The word budget for a first screen: names are most of the words now, and a different budget is needed for pages whose answer is a list of people.
 - Phones.
+- The skill graph's edges are an LLM's. Whether to show its confidence, or to leave out edges that run against the book's order, is open.
 
 ### Pictures
 

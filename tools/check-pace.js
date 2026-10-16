@@ -195,7 +195,7 @@ check('wide and narrow tracks have a finite common skill scale and every student
     assert.equal((svg.match(/data-act="stu"/g) || []).length, p.ALL.length);
     assert.equal((svg.match(/<svg class="viz"/g) || []).length, width === 1450 ? 2 : 1);
     assert(!/NaN|Infinity|undefined/.test(svg));
-    assert(svg.includes('Required skills secure'));
+    assert(svg.includes('Required skills mastered'));
     assert(svg.includes('Goal: ' + p.paceScope(p.S.v4.u).ks.length));
   }
 });

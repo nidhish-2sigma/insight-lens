@@ -1,60 +1,64 @@
-/* Insight Lens mock · styles for the Course Atlas screens, in Material UI's design language.
+/* Insight Lens mock · styles for the Course Atlas screens, in the theme of the ALPS app (alps-react-app).
 
-   Colour: the tokens of css/lens.css, which are a Material palette with the ALPS blue as primary. One colour, one meaning:
-     green   right, done, secure, finished, worked        pale green  got there after retries
-     amber   needs a look: developing, skipped, coasting  red         wrong or failing: not yet, stuck, gave up, drifting
-     blue    primary: links, buttons, the page you are on, and the student or row you picked
-     grey    recorded but neutral                         hatch       cannot be seen: not started
-   Standing (not yet, developing, proficient, mastered) is one green that only gets darker.
+   Colour: ALPS's own (src/App.css :root, src/utils/colors.js, src/utils/mui-theme.js). One colour, one meaning:
+     blue    primary #1864F2: links, buttons, the page you are on, and the student or row you picked; hover #E8F1FE
+     a skill or unit's level is ALPS's performance ramp, pale to dark: Beginning (grey), Attempted, Familiar, Proficient, Mastered; drawn as ALPS
+     draws it: a battery of four blocks for one student, a stacked bar (mastered first) for a class; no level yet is hatched (unavailable)
+     engagement is ALPS's yellow ramp: low, medium, high, very high
+     status: ALPS green #408B4D right or done, yellow #E19F01 needs a look, red #DC3545 wrong or failing; grey recorded but neutral
+   Text is ALPS's: #212121 for primary (black at .87), #666666 for secondary (black at .6); lines are black at .12 (#E0E0E0).
 
-   Shape, depth, type and spacing are Material UI's defaults: Roboto at 14px with medium (500) for emphasis, a 4px corner on
-   surfaces and controls and a full pill on chips, the Material elevation shadows, an 8px spacing step, and the usual three
-   weights of button (contained, outlined, text). Nothing is under 12px.
+   Shape and type are ALPS's MUI theme: Noto Sans at 14px with 500 for emphasis, a 4px corner on surfaces and a 10px corner on
+   buttons, no capitals on buttons, the Material elevation shadows, an 8px spacing step. Nothing is under 12px.
 
    The script (js/atlas.js) asks for colours by its own names (--good, --bad, --watch, --accent and so on); the second half
    of :root answers those names from the theme, so the script carries no colour of its own. */
 :root{
   color-scheme:light;
   /* the theme: the tokens of css/lens.css */
-  --ink:#1c1e21; --ink-2:#4d4f53; --muted:#5f636a; --line:#e7e8ec; --axis:#c9ccd3; --surface:#ffffff; --page:#f5f6f8; --wash:#fafbfc;
-  --blue:#1864F2; --blue-ink:#0b3fa8; --link:#1257d6; --blue-tint:#EFF4FE; --part:#7ea6f5; --prog:#b9cdf7;
-  --red:#D3302F; --red-ink:#a52422; --red-tint:#FCEDEC;
-  --amber:#E9A400; --amber-ink:#7a5200; --amber-tint:#FDF6E6;
-  --green:#2E7D32; --green-ink:#256b29; --green-tint:#F1F8F2; --grey:#BDBDBD;
+  --ink:#212121; --ink-2:#424242; --muted:#666666; --line:#E0E0E0; --axis:#BDBDBD; --surface:#ffffff; --page:#FAFAFA; --wash:#FAFAFA;
+  --blue:#1864F2; --blue-ink:#0E4CC0; --link:#1864F2; --blue-tint:#E8F1FE; --part:#4D8AF5; --prog:#90CAF9;
+  --red:#DC3545; --red-ink:#B00020; --red-tint:#FCF0F1;
+  --amber:#E19F01; --amber-ink:#B45309; --amber-tint:#FDF7EC;
+  --green:#408B4D; --green-ink:#2E7D32; --green-tint:#F1F6F2; --grey:#BDBDBD;
+  /* ALPS's performance levels (Beginning, Attempted, Familiar, Proficient, Mastered) and its engagement ramp */
+  --lv-b:#D7D7D7; --lv-a:#E3F2FD; --lv-f:#90CAF9; --lv-p:#1876D2; --lv-m:#0D47A1; --on-lv:#ffffff;
+  --eng-0:#D7D7D7; --eng-1:#FFFDE7; --eng-2:#FFF59D; --eng-3:#FDD836; --eng-4:#F9A925;
+  /* a level with no number, as ALPS draws it: unavailable is hatched pale gray in a dashed outline, not attempted is empty in a solid one */
+  --ua-1:#EEEEEE; --ua-2:#F8F8F8; --ua-line:#BDBDBD; --na-fill:#FAFAFA; --na-line:#E0E0E0;
   /* Material UI: shape, elevation, type, and the height of the app bar */
   --radius:4px;
   --e1:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12);
   --e2:0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12);
   --e4:0 2px 4px -1px rgba(0,0,0,.2),0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12);
   --e6:0 3px 5px -1px rgba(0,0,0,.2),0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12);
-  --font:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font:"Noto Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
   --bar:56px;
   --hover:rgba(0,0,0,.04);
-  --outline:#8cb2f9;              /* the border of an outlined button: primary at half strength */
-  --chip:#eceef2;                 /* the fill of a neutral chip */
+  --outline:#AEC9FA;              /* the border of an outlined button: ALPS's primary at .35 (--primary-blue-80) */
+  --chip:#EBEBEB;                 /* the fill of a neutral chip: black at .08, as ALPS's MUI chips */
   /* the names the screens use, answered from the theme */
-  --bg:var(--page); --surface-2:#f1f2f5; --band:var(--wash);
+  --bg:var(--page); --surface-2:#F5F5F5; --band:var(--wash);
   --ink-3:var(--muted); --rule:var(--line);
   /* what you picked, and the student you follow, are in the primary colour, as Material marks a selection */
-  --accent:var(--blue); --accent-ink:#ffffff; --accent-soft:#EFF4FE;
+  --accent:var(--blue); --accent-ink:#ffffff; --accent-soft:#E8F1FE;
   /* status colours carry their usual meaning: green is right or done, amber needs a look, red is wrong or stuck */
   --good:var(--green); --good-ink:var(--green-ink); --bg-good:var(--green-tint);
   --bad:var(--red); --bad-ink:var(--red-ink); --bg-bad:var(--red-tint);
   --watch:var(--amber); --watch-ink:var(--amber-ink); --bg-watch:var(--amber-tint);
   --neutral:var(--grey); --neutral-ink:var(--muted);
   --gone:var(--green); --gone-ink:var(--green-ink); --bg-gone:var(--green-tint);
-  --m-mas:#1447B8; --m-dev:var(--part); --on-mas:#ffffff;
-  --hatch:#b9bec7;
-  --c0:#f1f2f5; --c1:#F9DE9C; --c2:#F0B93A; --c3:#E9A400; --c4:#C77700;
-  /* stacked bars, whose parts sit side by side, use red, amber and a light green: that set stays apart for red-green colour blindness */
-  --ok-fill:#81C784;
-  /* a standing is a level, not a verdict: one colour, pale to dark (not yet, developing, proficient, mastered), so the eye reads "darker is better" and red is left for the two problem marks */
-  --ms-n:#CFE8D1; --ms-d:#7DC383; --ms-s:#2E7D32; --ms-m:#1B5E20;
-  --hd-ny:var(--red); --hd-dv:var(--amber);
-  --st-gu:var(--red); --st-sk:var(--amber); --st-rt:#C8E6C9;
-  --ct0:#1c1e21; --ct1:#1c1e21; --ct2:#1c1e21; --ct3:#1c1e21; --ct4:#1c1e21;
-  --f1:#BBD3FA; --f2:#86AEF4; --f3:#5B8FF2; --f4:#1864F2; --f5:#0b3fa8;
-  --ft1:#1c1e21; --ft2:#1c1e21; --ft3:#1c1e21; --ft4:#ffffff; --ft5:#ffffff;
+  --m-mas:#0D47A1; --m-dev:var(--part); --on-mas:#ffffff;
+  --hatch:#BDBDBD;
+  --track:#EEEEEE;               /* the empty part of a ring */
+  --c0:#F5F5F5; --c1:#FFF59D; --c2:#FDD836; --c3:#F9A925; --c4:#E19F01;
+  /* an answer's outcome, in ALPS's status colours: right (green, and paler when it took retries), skipped (yellow), wrong (red) */
+  --ok-fill:#8CB994;
+  --on-ny:#ffffff;
+  --st-gu:var(--red); --st-sk:var(--amber); --st-rt:#C6DCCA;
+  --ct0:#212121; --ct1:#212121; --ct2:#212121; --ct3:#212121; --ct4:#212121;
+  --f1:#E3F2FD; --f2:#90CAF9; --f3:#4D8AF5; --f4:#1876D2; --f5:#0D47A1;
+  --ft1:#212121; --ft2:#212121; --ft3:#212121; --ft4:#ffffff; --ft5:#ffffff;
 }
 
 /* ---------- base ---------- */
@@ -117,7 +121,7 @@ details.how[open]{background:var(--page);border-radius:4px;padding:4px 16px 12px
 details.how p{margin:4px 0 0 8px;line-height:1.57}
 
 /* ---------- buttons: contained, outlined, text ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 16px;border:1px solid var(--outline);border-radius:4px;background:transparent;color:var(--link);font-size:14px;font-weight:500;line-height:1.2;letter-spacing:.02em;white-space:nowrap;cursor:pointer;transition:background-color .15s,border-color .15s,box-shadow .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:0 16px;border:1px solid var(--outline);border-radius:10px;background:transparent;color:var(--link);font-size:14px;font-weight:500;line-height:1.2;letter-spacing:.02em;white-space:nowrap;cursor:pointer;transition:background-color .15s,border-color .15s,box-shadow .15s}
 .btn:hover{background:var(--blue-tint);border-color:var(--blue)}
 .btn.small{min-height:30px;padding:0 10px;font-size:13px}
 .btn.primary{border-color:transparent;background:var(--blue);color:#ffffff;box-shadow:var(--e2)}
@@ -178,14 +182,16 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:2px;flex:none}
 .ln{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:2px}
+.sw.lv{box-shadow:inset 0 0 0 1px var(--line)}
+.sw.ua{background:repeating-linear-gradient(45deg,var(--ua-1) 0 3px,var(--ua-2) 3px 6px);outline:1px dashed var(--ua-line);outline-offset:-1px}
+.sw.na{background:var(--na-fill);box-shadow:inset 0 0 0 1px var(--na-line)}
 .sw.hatch{background:repeating-linear-gradient(-45deg,var(--hatch) 0 1.5px,var(--surface-2) 1.5px 4.5px)}
 .mleg{align-items:center;width:fit-content;max-width:100%;padding:8px 12px;border:1px solid var(--rule);border-radius:4px}
 .mleg .lt{font-size:12px;font-weight:500;color:var(--ink-3)}
 .mleg .lt:not(:first-child){margin-left:8px}
 /* the grid's key: one line to the right of its controls */
 .key2{margin:0 0 0 auto;align-items:center;gap:8px 16px}
-.key2 .ramp .sw{margin-right:-4px}
-.key2 .ramp .sw:last-of-type{margin-right:0}
+.key2 .lt{font-size:12px;font-weight:500;color:var(--ink-3)}
 
 /* ---------- chips ---------- */
 /* a status: a small filled chip, tinted by what it says */
@@ -195,7 +201,6 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .sg{display:inline-block;height:24px;line-height:24px;padding:0 10px;border-radius:12px;background:var(--chip);color:var(--ink-2);font-size:13px;white-space:nowrap}
 .sg.bad{background:var(--bg-bad);color:var(--bad-ink)}
 /* a student: an outlined chip you can click to follow them; filled once you do */
-.names{display:flex;flex-wrap:wrap;gap:6px}
 .nm{display:inline-flex;align-items:center;height:24px;padding:0 10px;border:1px solid var(--axis);border-radius:12px;background:var(--surface);color:var(--ink);font-size:13px;cursor:pointer;transition:background-color .15s}
 .nm:hover{background:var(--page)}
 .nm.on,.nm.on:hover{border-color:var(--blue);background:var(--blue);color:#ffffff}
@@ -204,12 +209,6 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .who5 .nm.on{background:var(--blue)}
 .who5 .why{padding-right:4px;color:var(--ink-3)}
 .who5.out .nm{text-decoration:line-through;color:var(--ink-3)}
-.chipx{display:inline-flex;align-items:center;height:28px;border:1px solid var(--axis);border-radius:14px;background:var(--surface);font-size:13px;overflow:hidden}
-.chipx .nm{height:26px;padding:0 4px 0 10px;border:0;border-radius:0;background:none}
-.chipx .nm.on{color:var(--blue-ink);font-weight:500}
-.chipx .x{width:26px;height:26px;border-radius:0}
-.chipx .x:hover{background:var(--bg-bad);color:var(--bad-ink)}
-.gn{margin-left:4px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--watch-ink)}
 /* a page that flags a student: its priority number, in a small disc */
 .vchips{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
 .vchip{min-width:24px;height:24px;padding:0;border:0;border-radius:12px;background:var(--bg-watch);color:var(--watch-ink);font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;cursor:pointer}
@@ -228,7 +227,7 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .viz text{font-size:12px;fill:var(--ink-2);font-variant-numeric:tabular-nums;letter-spacing:0}
 /* emphasis in a chart is medium weight, as everywhere else */
 .viz text[font-weight="700"]{font-weight:500}
-.viz .t1{fill:var(--ink)} .viz .t2{fill:var(--ink-2)} .viz .t3{fill:var(--ink-3)}
+.viz .t1{fill:var(--ink)} .viz .t2{fill:var(--ink-2)} .viz .t3{fill:var(--ink-3)} .viz .tunit{fill:var(--blue-ink)}
 .viz .tbad{fill:var(--bad-ink)} .viz .tgood{fill:var(--good-ink)} .viz .twatch{fill:var(--watch-ink)} .viz .tgone{fill:var(--gone-ink)} .viz .tacc{fill:var(--blue-ink)}
 .viz .tin{fill:var(--on-mas);font-weight:500;pointer-events:none}
 .viz .tlink{fill:var(--link)}
@@ -277,7 +276,7 @@ details.fold>summary:hover{background:var(--blue-tint)}
 .detail h3{font-size:16px;font-weight:500;line-height:1.5;letter-spacing:.0094em}
 .dnext{font-size:14px;color:var(--ink-2)}
 .dtext{margin:0;font-size:14px;color:var(--ink-2);max-width:80ch}
-.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .dgrid > *{min-width:0}
 .dl{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;font-weight:500;color:var(--ink-2)}
 .evs{display:grid;gap:8px}
@@ -332,7 +331,25 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .ags{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
 .ag{display:grid;gap:12px;align-content:start;padding:16px;border:1px solid var(--rule);border-radius:4px}
 .ag .dl{margin:0}
-.fl-names{display:flex;flex-wrap:wrap;gap:6px}
+/* students as a list to scan: a row a student, a hairline under each, columns that run down then across; the number behind a place
+   at the right, named by a short caption; a name is plain text that still opens the student */
+.roster{list-style:none;margin:0;padding:0}
+.roster.cols{columns:150px;column-gap:24px}
+.pcard .roster.cols{columns:120px;column-gap:16px}   /* first names in a plan card: two columns even on a phone */
+.roster li{display:flex;align-items:center;gap:8px;min-height:30px;border-bottom:1px solid var(--line);break-inside:avoid}
+.roster .nm,.roster .nm:hover{flex:1 1 auto;justify-content:flex-start;height:auto;min-height:28px;padding:0;border:0;border-radius:0;background:none;color:var(--ink);font-size:14px;text-align:left}
+.roster .nm:hover{text-decoration:underline}
+.roster .nm.on,.roster .nm.on:hover{background:none;color:var(--blue-ink);font-weight:500}
+.roster .rv{flex:none;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.roster .x{flex:none;width:24px;height:24px;border-radius:12px}
+.roster .x:hover{background:var(--bg-bad);color:var(--bad-ink)}
+/* where a pointer can hover, a name's remove button shows on its row only */
+@media (hover:hover){.roster .x{opacity:0}.roster li:hover .x,.roster li:focus-within .x{opacity:1}}
+.rcap{margin-left:auto;padding-left:12px;font-size:12px;font-weight:400;color:var(--ink-3)}
+.rlist{display:grid;gap:6px;margin-top:12px}
+.rlist .hint{margin:0}
+.rlist .rcap{margin-left:0;padding-left:0}
+.rlist .rcap::before{content:" · "}
 .fl-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0;font-size:14px}
 
 /* ---------- drifting: one outlined row a student ---------- */
@@ -401,6 +418,59 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .nsrow .nsl{margin-right:6px;font-weight:500}
 .nsrow i{height:22px;line-height:20px;padding:0 8px;border:1px dashed var(--axis);border-radius:11px;font-style:normal;font-size:12px}
 .hc ul .nsrow{padding-left:32px}
+
+/* the questions behind a point on the weak-skills lines: a name a row, its lesson, and the counts at the right */
+.qlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.qlist li{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:13px}
+.qlist .lnk{font-size:13px;font-weight:400}
+.qlist .qc{margin-left:2px;color:var(--ink-3)}
+.qlist{gap:12px}
+/* the point panel's bars: the class on a day (not yet, developing, secure, too early to tell), and a question (got it wrong, needed retries,
+   right first time; the empty part did not try). A part shows its count when it is wide enough */
+.sbs{display:grid;gap:10px}
+.sbrow{display:grid;gap:6px}
+.sbl{margin:0;font-size:14px;color:var(--ink-2)}
+.sbl b{font-weight:500;color:var(--ink)}
+.sb{display:flex;height:20px;border-radius:4px;overflow:hidden;background:var(--surface);box-shadow:inset 0 0 0 1px var(--axis)}
+.sb.q{height:16px}
+.sb i{display:flex;align-items:center;justify-content:center;flex:none;height:100%;font-style:normal;font-size:12px;font-weight:500;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)}
+.sb .l4{background:var(--lv-m);color:var(--on-lv)}
+.sb .l3{background:var(--lv-p);color:var(--on-lv)}
+.sb .l2{background:var(--lv-f)}
+.sb .l1{background:var(--lv-a)}
+.sb .l0{background:var(--lv-b)}
+.sb .ft{background:var(--ok-fill)}
+.sb .ua{background:repeating-linear-gradient(45deg,var(--ua-1) 0 4px,var(--ua-2) 4px 8px);outline:1px dashed var(--ua-line);outline-offset:-1px}
+.sb .gu{background:var(--st-gu);color:var(--on-ny)}
+.sb .rt{background:var(--st-rt)}
+.sw.empty{background:var(--surface);box-shadow:inset 0 0 0 1px var(--axis)}
+.legend.sbkey{margin:0}
+/* ready for a unit: the key in two short lines, each led by what it keys */
+.legend.rdkey{margin-bottom:6px}
+.legend.rdkey+.legend.rdkey{margin-bottom:14px}
+.rdkey .lt:not(:first-child){margin-left:12px}
+/* a plan group shown on the tree: its card is ringed, its button pressed, and the tree says whose it is */
+.rdfor{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 8px;scroll-margin-top:calc(var(--bar) + 12px)}
+.pill.acc{background:var(--blue-tint);color:var(--blue-ink)}
+.pcard h4 .gsel{margin-left:auto}
+.pcard .gsel[aria-pressed="true"]{border-color:var(--outline);background:var(--blue-tint);color:var(--blue-ink)}
+.pcard.on{box-shadow:0 0 0 2px var(--accent)}
+.plan-none{margin:0 0 12px}
+/* the readiness line on Ready for a unit: four stops strung on one line, each the level's battery, its name, and what the class is at it */
+.lvline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;margin:0 0 12px}
+.lvlab{flex:none;margin:0;font-size:13px;color:var(--ink-2)}
+.lvstops{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex:1 1 440px;max-width:640px}
+.lvstops::before{content:"";position:absolute;left:12.5%;right:12.5%;top:16px;height:2px;background:var(--line)}
+.lvstop{position:relative;display:grid;justify-items:center;align-content:start;gap:4px;padding:12px 4px 8px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--ink-2);font-size:13px;line-height:1.3;text-align:center;cursor:pointer}
+.lvstop svg{padding:0 4px;background:var(--surface);box-sizing:content-box}
+.lvstop:hover,.lvstop:hover svg{background:var(--page)}
+.lvstop[aria-pressed="true"]{border-color:var(--outline);background:var(--blue-tint)}
+.lvstop[aria-pressed="true"] svg{background:var(--blue-tint)}
+.lvstop .lvn{font-weight:500;color:var(--ink)}
+.lvstop[aria-pressed="true"] .lvn{color:var(--blue-ink)}
+.lvstop .lvv{font-size:12px;color:var(--ink-2)}
+.lvstop .dot{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:50%;vertical-align:0}
+.ck-r .ck-g .hint.sbline{display:flex;align-items:center;gap:8px}
 
 /* where a skill was first introduced: a card to check at a glance, and the way to the grid there */
 .intro{display:grid;gap:2px;width:100%;padding:12px 16px;border:1px solid var(--rule);border-left:4px solid var(--blue);border-radius:4px;background:var(--page);color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;transition:background-color .15s}

@@ -29,6 +29,7 @@ from collections import defaultdict
 
 GRADED = ('mchoice', 'activecode', 'parsonsprob', 'parsonprob', 'fillintheblank', 'clickablearea', 'dragndrop')
 SKILLS_PER_SUB = 3        # skills shown for a subunit: the ones its questions check most
+MIN_RELEVANCE = 0.5       # a question checks a skill only when its tag's relevance score is above this (item_skill: 0.25, 0.5, 0.75 or 1)
 SHORT_MAX = 18            # a book's short name: whole words of its title up to this many characters
 SMALL = ('of', 'for', 'the', 'and', 'in', 'to', 'a', 'an', 'with', 'on', 'using')
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
@@ -110,12 +111,13 @@ def read_outline(q, books):
 def read_skills(q, U, subs, items, subix, iidx):
     """What each subunit teaches and checks, the skills each item is tagged with, and what each unit builds on.
     A subunit's skills are the ones it gives most teaching weight to (unit_skill_coverage) that its questions are
-    tagged with (item_skill), preferring skills three or more of its questions check. A review subunit, or a lesson in
+    tagged with (item_skill, only tags with a relevance score above MIN_RELEVANCE), preferring skills three or more of
+    its questions check. A review subunit, or a lesson in
     a book with no coverage weights (a book of labs), teaches nothing new by that measure, so it lists what it checks most.
     Skills are numbered in the order the subunits first name them, so the first book's numbers do not change when a
     book is added after it. Returns the skills as [{'id', 'name'}]."""
     graded_ids = [it['id'] for it in items if it['type'] in GRADED]
-    tag_rows = q("select item_id, skill_id::text, relevance_score from item_skill where item_id = any(:i) and coalesce(ignore, false) = false order by item_id, relevance_score desc, skill_id", i=graded_ids)
+    tag_rows = q("select item_id, skill_id::text, relevance_score from item_skill where item_id = any(:i) and coalesce(ignore, false) = false and relevance_score > :r order by item_id, relevance_score desc, skill_id", i=graded_ids, r=MIN_RELEVANCE)
     cov_rows = q("select unit_id, skill_id::text, coalesce(teach_weight, 0)::float8, coalesce(assess_weight, 0)::float8 from unit_skill_coverage where unit_id = any(:u)", u=[s['id'] for s in subs])
     tags = defaultdict(list)
     for item_id, sk, rel in tag_rows: tags[iidx[item_id]].append(sk)
