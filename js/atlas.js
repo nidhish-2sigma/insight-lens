@@ -156,7 +156,7 @@ TB0.forEach(U=>U.js.forEach(j=>jSk(0,j).forEach(k=>{if(KHOME[k]===null)KHOME[k]=
 const taught=k=>KT[k]!==null;
 const TSK=ASK.map((_,k)=>k).filter(taught).sort((a,b)=>SUBS[KHOME[a]].mid-SUBS[KHOME[b]].mid||a-b);  // taught skills, in the order the class met them
 const NK=TSK.length;
-const uOf=k=>SUBS[KHOME[k]].u,jOf=k=>KHOME[k];
+const uOf=k=>SUBS[KHOME[k]].u;
 const tbOfSub=k=>[{ix:0,t:KTAUGHT[k],a:chk5(k)}];
 /* a later check of a skill counts once it comes this many days after the student first met it (fading skills) */
 const RECHECK=21,LATER='21 days or more later';
@@ -438,12 +438,12 @@ const RULE0={};
    The number a teacher sees on a tab is not the id but the page's priority (PRI, below). State keys keep their original names (v6 = hardest content, v7 = shared weak skills, and so on). */
 const RV0=(location.search.match(/[?&]rv=([1-4])(?=&|$)/)||[])[1]||'now';   // ?rv=1 to 4 opens a version of Ready for a unit
 const S={view:2,stu:null,log:[],
-  v2:{tb:0,at:{u:null,j:null},pg:0,sel:{t:'u',id:0},sort:'start',line:60},
+  v2:{tb:0,at:{u:null,j:null},pg:0,sel:{t:'u',id:0},sort:'start',line:60,hl:null},
   v3:{all:false},
   v4:{u:0,day:TODAY+30,sort:'status'},
   v6:{tb:0,sort:'hard',ex:{},sel:{},xf:'all'},
   v7:{r:0,f:'all',more:false,view:'weak',u:'all',pts:[]},
-  v8:{tb:0,ex:{},sel:{},sort:'course',view:'worst'},
+  v8:{tb:0,ex:{},sel:{},sort:'course',view:'worst',k:null},
   v10:{u:'all',all:false,k:-1},
   v11:{lv:'P',grp:null,tb:0,u:{},rm:{},acc:{},ver:RV0},
   v12:{r:0,f:'all'},
@@ -491,7 +491,7 @@ const OLDSLUG={'overview':2,'effort':2,'weak-skills':6,'worked':11};   // the ol
 /* with several books, two sentences are added to the pages that show them (below, after the list) */
 const HOW=['', /* id 0: the overview, removed */
 '', /* id 1: removed */
-'Everyone in the unit on show, placed by engagement, the share of its questions they tried (across), and performance, their mean score on its key skills (up), with ALPS’s level bands on the left. Red regions need a step; the cards name who and offer it. Folded under the chart, every student by unit, keyed above.',
+'Everyone in the unit on show, placed by engagement, the share of its questions they tried (across), and performance, their mean score on its key skills (up), with ALPS’s level bands on the left. Red regions need a step; the cards name who and offer it. A card’s heading picks them out. Folded below, every student by unit, keyed above.',
 'One row per student working less than their own normal. The line is the questions they tried per five days, on any unit; the gray band is their own normal range. Red is where it stays under half their normal while the class is working. Hatched stretches had no class work.',
 'Pick a unit and date. Only its key skills and earlier skills used here count. Solid bars show mastered now; dashed bars estimate gains by your date, assuming learning continues at each student’s latest observed pace. Black is the goal; dotted is today’s share. Hover for the evidence dates.',
 'Units open into subunits, and subunits into their skills. Each bar splits the students checked by ALPS level, darkest for mastered; the figure is the share not mastered. A skill no question checks has no bar, nor one that fewer than eight students were checked on.',
@@ -651,9 +651,13 @@ function v2(){const E=S.v2,A=E.at,ns=TB0.filter(U=>!U.on);
   const what=A.j!==null?`by skill of ${SUBS[A.j].s}`:A.u!==null?`by subunit of ${TB0[A.u].s}`:'by unit';
   const line=`<label class="rng" for="v2line">Engaged: at least <output id="v2lo">${E.line}% of practice</output><input type="range" id="v2line" min="40" max="80" step="5" value="${E.line}"></label><label class="sel" for="v2sort">Sort <select id="v2sort">${[['start','By name'],['stuck','Struggling first'],['off','Low engagement first']].map(o=>`<option value="${o[0]}"${E.sort===o[0]?' selected':''}>${o[1]}</option>`).join('')}</select></label>`;
   return `<div class="controls">${pick}${CELLKEY()}</div><div id="v2top"></div>${fold('v2grid',`Every student, ${what}`,`<div class="controls" style="margin:12px 0">${line}</div><div id="v2c"></div>`)}`}
+/* the points in focus: the students of the card picked beside the chart (S.v2.hl), or else the student followed. dim2 gives the class that
+   dims every other point; with nothing picked, or no point here for what is picked, nothing is dimmed */
+const dim2=P=>{const g=S.v2.hl,F=new Set(P.filter(p=>g?p.c.g===g:p.i===S.stu).map(p=>p.i));return i=>F.size&&!F.has(i)?' dim':''};
 /* everyone in the picked column, placed by engagement (across) and performance (up) */
 function v2scatter(tb,n,ids,W){const L=58,R=18,T0=14,B=T0+Math.round(clamp((W-L-R)*.46,256,380)),H=B+40,x=e=>L+clamp(e,0,1)*(W-L-R),y=m=>B-clamp(m,0,1)*(B-T0),ln=S.v2.line/100,sel=S.stu,P=[],early=[];
   ids.forEach(i=>{const c=cellN(i,tb,n);if(c.g==='x'||c.g==='na')return;if(c.mc==='U'||c.mc==='Q')early.push(NM[i]);else P.push({i,c,X:x(c.e),Y:y(c.st.cap?Math.min(c.m,[.4,.55,.65,.8,1][LVN[c.mc]]-.01):c.m)})});
+  const dm=dim2(P);
   let s=`<svg class="viz" viewBox="0 0 ${W} ${H}" role="group" aria-label="${nodeName(n,tb)}: each student placed by engagement and performance">`;
   s+=`<rect x="${f1(x(ln))}" y="${f1(y(.55))}" width="${f1(x(1)-x(ln))}" height="${f1(y(0)-y(.55))}" style="fill:var(--bad);opacity:.08"/><rect x="${f1(x(0))}" y="${f1(y(.65))}" width="${f1(x(ln)-x(0))}" height="${f1(y(0)-y(.65))}" style="fill:var(--bad);opacity:.08"/><rect x="${f1(x(0))}" y="${f1(y(1))}" width="${f1(x(ln)-x(0))}" height="${f1(y(.65)-y(1))}" style="fill:var(--watch);opacity:.1"/>`;
   /* the levels' bands up the left edge, in ALPS's colours: the grid's key names them */
@@ -671,31 +675,38 @@ function v2scatter(tb,n,ids,W){const L=58,R=18,T0=14,B=T0+Math.round(clamp((W-L-
   s+=T((L+W-R)/2,B+34,'Engagement: share of the class’s questions tried',{a:'middle'})+`<text x="16" y="${f1((T0+B)/2)}" text-anchor="middle" transform="rotate(-90 16 ${f1((T0+B)/2)})" class="t2">${n.t==='k'?'Score on the skill':n.t==='j'?'Performance on its skills':'Performance on key skills'}</text>`;
   const COL={on:'var(--good)',go:'var(--ink-3)',stuck:'var(--bad)',off:'var(--bad)',coast:'var(--watch)'},boxes=[];
   const hit=(b)=>boxes.some(o=>b.x<o.x+o.w&&b.x+b.w>o.x&&b.y<o.y+o.h&&b.y+b.h>o.y);
-  P.forEach(p=>boxes.push({x:p.X-5,y:p.Y-5,w:10,h:10}));boxes.push({x:x(ln)-2,y:T0,w:4,h:B-T0},{x:L,y:y(.65)-2,w:W-L-R,h:4});RL.forEach(o=>boxes.push(o.b));
-  const lab=[];P.filter(p=>['stuck','off','coast'].includes(p.c.g)||p.i===sel).sort((a,b)=>(b.i===sel)-(a.i===sel)||a.Y-b.Y).forEach(p=>{const nm=NM[p.i],w=nm.length*6.6+4,cand=[[p.X+8,p.Y-6,'start'],[p.X-8-w,p.Y-6,'end'],[p.X-w/2,p.Y-20,'middle'],[p.X-w/2,p.Y+8,'middle'],[p.X+7,p.Y-17,'start'],[p.X+7,p.Y+5,'start'],[p.X-7-w,p.Y-17,'end'],[p.X-7-w,p.Y+5,'end'],[p.X-w/2,p.Y-31,'middle'],[p.X-w/2,p.Y+19,'middle']];
+  P.forEach(p=>{const r=p.i===sel?10:5;boxes.push({x:p.X-r,y:p.Y-r,w:2*r,h:2*r})});boxes.push({x:x(ln)-2,y:T0,w:4,h:B-T0},{x:L,y:y(.65)-2,w:W-L-R,h:4});RL.forEach(o=>boxes.push(o.b));
+  /* names in focus are placed first, so they get the free spots */
+  const lab=[];P.filter(p=>['stuck','off','coast'].includes(p.c.g)||p.i===sel).sort((a,b)=>!!dm(a.i)-!!dm(b.i)||(b.i===sel)-(a.i===sel)||a.Y-b.Y).forEach(p=>{const nm=NM[p.i],w=nm.length*6.6+4,o=p.i===sel?4:0;   // the followed student's name stands clear of the ring round the dot
+    const cand=[[p.X+8+o,p.Y-6,'start'],[p.X-8-o-w,p.Y-6,'end'],[p.X-w/2,p.Y-20-o,'middle'],[p.X-w/2,p.Y+8+o,'middle'],[p.X+7+o,p.Y-17-o,'start'],[p.X+7+o,p.Y+5+o,'start'],[p.X-7-o-w,p.Y-17-o,'end'],[p.X-7-o-w,p.Y+5+o,'end'],[p.X-w/2,p.Y-31-o,'middle'],[p.X-w/2,p.Y+19+o,'middle']];
     for(const [bx,by,a] of cand){const b={x:bx,y:by,w,h:12};if(bx<L||bx+w>W-R||by<T0||by+12>B)continue;if(!hit(b)){boxes.push(b);lab.push({p,b,a});break}}});
-  P.forEach(p=>{const on=p.i===sel;s+=`<g class="hit" data-act="stu" data-i="${p.i}"${tp(cellTip(p.i,p.c,nodeName(n,tb)))}><circle cx="${f1(p.X)}" cy="${f1(p.Y)}" r="11" fill="transparent"/>${on?`<circle cx="${f1(p.X)}" cy="${f1(p.Y)}" r="8.5" style="fill:none;stroke:var(--accent);stroke-width:2"/>`:''}<circle cx="${f1(p.X)}" cy="${f1(p.Y)}" r="5" style="fill:${COL[p.c.g]};stroke:var(--surface);stroke-width:2"/></g>`});
-  lab.forEach(o=>{const tx=o.a==='start'?o.b.x:o.a==='end'?o.b.x+o.b.w:o.b.x+o.b.w/2;s+=T(tx,o.b.y+10,NM[o.p.i],{a:o.a,c:o.p.i===sel?'tacc':'t1',w:o.p.i===sel?700:null})});
+  /* the dimmed points are drawn first, so none sits over a point in focus */
+  P.slice().sort((a,b)=>!!dm(b.i)-!!dm(a.i)).forEach(p=>{const on=p.i===sel;s+=`<g class="hit${dm(p.i)}" data-act="stu" data-i="${p.i}"${tp(cellTip(p.i,p.c,nodeName(n,tb)))}><circle cx="${f1(p.X)}" cy="${f1(p.Y)}" r="11" fill="transparent"/>${on?`<circle cx="${f1(p.X)}" cy="${f1(p.Y)}" r="8.5" style="fill:none;stroke:var(--accent);stroke-width:2"/>`:''}<circle cx="${f1(p.X)}" cy="${f1(p.Y)}" r="5" style="fill:${COL[p.c.g]};stroke:var(--surface);stroke-width:2"/></g>`});
+  lab.forEach(o=>{const tx=o.a==='start'?o.b.x:o.a==='end'?o.b.x+o.b.w:o.b.x+o.b.w/2;s+=T(tx,o.b.y+10,NM[o.p.i],{a:o.a,c:(o.p.i===sel?'tacc':'t1')+dm(o.p.i),w:o.p.i===sel?700:null})});
   s+='</svg>';
   return fig(s)+(early.length?`<p class="hint">Too early to tell: ${andList(early)}.</p>`:'')}
 /* a unit or lesson of labs has no level, so its chart has one axis: everyone placed by the share of its labs they tried, stacked where shares coincide */
 function v2strip(tb,n,ids,W){const L=58,R=18,T0=34,ln=S.v2.line/100,x=e=>L+clamp(e,0,1)*(W-L-R),sel=S.stu,P=[],cols={};
   ids.forEach(i=>{const c=cellN(i,tb,n);if(c.g==='x'||c.g==='na')return;const k=Math.round(c.e*40);P.push({i,c,e:c.e,row:cols[k]||0});cols[k]=(cols[k]||0)+1});
-  const rh=13,B=T0+Math.max(1,...P.map(p=>p.row+1))*rh+8,H=B+40;
+  const rh=13,B=T0+Math.max(1,...P.map(p=>p.row+1))*rh+8,H=B+40,dm=dim2(P);
   let s=`<svg class="viz" viewBox="0 0 ${W} ${H}" role="group" aria-label="${nodeName(n,tb)}: each student placed by the share of its labs they tried">`;
   s+=`<rect x="${f1(x(0))}" y="${T0-10}" width="${f1(x(ln)-x(0))}" height="${B-T0+10}" style="fill:var(--bad);opacity:.08"/>`;
   [0,.25,.5,.75,1].forEach(v=>{s+=`<line x1="${f1(x(v))}" x2="${f1(x(v))}" y1="${T0-10}" y2="${B}" class="grid"/>`+T(x(v),B+16,Math.round(v*100)+'%',{a:'middle',c:'t3'})});
   s+=`<line x1="${f1(x(ln))}" x2="${f1(x(ln))}" y1="${T0-10}" y2="${B}" class="axis"/>`+T(x(ln)-8,T0-16,'Not doing the labs',{a:'end',c:'tbad',w:700})+T(x(ln)+8,T0-16,'Doing the labs',{c:'t2',w:700});
   s+=T((L+W-R)/2,B+34,'Share of the labs tried',{a:'middle'});
-  P.forEach(p=>{const on=p.i===sel,X=x(p.e),Y=B-7-p.row*rh;s+=`<g class="hit" data-act="stu" data-i="${p.i}"${tp(`<b>${NM[p.i]}</b> · ${GLAB[p.c.g]}<br>Tried ${Math.round(p.e*100)}% of the labs`)}><circle cx="${f1(X)}" cy="${f1(Y)}" r="10" fill="transparent"/>${on?`<circle cx="${f1(X)}" cy="${f1(Y)}" r="8.5" style="fill:none;stroke:var(--accent);stroke-width:2"/>`:''}<circle cx="${f1(X)}" cy="${f1(Y)}" r="5" style="fill:${p.c.doing?'var(--ink-3)':'var(--bad)'};stroke:var(--surface);stroke-width:2"/></g>`});
+  P.forEach(p=>{const on=p.i===sel,X=x(p.e),Y=B-7-p.row*rh;s+=`<g class="hit${dm(p.i)}" data-act="stu" data-i="${p.i}"${tp(`<b>${NM[p.i]}</b> · ${GLAB[p.c.g]}<br>Tried ${Math.round(p.e*100)}% of the labs`)}><circle cx="${f1(X)}" cy="${f1(Y)}" r="10" fill="transparent"/>${on?`<circle cx="${f1(X)}" cy="${f1(Y)}" r="8.5" style="fill:none;stroke:var(--accent);stroke-width:2"/>`:''}<circle cx="${f1(X)}" cy="${f1(Y)}" r="5" style="fill:${p.c.doing?'var(--ink-3)':'var(--bad)'};stroke:var(--surface);stroke-width:2"/></g>`});
   return fig(s+'</svg>')}
 function v2draw(){const c=$('#v2c'),tp0=$('#v2top');if(!c||!tp0)return;const E=S.v2,A=E.at,tb=0,sel=S.stu,cs=cols2().slice(pg2From(),pg2From()+PG2),ids=tbWho(tb),lv=A.j!==null?'k':A.u!==null?'j':'u',n=cs.length;
   /* first the unit's chart and its cards: everyone placed by practice done and standing, then who to act on, with the button each */
   const all=ids.map(i=>({n:NM[i],c:cellN(i,tb,E.sel)})),by=g=>all.filter(o=>o.c.g===g).map(o=>o.n);
   const MSQ={stuck:['A',true],off:['A',false],coast:['P',false]};
-  const gv=(g,c)=>g==='stuck'?(c.st&&c.st.e?`${c.st.e-c.st.close.length} of ${c.st.e}`:''):`${Math.round(c.e*100)}%`;
-  const grp=(g,act)=>{const a=all.filter(o=>o.c.g===g);if(!a.length)return '';const key=`v2:${tb}:${E.sel.t}${E.sel.id}:${g}`;
-    return `<div class="ag"><p class="dl">${sq2(MSQ[g][0],MSQ[g][1],g)}${GLAB[g]} · ${a.length}${rcap(g==='stuck'?'key skills mastered':'questions tried')}</p>${roster(a.map(o=>({n:o.n,v:gv(g,o.c)})))}<p class="fl-act">${isLogged(key)?'<span class="pill good">Logged</span>':`<button class="btn small" type="button" data-act="v2log" data-g="${g}">${act}</button>`}</p></div>`};
+  /* the number beside a struggling student is about the column picked: key skills mastered in a unit, skills mastered in a lesson, the score on one skill */
+  const gcap=E.sel.t==='u'?'key skills mastered':E.sel.t==='j'?'skills mastered':'score';
+  const gv=(g,c)=>g==='stuck'?(!c.st||!c.st.e?'':E.sel.t==='k'?Math.round(c.st.f*100)+'%':`${c.st.e-c.st.close.length} of ${c.st.e}`):`${Math.round(c.e*100)}%`;
+  /* a card's heading is a switch: on, the card's students are picked out on the chart and the other points dimmed. A card with nobody in it here is not on */
+  if(E.hl&&!all.some(o=>o.c.g===E.hl))E.hl=null;
+  const grp=(g,act)=>{const a=all.filter(o=>o.c.g===g);if(!a.length)return '';const key=`v2:${tb}:${E.sel.t}${E.sel.id}:${g}`,on=E.hl===g;
+    return `<div class="ag${on?' on':''}"><button class="dl agh" type="button" data-act="v2hl" data-g="${g}" aria-pressed="${on}"${tp(on?'Click to show everyone again':'Click to pick them out on the chart')}>${sq2(MSQ[g][0],MSQ[g][1],g)}${GLAB[g]} · ${a.length}${rcap(g==='stuck'?gcap:'questions tried')}</button>${roster(a.map(o=>({n:o.n,v:gv(g,o.c)})))}<p class="fl-act">${isLogged(key)?'<span class="pill good">Logged</span>':`<button class="btn small" type="button" data-act="v2log" data-g="${g}">${act}</button>`}</p></div>`};
   const isLab=all.some(o=>o.c.lab),gs=isLab?grp('off','Assign the labs'):grp('stuck','Reteach in a small group')+grp('off','Assign the practice')+grp('coast','Give a stretch set'),da=duoW(.58,520);
   const pills=isLab?`<span class="pill good">${by('labs').length} doing the labs</span><span class="hint">A lab is work, not a check: no level</span>`:`<span class="pill good">${by('on').length} on track</span><span class="pill">${by('go').length} keep going</span>${by('early').length?`<span class="pill">${by('early').length} too early to tell</span>`:''}`;
   const none=all.every(o=>o.c.g==='x'||o.c.g==='na');
@@ -849,6 +860,10 @@ const pool5=ss=>{let a=0;const l=[0,0,0,0,0];ss.forEach(s=>{if(s.p!==null){a+=s.
 const whereTxt=k=>`Introduced in ${SUBS[KHOME[k]].s} ${esc(cut(VJ[KHOME[k]].name,36))} · ${chk5(k)?`${KIT[k].length} ${pl(KIT[k].length,'question')}`:'no question checks it'}`;
 /* where a skill was first introduced, big enough to check at a glance: the unit, the subunit, the day the class met it, and the questions on it. It opens the grid at that subunit with the skill picked */
 const introCard=k=>{const j=KHOME[k],u=SUBS[j].u;return `<button class="intro" type="button" data-act="gointro" data-k="${k}" data-j="${j}"${tp('Open Engagement and performance at this subunit, with the skill picked')}><span class="l">Introduced in</span><b>${TB0[u].s} · ${TB0[u].nb}</b><span class="j">${SUBS[j].n}</span><span class="m">${taught(k)?`First met on ${dayDate(KT[k])}`:'Not started by the class'} · ${chk5(k)?`${KIT[k].length} ${pl(KIT[k].length,'question')} check it`:'no question checks it'}</span></button>`};
+/* the reteach a skill's panel offers, the same on every view of the page: only while the skill is still weak or getting worse for the class, and logged once */
+const reteachBtn=k=>{const r=WEAK.findIndex(m=>m.k===k&&SG[m.st]==='p');return r<0?'':isLogged('v7:'+k)?'<span class="pill good">Reteach planned</span>':`<button class="btn small primary" type="button" data-act="v7plan" data-r="${r}">Reteach</button>`};
+/* where the class stalls on a skill: Stall points narrowed to the questions that check it, worst first. Shown only when such a question is there to see */
+const whereLink=k=>stallN(k)?`<button class="lnk" type="button" data-act="gosk" data-k="${k}">Where they stall →</button>`:'';
 /* under "All books" an outline is grouped by book: a heading a book, then its units, then its units not started. The labs are left out and named under the list */
 const treeBody=(T,ord,unitRow,nsI)=>MULTI&&PICK===null?BKON.filter(tb=>!LABB[tb]).map(tb=>{const Ts=T.filter(U=>TB0[U.u].tb===tb);return Ts.length?`<li class="hg"><div class="hr hgr"><span class="hn"><b>${BL[tb]} · ${BOOKS[tb].s}</b></span></div></li>`+ord(Ts.filter(U=>U.on)).map(unitRow).join('')+nsRow(Ts.filter(U=>!U.on).map(nsI)):''}).join('')
   :ord(T.filter(U=>U.on)).map(unitRow).join('')+nsRow(T.filter(U=>!U.on).map(nsI));
@@ -905,7 +920,7 @@ function v6list(tb){const H=hard5(tb),T=H.T,ids=tbWho(tb),Tb=TB[tb],E=ex5(tb,H),
   const leg=`<div class="legend mleg">${LEG5}${fol?`<span class="lt">${NM[sel]}</span><span><i class="sd e"></i>Beginning or attempted</span><span><i class="sd h"></i>Familiar or proficient</span>`:''}</div>`;
   const list=`<ul class="hc${fol?' fol':''}" aria-label="${Tb.n}: units, subunits and skills, with the share of students not mastered yet"><li class="hh" aria-hidden="true"><div class="hr"><span class="hn"></span><span class="hx"></span><span class="hp">Not mastered</span>${fol?`<span class="hs">${NM[sel]}</span>`:''}</div></li>${treeBody(T,ord,unitRow,U=>`<i>${U.U.nb}</i>`)}</ul>${labsNote('they are not ranked here')}`;
   const K0=T.flatMap(U=>U.subs.flatMap(J=>J.ks)).find(K=>K.k===k0),s0=K0?K0.s:EMPTYK,p0=s0.p;
-  const det=`<div class="detail"><div class="dhead"><h3>${ASK[k0]}</h3>${p0===null?`<span class="pill watch">${chk5(k0)?'Too few checked yet':'No item checks it'}</span>`:`<span class="pill ${p0>=.45?'bad':p0>=.3?'watch':'good'}">${pc5(p0)} not mastered</span>`}${taught(k0)&&p0!==null?`<button class="lnk" type="button" data-act="gosub" data-j="${jOf(k0)}">Where they stall →</button>`:''}</div>
+  const det=`<div class="detail"><div class="dhead"><h3>${ASK[k0]}</h3>${p0===null?`<span class="pill watch">${chk5(k0)?'Too few checked yet':'No item checks it'}</span>`:`<span class="pill ${p0>=.45?'bad':p0>=.3?'watch':'good'}">${pc5(p0)} not mastered</span>`}${reteachBtn(k0)}${whereLink(k0)}</div>
   ${introCard(k0)}
   ${p0===null?`<p class="none">${chk5(k0)?'Fewer than eight students have been checked on this skill, so the share would mislead.':'No question or activity checks this skill yet, so there is no evidence of who has it.'}</p>`:`<div class="dgrid">${whoCol('Beginning or attempted',GBG.E,s0.c.E,mNow(k0),'score')}${whoCol('Familiar or proficient',GBG.H,s0.c.H,mNow(k0),'score')}</div>`}</div>`;
   return (note?`<p class="hint" style="margin:0 0 10px">${note}</p>`:'')+labsLevelNote()+ctl+leg+duo(duoW(.6,560),list,det,'stick')}
@@ -960,22 +975,22 @@ const stRow=(label,g,pct)=>{const ch=g.ny.length+g.dev.length+g.sec.length;retur
 const stKey=gs=>`<div class="legend sbkey">${STP.filter(([k])=>gs.some(g=>stN(g,k))).map(([,,l,c])=>`<span>${stSw(c)}${l}</span>`).join('')}</div>`;
 const qBar=(r,N)=>{const w=r.wrong.size,t=r.retry.size,f=r.tried.size-w-t,no=N-r.tried.size;return `<span class="sb q" role="img" aria-label="${[[w,'got it wrong'],[t,'needed retries'],[f,'right first time'],[no,'did not try']].filter(x=>x[0]>0).map(x=>x.join(' ')).join(', ')}">${sbSeg('gu',w,N)}${sbSeg('rt',t,N)}${sbSeg('ft',f,N)}</span>`};
 const QKEY=`<div class="legend sbkey"><span><i class="sw" style="background:var(--st-gu)"></i>Got it wrong</span><span><i class="sw" style="background:var(--st-rt)"></i>Needed retries</span><span><i class="sw" style="background:var(--ok-fill)"></i>Right first time</span><span><i class="sw empty"></i>Did not try</span></div>`;
-/* a question in a list: its name and lesson over its bar, the names on hover; it opens Stall points at it */
-const qRow=(r,N)=>{const ix=r.ix,j=IT[ix].j,lk=j>=0&&!!SUBS[j]&&SUBS[j].on&&SUBS[j].its.includes(ix),w=[...r.wrong].map(i=>NM[i]),t=[...r.retry].map(i=>NM[i]),f=r.tried.size-w.length-t.length,no=N-r.tried.size;
+/* a question in a list: its name and lesson over its bar, the names on hover; it opens Stall points at it, among the other questions on the skill k */
+const qRow=(r,N,k)=>{const ix=r.ix,j=IT[ix].j,lk=j>=0&&!!SUBS[j]&&SUBS[j].on&&SUBS[j].its.includes(ix),w=[...r.wrong].map(i=>NM[i]),t=[...r.retry].map(i=>NM[i]),f=r.tried.size-w.length-t.length,no=N-r.tried.size;
   const tip=`<b>${IT[ix].name}</b>${j>=0?' · '+SUBS[j].s:''}${w.length?`<br>Got it wrong: ${andList(w)}`:''}${t.length?`<br>Needed retries: ${andList(t)}`:''}<br>${f} right first time${no?`, ${no} did not try`:''}${lk?'<br><span>Click to see it on Stall points</span>':''}`,nm=`${IT[ix].name} <span class="qc">${j>=0?SUBS[j].s:''}</span>`;
-  return `<li${tp(tip)}>${lk?`<button class="lnk" type="button" data-act="v7q" data-ix="${ix}">${nm}</button>`:`<span>${nm}</span>`}${qBar(r,N)}</li>`};
-const qList=(rows,max,N)=>`<ul class="qlist">${rows.slice(0,max).map(r=>qRow(r,N)).join('')}</ul>${rows.length>max?`<p class="hint">and ${rows.length-max} more</p>`:''}`;
+  return `<li${tp(tip)}>${lk?`<button class="lnk" type="button" data-act="v7q" data-ix="${ix}" data-k="${k}">${nm}</button>`:`<span>${nm}</span>`}${qBar(r,N)}</li>`};
+const qList=(rows,max,N,k)=>`<ul class="qlist">${rows.slice(0,max).map(r=>qRow(r,N,k)).join('')}</ul>${rows.length>max?`<p class="hint">and ${rows.length-max} more</p>`:''}`;
 /* one day: what the students not mastered got wrong, the last 30 days of class work first (the six blocks with work up to that day) */
 function ptQOne(P){const k=P.m.k,j=P.j,who=ALL.filter(i=>STW[i][k][j]>=0&&STW[i][k][j]<4);if(!who.length)return '';
   const lb=[];for(let q=j;q>=0&&lb.length<6;q--)if(ONB[q])lb.push(q);const since=lb.length?BS(lb[lb.length-1]):0,recent=ptQs(k,who,since-1,BE(j)),earlier=ptQs(k,who,-1,since-1),N=who.length;
   return `<div class="ag"><p class="dl">Questions they are getting wrong</p><p class="hint" style="margin:-8px 0 0">Each bar is the ${N} not mastered, on one question</p>${recent.length||earlier.length?QKEY:''}
-    ${recent.length?`<p class="hint">Since ${dayDate(since)}, the last 30 days of class work</p>${qList(recent,6,N)}`:`<p class="none">Nothing on it tried since ${dayDate(since)}.</p>`}
-    ${earlier.length?fold('v7qe',`Earlier · ${earlier.length} ${pl(earlier.length,'question')}`,`<div style="margin-top:8px">${qList(earlier,8,N)}</div>`):''}</div>`}
+    ${recent.length?`<p class="hint">Since ${dayDate(since)}, the last 30 days of class work</p>${qList(recent,6,N,k)}`:`<p class="none">Nothing on it tried since ${dayDate(since)}.</p>`}
+    ${earlier.length?fold('v7qe',`Earlier · ${earlier.length} ${pl(earlier.length,'question')}`,`<div style="margin-top:8px">${qList(earlier,8,N,k)}</div>`):''}</div>`}
 /* two days: what the students who were doing better on the earlier day got wrong between the days */
 function ptQTwo(P){const k=P.m.k,drop=ALL.filter(i=>{const x=G3(STW[i][k][P.a]),y=G3(STW[i][k][P.b]);return (x===2&&y>=0&&y<2)||(x===1&&y===0)});if(!drop.length)return '';
   const A=dayDate(BE(P.a)),rows=ptQs(k,drop,BE(P.a),BE(P.b));
   return `<div class="ag"><p class="dl">What they got wrong after ${A}</p><p class="hint" style="margin:-8px 0 0">Each bar is the ${drop.length} who were doing better on ${A}: lost it or fell back</p>
-    ${rows.length?QKEY+qList(rows,8,drop.length):'<p class="none">No answer on it between the days.</p>'}</div>`}
+    ${rows.length?QKEY+qList(rows,8,drop.length,k):'<p class="none">No answer on it between the days.</p>'}</div>`}
 const ptKey=(P,g)=>`v7p:${P.kind==='skills'?P.m1.k+'+'+P.m2.k:P.m.k}:${g}:${P.kind==='time'?P.a+'-'+P.b:P.j}`;
 const ptNames=a=>roster(a);
 const ptBtn=(P,g,label)=>`<p class="fl-act">${isLogged(ptKey(P,g))?'<span class="pill good">Planned</span>':`<button class="btn small" type="button" data-act="v7act" data-g="${g}">${label}</button>`}</p>`;
@@ -1052,7 +1067,7 @@ function v7(){const sel=S.stu,uf=S.v7.u,uok=k=>uf==='all'||uOf(k)<=+uf,inU=WEAK.
   let det='';
   if(rows.length&&P)det=ptPanel(P);
   else if(rows.length){const i=S.v7.r,m=WEAK[i],g=SG[m.st],sk=statK(m.k,ALL);
-    det=`<div class="detail"><div class="dhead"><h3>${ASK[m.k]}</h3><span class="pill ${SC[g][3]}">${m.st}</span>${g==='p'?(isLogged('v7:'+m.k)?'<span class="pill good">Reteach planned</span>':`<button class="btn small primary" type="button" data-act="v7plan" data-r="${i}">Reteach</button>`):''}<button class="lnk" type="button" data-act="gosub" data-j="${jOf(m.k)}">Where they stall →</button></div>
+    det=`<div class="detail"><div class="dhead"><h3>${ASK[m.k]}</h3><span class="pill ${SC[g][3]}">${m.st}</span>${reteachBtn(m.k)}${whereLink(m.k)}</div>
     ${introCard(m.k)}
     <div class="evs"><div class="ev"><span>The class now</span>${hbar(eo(sk),2)}<span class="hint">${lvTxt(sk.l)}</span></div></div>
     <div class="dgrid">${m.now.length?whoCol('Beginning or attempted',GBG.E,m.now,mNow(m.k),'score'):'<p class="none">Nobody is weak in it now.</p>'}${m.peak.length?whoCol(`Weak around ${dayDate(m.pwd)}, not now`,'var(--neutral)',m.peak,mNow(m.k),'score now'):''}</div></div>`}
@@ -1069,27 +1084,39 @@ const OUT7=['First time','Needed retries','Gave up','Skipped'],OUT7L=['Ran right
 /* on a page about labs, "gave up" is "not right yet" and is gray, not red: half of all labs are never marked right, so that is a lab's usual state and the share is what matters */
 const OUTV=LABV?OUT7L:OUT7,CGU=LABV?'var(--neutral)':'var(--st-gu)',HOT7=LABV?.7:.18;
 const pool7=cs=>{const t=[0,0,0,0];let n=0;cs.forEach(x=>{x.t.forEach((v,q)=>t[q]+=v);n+=x.n});return {t,n}};
-function tree7(tb){
-  return TREEU.map(u=>{const U=TB[tb].units[u],subs=uJs(tb,u).map(j=>{const J=TBJ(tb,j),on=J.on,ct=ctOf(tb,j);
-      const cs=on?cCnt(tb,j).map((c,s)=>({s,j,nm:ct[s][0],kind:ct[s][1],t:c,n:c[0]+c[1]+c[2]+c[3]})):[];
+/* k narrows the outline to one skill's questions (the ones that check it), and to the units and subunits that hold them: where the class stalls on that skill */
+function tree7(tb,k){const ok=k===null||k===undefined?null:new Set(KIT[k]);
+  const T=TREEU.map(u=>{const U=TB[tb].units[u],subs=uJs(tb,u).map(j=>{const J=TBJ(tb,j),on=J.on,ct=ctOf(tb,j);
+      const cs=on?cCnt(tb,j).map((c,s)=>({s,j,nm:ct[s][0],kind:ct[s][1],t:c,n:c[0]+c[1]+c[2]+c[3]})).filter(C=>!ok||ok.has(ct[C.s][2])):[];
       return Object.assign({j,J,on,cs},pool7(cs))});
-    return Object.assign({u,U,on:tU(tb,u),subs},pool7(subs.flatMap(x=>x.cs)))})}
+    return Object.assign({u,U,on:tU(tb,u),subs},pool7(subs.flatMap(x=>x.cs)))});
+  return ok?T.map(U=>Object.assign({},U,{subs:U.subs.filter(J=>J.cs.length)})).filter(U=>U.subs.length):T}
 /* where the most students gave up, and where the most skipped */
 function worst7(T){let g=null,k=null;T.forEach(U=>U.subs.forEach(J=>J.cs.forEach(C=>{if(!g||C.t[2]>g.t[2])g=Object.assign({u:U.u},C);if(!k||C.t[3]>k.t[3])k=Object.assign({u:U.u},C)})));return {g,k}}
-function h8(){const tb=S.v8.tb,Tb=TB[tb],{g,k}=worst7(tree7(tb)),n=tbWho(tb).length,of=v=>n<NM.length?`${v} of ${n}`:v,JN=j=>TBJ(tb,j).n,what=LABV?BOOKS[PICK].s:Tb.n;
+/* the worst questions, ranked: the most who gave up or skipped, then the most who gave up. On the whole class a question needs two who gave up or three who
+   skipped to be listed; on one skill every one of its questions is ranked, the most retries breaking a tie, so a skill nobody gives up on still shows where it takes retries */
+const worstQs=(T,k)=>T.flatMap(U=>U.subs.flatMap(J=>J.cs)).filter(C=>C.n&&(k!==null||C.t[2]>=2||C.t[3]>=3)).sort((a,b)=>(b.t[2]+b.t[3])-(a.t[2]+a.t[3])||b.t[2]-a.t[2]||(k===null?0:b.t[1]-a.t[1])).slice(0,8);
+/* the skill the page is narrowed to, if any. "Where they stall" on a skill's panel sets it; "All questions", the rail and a student's flag clear it */
+const k8=()=>{const k=S.v8.k;if(k===null)return null;if(!tree7(S.v8.tb,k).length)S.v8.k=null;return S.v8.k};
+const stallN=k=>tree7(0,k).reduce((a,U)=>a+U.subs.reduce((b,J)=>b+J.cs.length,0),0);
+function h8(){const tb=S.v8.tb,Tb=TB[tb],K=k8(),{g,k}=worst7(tree7(tb,K)),n=tbWho(tb).length,of=v=>n<NM.length?`${v} of ${n}`:v,JN=j=>TBJ(tb,j).n,what=LABV?BOOKS[PICK].s:Tb.n;
   if(!g)return `Nothing in ${what} has started yet.`;
-  if(g.t[2]<2&&k.t[3]<3)return `Nobody is stalling in ${what} so far.`;
-  const JS=j=>TBJ(tb,j).s,gu=LABV?`have not got ${g.nm} to run yet`:`gave up at ${g.nm}`;if(g.j===k.j)return `${JS(g.j)}: ${g.t[2]} ${gu}, ${k.t[3]} skipped ${k.nm}.`;
+  if(g.t[2]<2&&k.t[3]<3)return K===null?`Nobody is stalling in ${what} so far.`:`Nobody is stalling on ${ASK[K]} so far.`;
+  const JS=j=>TBJ(tb,j).s,gu=LABV?`have not got ${g.nm} to run yet`:`gave up at ${g.nm}`;
+  /* on one skill: the same two clauses, each only when it passes the page's own line (two gave up, three skipped) */
+  if(K!==null)return `On ${ASK[K]}: ${[g.t[2]>=2?`${g.t[2]} ${gu} (${JS(g.j)})`:'',k.t[3]>=3?`${k.t[3]} skipped ${k.nm} (${JS(k.j)})`:''].filter(Boolean).join('; ')}.`;
+  if(g.j===k.j)return `${JS(g.j)}: ${g.t[2]} ${gu}, ${k.t[3]} skipped ${k.nm}.`;
   return `${g.t[2]} ${gu} (${JS(g.j)}); ${k.t[3]} skipped ${k.nm} (${JS(k.j)}).`}
 /* which rows are open: none to begin with. The headline and the panel beside the list already name the worst stall point */
 function ex7(tb,T){if(!S.v8.ex[tb])S.v8.ex[tb]={U:[],J:[]};return S.v8.ex[tb]}
 function sel7(tb,T){const all=T.flatMap(U=>U.subs.flatMap(J=>J.cs));let s=S.v8.sel[tb];if(!s||!all.some(C=>C.j===s.j&&C.s===s.s)){const {g}=worst7(T);s=S.v8.sel[tb]=g?{j:g.j,s:g.s}:{j:all[0].j,s:0}}return s}
-function open7(tb,j,s){const E=ex7(tb,tree7(tb)),u=uOfJ(j);if(!E.U.includes(u))E.U.push(u);if(!E.J.includes(j))E.J.push(j);S.v8.sel[tb]={j,s};S.v8.tb=tb;S.v8.view='outline'}
-const lvAll7=tb=>{const us=TREEU.filter(u=>tU(tb,u)),js=us.flatMap(u=>uJs(tb,u)).filter(j=>TBJ(tb,j).on&&ctOf(tb,j).length);return {us,js}};
-const level7=tb=>{const E=S.v8.ex[tb],{us,js}=lvAll7(tb);if(!E.U.length)return 'u';if(us.every(x=>E.U.includes(x))){if(!js.some(x=>E.J.includes(x)))return 'j';if(js.every(x=>E.J.includes(x)))return 'c'}return ''};
+/* open the outline at one question; with a skill, the outline holds that skill's questions only */
+function open7(tb,j,s,k){const E=ex7(tb),u=uOfJ(j);if(!E.U.includes(u))E.U.push(u);if(!E.J.includes(j))E.J.push(j);S.v8.k=k===undefined?null:k;S.v8.sel[tb]={j,s};S.v8.tb=tb;S.v8.view='outline'}
+const lvAll7=T=>{const us=T.filter(U=>U.on).map(U=>U.u),js=T.flatMap(U=>U.on?U.subs.filter(J=>J.on&&J.cs.length).map(J=>J.j):[]);return {us,js}};
+const level7=(tb,T)=>{const E=S.v8.ex[tb],{us,js}=lvAll7(T);if(!E.U.length)return 'u';if(us.every(x=>E.U.includes(x))){if(!js.some(x=>E.J.includes(x)))return 'j';if(js.every(x=>E.J.includes(x)))return 'c'}return ''};
 const sKey7=(tb,j,s)=>tb===0?`v8:${j}:${s}`:`v8:${tb}:${j}:${s}`;
 const OUTLEG7=`<span class="lt">Students</span><span><i class="sw" style="background:${CGU}"></i>${OUTV[2]}</span><span><i class="sw" style="background:var(--st-sk)"></i>Skipped</span><span><i class="sw" style="background:var(--st-rt)"></i>${OUTV[1]}</span><span><i class="sw" style="background:var(--ok-fill)"></i>${OUTV[0]}</span>`;
-function v8(){const tb=S.v8.tb,T=tree7(tb),ids=tbWho(tb),Tb=TB[tb],E=ex7(tb,T),sl=sel7(tb,T),srt=S.v8.sort,su=S.stu,fol=su!==null&&ids.includes(su);
+function v8(){const tb=S.v8.tb,K=k8(),T=tree7(tb,K),ids=tbWho(tb),Tb=TB[tb],E=ex7(tb,T),sl=sel7(tb,T),srt=S.v8.sort,su=S.stu,fol=su!==null&&ids.includes(su);
   const key=o=>!o.n?-1:srt==='gu'?o.t[2]/o.n:srt==='sk'?o.t[3]/o.n:0;
   const ord=a=>srt==='course'?a:a.slice().sort((x,y)=>key(y)-key(x));
   const pc=(o,q,cls)=>`<span class="hp ${cls}">${o.n?Math.round(o.t[q]/o.n*100)+'%':''}</span>`;
@@ -1112,21 +1139,23 @@ function v8(){const tb=S.v8.tb,T=tree7(tb),ids=tbWho(tb),Tb=TB[tb],E=ex7(tb,T),s
   const note=[ids.length<NM.length?`${ids.length} of ${NM.length} students use ${Tb.n}.`:'',su!==null&&!fol?`${NM[su]} doesn’t use it.`:''].filter(Boolean).join(' ');
   /* the first view is the answer: the questions where the most students gave up or skipped, worst first. The outline of the book is the second view */
   const view=S.v8.view||'worst',vw=`<span class="sel">View ${seg('v8view',view,[['worst','Worst questions'],['outline','By unit']],'View')}</span>`;
-  const ctl=`<div class="controls">${vw}${view==='outline'?`<span class="sel">Show ${seg('v8lvl',level7(tb),[['u','Units'],['j','Subunits'],['c','Content']],'Show rows down to')}</span><label class="sel" for="v8sort">Sort <select id="v8sort">${[['course','Course order'],['gu','Most gave up first'],['sk','Most skipped first']].map(([v,l])=>`<option value="${v}"${srt===v?' selected':''}>${l}</option>`).join('')}</select></label>`:''}</div>`;
-  const worst=T.flatMap(U=>U.subs.flatMap(J=>J.cs)).filter(C=>C.n&&(C.t[2]>=2||C.t[3]>=3)).sort((a,b)=>(b.t[2]+b.t[3])-(a.t[2]+a.t[3])||b.t[2]-a.t[2]).slice(0,8);
+  const ctl=`<div class="controls">${vw}${view==='outline'?`<span class="sel">Show ${seg('v8lvl',level7(tb,T),[['u','Units'],['j','Subunits'],['c','Content']],'Show rows down to')}</span><label class="sel" for="v8sort">Sort <select id="v8sort">${[['course','Course order'],['gu','Most gave up first'],['sk','Most skipped first']].map(([v,l])=>`<option value="${v}"${srt===v?' selected':''}>${l}</option>`).join('')}</select></label>`:''}</div>`;
+  const worst=worstQs(T,K),nK=K===null?0:T.reduce((a,U)=>a+U.subs.reduce((b,J)=>b+J.cs.length,0),0);
+  /* narrowed to one skill: a bar says which, with the way back to every question, as a group on Ready for a unit does */
+  const kbar=K===null?'':`<p class="rdfor"><span class="pill acc">${ASK[K]} · ${nK} ${pl(nK,'question')}</span><button class="lnk" type="button" data-act="v8k">All questions</button></p>`;
   const wRow=C=>{const on=sl.j===C.j&&sl.s===C.s,t=C.t;
     return `<li><button type="button" class="hr l0${on?' on':''}" data-act="v8c" data-j="${C.j}" data-s="${C.s}" aria-pressed="${on}"${tp(`<b>${C.nm}</b> · ${TBJ(tb,C.j).n}<br>${C.kind==='r'?`${t[0]} tried it · ${t[3]} skipped · nothing marks it right`:`${t[0]} ${OUTV[0].toLowerCase()} · ${t[1]} ${OUTV[1].toLowerCase()}<br>${t[2]} ${OUTV[2].toLowerCase()} · ${t[3]} skipped`}`)}><span class="hn"><span>${C.nm}<span class="tg">${TBJ(tb,C.j).s}</span></span></span>${bar(C,1)}${nums(C,2)}${sc(()=>smC(C))}</button></li>`};
-  const wList=`<ul class="hc v7${fol?' fol':''}" aria-label="The questions where the most students gave up or skipped, worst first"><li class="hh" aria-hidden="true"><div class="hr"><span class="hn"></span><span class="hx"></span><span class="hp g">${LABV?'Not right yet':'Gave up'}</span><span class="hp k">Skipped</span>${fol?`<span class="hs">${NM[su]}</span>`:''}</div></li>${worst.map(wRow).join('')}</ul>${worst.length?'':'<p class="none">Nobody has given up on or skipped a question yet.</p>'}`;
+  const wList=`<ul class="hc v7${fol?' fol':''}" aria-label="The questions${K===null?'':' on '+ASK[K]} where the most students gave up or skipped, worst first"><li class="hh" aria-hidden="true"><div class="hr"><span class="hn"></span><span class="hx"></span><span class="hp g">${LABV?'Not right yet':'Gave up'}</span><span class="hp k">Skipped</span>${fol?`<span class="hs">${NM[su]}</span>`:''}</div></li>${worst.map(wRow).join('')}</ul>${worst.length?'':'<p class="none">Nobody has given up on or skipped a question yet.</p>'}${nK>worst.length?`<p class="hint" style="margin:8px 0 0"><button class="lnk" type="button" data-act="v8allk">All ${nK} by unit</button></p>`:''}`;
   const leg=`<div class="legend mleg">${OUTLEG7}${fol?`<span class="lt">${NM[su]}</span>${[2,3,1,0].map(o=>`<span>${pm7(o)}${OUTV[o]}</span>`).join('')}`:''}</div>`;
   const list=`<ul class="hc v7${fol?' fol':''}" aria-label="${Tb.n}: where students gave up, skipped or needed retries, by unit, subunit and content"><li class="hh" aria-hidden="true"><div class="hr"><span class="hn"></span><span class="hx"></span><span class="hp g">${LABV?'Not right yet':'Gave up'}</span><span class="hp k">Skipped</span>${fol?`<span class="hs">${NM[su]}</span>`:''}</div></li>${treeBody(T,ord,uRow,U=>`<i>${U.U.nb}</i>`)}</ul>${labsNote('they are not listed with the questions')}`;
   /* detail: the selected piece of content */
-  const U0=T.find(U=>U.subs.some(J=>J.j===sl.j)),J0=U0.subs.find(J=>J.j===sl.j),C0=J0.cs[sl.s],c=C0.t,n=C0.n,O=cOut(tb,sl.j)[sl.s];
+  const U0=T.find(U=>U.subs.some(J=>J.j===sl.j)),J0=U0.subs.find(J=>J.j===sl.j),C0=J0.cs.find(C=>C.s===sl.s),c=C0.t,n=C0.n,O=cOut(tb,sl.j)[sl.s];
   const by=[0,1,2,3].map(q=>ids.filter(i=>O[i]===q).map(i=>NM[i])),stall=c[2]/n>=HOT7,skp=c[3]/n>=.29,act=skp||c[2]/n>=(LABV?.5:.1);
   const nt=((tb===0?STALL[sl.j]:XSTALL[tb+':'+sl.j])||{})[sl.s],pk=sKey7(tb,sl.j,sl.s);
   const chg=skp?'Assign it as coursework':'Reteach this';
   const det=`<div class="detail"><div class="dhead"><h3>${C0.nm}</h3><span class="hint">${J0.J.s}</span>${stall?`<span class="pill bad">${LABV?'Hardest lab':'Stall point'}</span>`:skp?'<span class="pill watch">Often skipped</span>':''}${act?(isLogged(pk)?'<span class="pill good">Planned</span>':`<button class="btn small primary" type="button" data-act="v8plan">${chg}</button>`):''}</div>
   ${nt?`<p class="dtext">${nt}</p>`:''}<div class="dgrid">${by[2].length?whoCol(OUTV[2],CGU,by[2]):''}${by[3].length?whoCol('Skipped','var(--st-sk)',by[3]):''}${C0.kind!=='r'&&by[1].length?whoCol(OUTV[1],'var(--st-rt)',by[1]):''}${!by[2].length&&!by[3].length?`<p class="none">${LABV?'Everyone who tried this lab got it to run.':'Nobody gave up on or skipped this.'}</p>`:''}</div></div>`;
-  return (note?`<p class="hint" style="margin:0 0 10px">${note}</p>`:'')+ctl+leg+duo(duoW(.6,560),view==='outline'?list:wList,det,'stick')}
+  return (note?`<p class="hint" style="margin:0 0 10px">${note}</p>`:'')+ctl+kbar+leg+duo(duoW(.6,560),view==='outline'?list:wList,det,'stick')}
 
 /* ---------- view 10: fade slopes ---------- */
 const fadeKind=d=>d<=-8?'fade':d>=5?'up':'flat';
@@ -1147,7 +1176,8 @@ function v10(){const Z=S.v10,sel=S.stu;
   const ctl=`<div class="controls">${pickCtl('v10unit',Z.u,[['all','All units']].concat(fdu.map(u=>[String(u),`${TB0[u].s} · ${TB0[u].nb}`])),'Unit')}<label class="chk" for="v10all"><input type="checkbox" id="v10all"${Z.all?' checked':''}> Show all ${inU.length}</label></div>`;
   const dot=(f,st)=>`<svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.2" style="fill:${f};${st||''}"/></svg>`;
   const leg=`<div class="legend"><span>${dot('var(--surface)','stroke:var(--ink-3);stroke-width:1.6')}When taught</span><span>${dot('var(--bad)')}Later: down 8+</span>${Z.all?`<span>${dot('var(--neutral)')}Steady</span><span>${dot('var(--good)')}Grew</span>`:''}${sel!==null?`<span><svg width="22" height="10" aria-hidden="true"><line x1="3" y1="5" x2="19" y2="5" style="stroke:var(--accent);stroke-width:1.6"/><circle cx="19" cy="5" r="3" style="fill:var(--accent)"/></svg>${NM[sel]}</span>`:''}</div>`;
-  const sv=sel!==null?rows.flatMap(o=>ML[sel][o.k]===null?[]:[MT[sel][o.k]*100,ML[sel][o.k]*100]):[],lo=Math.max(0,Math.min(40,Math.floor((sv.length?Math.min(...sv):40)/10)*10));
+  /* the axis starts at 40, or lower when a dot would sit under it (the class's average, or the followed student's): a dot is never pinned to the edge */
+  const sv=rows.flatMap(o=>[o.a,o.b]).concat(sel!==null?rows.flatMap(o=>ML[sel][o.k]===null?[]:[MT[sel][o.k]*100,ML[sel][o.k]*100]):[]),mn=Math.min(40,...sv),lo=mn>=40?40:Math.max(0,Math.floor(mn/20)*20);
   /* alone, the rows are a chart of modest width in the middle of the page; with a skill picked they share a wider stage with its chart */
   const da=pk?duoW(.6,620,Math.min(VW(),1360)):0,SWD=Math.min(VW(),da?1360:920),W=da||SWD,wide=W>=700;
   if(!rows.length)return stage(SWD,ctl+`<p class="none">${Z.all?'No skill here has been checked again 21 days or more after it was taught.':`No skill here has faded.${inU.length?` Tick “Show all” for the ${inU.length} that were checked again.`:''}`}</p>`);
@@ -1157,7 +1187,7 @@ function v10(){const Z=S.v10,sel=S.stu;
   for(let v=lo;v<=100;v+=lo<30?20:10){s+=`<line x1="${f1(x(v))}" x2="${f1(x(v))}" y1="${T0-4}" y2="${H-6}" class="grid"/>`+T(x(v),T0-10,v,{a:'middle',c:'t3'})}
   s+=T(X1+24,T0-10,'Change',{c:'t3',w:700})+T(X1+76,T0-10,'Slipped 20+',{c:'t3',w:700})+(wide?T(X1+150,T0-10,`Needed in ${TB0[CU].s}`,{c:'t3',w:700}):'');
   rows.forEach((o,ri)=>{const y=T0+ri*rh+rh/2-(sel!==null?3:0),kd=fadeKind(o.d),col=kd==='fade'?'var(--bad)':kd==='up'?'var(--good)':'var(--neutral)',on=o.k===Z.k,need=PREK.has(o.k);
-    s+=`<g class="row${on?' on':''}" data-act="v10line" data-k="${o.k}" tabindex="0" role="button" aria-pressed="${on}" aria-label="${SK[o.k]}: ${Math.round(o.a)} when taught, ${Math.round(o.b)} ${LATER}, ${o.sl.length} slipped"${tp(`<b>${dTxt(o.d)} points</b> · ${SK[o.k]}<br>${Math.round(o.a)}% when taught (week ${KT[o.k]}) → ${Math.round(o.b)}% ${LATER}<br><span>${o.sl.length} slipped 20+ points${need?` · needed for ${NXT}`:''}</span>`)}><rect class="rbg" x="2" y="${f1(T0+ri*rh+1)}" width="${W-4}" height="${rh-2}" rx="5"/>`;
+    s+=`<g class="row${on?' on':''}" data-act="v10line" data-k="${o.k}" tabindex="0" role="button" aria-pressed="${on}" aria-label="${SK[o.k]}: ${Math.round(o.a)} when taught, ${Math.round(o.b)} ${LATER}, ${o.sl.length} slipped"${tp(`<b>${dTxt(o.d)} points</b> · ${SK[o.k]}<br>${Math.round(o.a)}% when taught (first met on ${dayDate(KT[o.k])}) → ${Math.round(o.b)}% ${LATER}<br><span>${o.sl.length} slipped 20+ points${need?` · needed for ${NXT}`:''}</span>`)}><rect class="rbg" x="2" y="${f1(T0+ri*rh+1)}" width="${W-4}" height="${rh-2}" rx="5"/>`;
     s+=T(LX,y+4,ASKM[o.k],{a:'end',c:on||kd==='fade'?'t1':'t2',w:on||kd==='fade'?700:null});
     s+=`<line x1="${f1(x(o.a))}" x2="${f1(x(o.b))}" y1="${f1(y)}" y2="${f1(y)}" style="stroke:${col};stroke-width:4;stroke-linecap:round;opacity:.5"/><circle cx="${f1(x(o.a))}" cy="${f1(y)}" r="4.5" style="fill:var(--surface);stroke:var(--ink-3);stroke-width:1.8"/><circle cx="${f1(x(o.b))}" cy="${f1(y)}" r="5" style="fill:${col};stroke:var(--surface);stroke-width:2"/>`;
     if(sel!==null&&ML[sel][o.k]!==null){const a=MT[sel][o.k]*100,b=ML[sel][o.k]*100,sy=y+9;s+=`<line x1="${f1(x(a))}" x2="${f1(x(b))}" y1="${f1(sy)}" y2="${f1(sy)}" style="stroke:var(--accent);stroke-width:1.6"/><circle cx="${f1(x(a))}" cy="${f1(sy)}" r="2.6" style="fill:var(--surface);stroke:var(--accent);stroke-width:1.4"/><circle cx="${f1(x(b))}" cy="${f1(sy)}" r="3" style="fill:var(--accent)"/>`}
@@ -1599,9 +1629,9 @@ const refocusId=id=>{const el=document.getElementById(id);if(el)el.focus({preven
 const maxGaveUp=j=>{const g=cCnt(0,j).map(c=>c[2]);return g.indexOf(Math.max(...g))};
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=Object.assign({},t.dataset);
   switch(a){
-  case 'stu':{const i=+d.i;S.stu=S.stu===i?null:i;render();break}
+  case 'stu':{const i=+d.i;S.stu=S.stu===i?null:i;if(S.stu!==null)S.v2.hl=null;render();break}   // the student just followed takes the chart's focus from a picked card
   case 'clear':S.stu=null;render();break;
-  case 'go':go(+d.v);break;
+  case 'go':if(+d.v===7)S.v8.k=null;go(+d.v);break;   // the rail opens Stall points on every question
   case 'gofor':S.stu=+d.i;if(+d.v===7)open7(0,CJ,maxGaveUp(CJ));if(+d.v===10){S.v11.tb=0;S.v11.u[0]=rdDef(0)}go(+d.v);break;
   case 'log':go(11);{const l=$('#log');if(l&&l.scrollIntoView)l.scrollIntoView({block:'start'})}break;
   case 'v2u':{const u=+d.u;at2(u,null);S.v2.sel={t:'u',id:u};reView();break}
@@ -1610,6 +1640,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
   case 'v2sel':{const id=+d.id,E=S.v2;if(d.t==='u'){at2(id,null);E.sel={t:'u',id}}else if(d.t==='j'){at2(uOfJ(id),id);E.sel={t:'j',id}}else E.sel={t:'k',id,j:+d.j};reView();break}
   case 'v2up':{const E=S.v2,u=E.at.u,j=E.at.j;E.sel={t:'u',id:u};if(d.f==='all')at2(null,null,TAUGHT.indexOf(u));else at2(u,null,uJs(0,u).filter(x=>SUBS[x].on).indexOf(j));reView();break}
   case 'v2pg':S.v2.pg+=+d.f;reView();break;
+  case 'v2hl':{S.v2.hl=S.v2.hl===d.g?null:d.g;hideTip();v2draw();const f=$('#v2top .fig');if(S.v2.hl&&f){const r=f.getBoundingClientRect();if(r.top<0||r.top>window.innerHeight-80)$('#v2top').scrollIntoView({block:'start',behavior:'smooth'})}break}   // stacked on a narrow page, the chart is above the cards: bring it into view
   case 'v2log':{const E=S.v2,tb=E.tb,g=d.g,nm=nodeName(E.sel,tb)+(tb?` (${TB[tb].s})`:''),who=tbWho(tb).filter(i=>cellN(i,tb,E.sel).g===g).map(i=>NM[i]);
     const txt=g==='stuck'?`Small-group reteach on ${nm} for ${andList(who)}`:g==='off'?`Assigned the ${LABV?'labs':'practice'} in ${nm} to ${andList(who)}`:`Stretch set in ${nm} for ${andList(who)}`;
     logAct(`v2:${tb}:${E.sel.t}${E.sel.id}:${g}`,2,txt,'plan');v2draw();break}
@@ -1619,6 +1650,11 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
   case 'v6sk':S.v6.sel[S.v6.tb]=+d.k;reView();break;
   case 'v6lvl':{const tb=S.v6.tb,E=S.v6.ex[tb];if(!E)break;const {us,js}=lvAll5(tb);if(d.f==='u'){E.U=[];E.J=[]}else if(d.f==='j'){E.U=us.slice();E.J=[]}else{E.U=us.slice();E.J=js.slice()}reView();break}
   case 'gosub':{const j=+d.j;open7(0,j,maxGaveUp(j));go(7);return}
+  /* where they stall on a skill: Stall points' worst questions narrowed to the skill, the worst of them picked */
+  case 'gosk':{const k=+d.k,w=worstQs(tree7(0,k),k);if(!w.length)break;S.v8.k=k;S.v8.view='worst';S.v8.tb=0;S.v8.sel[0]={j:w[0].j,s:w[0].s};go(7);return}
+  case 'v8k':S.v8.k=null;reView();break;
+  /* every question on the skill: the outline, opened down to the questions */
+  case 'v8allk':{const tb=S.v8.tb,E=ex7(tb),{us,js}=lvAll7(tree7(tb,k8()));E.U=us.slice();E.J=js.slice();S.v8.view='outline';reView();break}
   case 'gointro':{const j=+d.j,k=+d.k;at2(uOfJ(j),j);S.v2.sel={t:'k',id:k,j};S.fold.v2grid=true;go(2);return}
   case 'v7view':go(d.f==='unit'?5:d.f==='faded'?9:6);return;
   case 'v8view':S.v8.view=d.f;reView();break;
@@ -1632,7 +1668,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
     else S.v7.pts=[{r,j}];
     S.v7.r=r;reView();break}
   case 'v7now':S.v7.pts=[];reView();break;
-  case 'v7q':{const ix=+d.ix,j=IT[ix]?IT[ix].j:-1;if(j<0||!SUBS[j].on)break;const s=SUBS[j].its.indexOf(ix);if(s<0)break;open7(0,j,s);go(7);return}
+  case 'v7q':{const ix=+d.ix,j=IT[ix]?IT[ix].j:-1,k=d.k===undefined?undefined:+d.k;if(j<0||!SUBS[j].on)break;const s=SUBS[j].its.indexOf(ix);if(s<0)break;open7(0,j,s,k);go(7);return}
   case 'v7cmp':{const P=ptSel(),Ln=NBC-1;if(!P)break;S.v7.pts=P.kind==='one'?[{r:P.r,j:P.j},{r:P.r,j:Ln}]:P.kind==='time'?[{r:P.r,j:P.a},{r:P.r,j:Ln}]:[{r:P.r1,j:Ln},{r:P.r2,j:Ln}];reView();break}
   /* the actions of the point views: a reteach, a review or practice set, a group */
   case 'v7act':{const P=ptSel();if(!P)break;const G=ptGroups(P),g=d.g,sn=m=>D.skills[m.k];let txt='';
@@ -1645,7 +1681,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
   case 'v8unit':{const E=S.v8.ex[S.v8.tb],u=+d.u;if(!E)break;const ix=E.U.indexOf(u);if(ix>=0)E.U.splice(ix,1);else E.U.push(u);reView();break}
   case 'v8sub':{const E=S.v8.ex[S.v8.tb],j=+d.j;if(!E)break;const ix=E.J.indexOf(j);if(ix>=0)E.J.splice(ix,1);else E.J.push(j);reView();break}
   case 'v8c':S.v8.sel[S.v8.tb]={j:+d.j,s:+d.s};reView();break;
-  case 'v8lvl':{const tb=S.v8.tb,E=S.v8.ex[tb];if(!E)break;const {us,js}=lvAll7(tb);if(d.f==='u'){E.U=[];E.J=[]}else if(d.f==='j'){E.U=us.slice();E.J=[]}else{E.U=us.slice();E.J=js.slice()}reView();break}
+  case 'v8lvl':{const tb=S.v8.tb,E=S.v8.ex[tb];if(!E)break;const {us,js}=lvAll7(tree7(tb,k8()));if(d.f==='u'){E.U=[];E.J=[]}else if(d.f==='j'){E.U=us.slice();E.J=[]}else{E.U=us.slice();E.J=js.slice()}reView();break}
   case 'v8plan':{const tb=S.v8.tb,sl=S.v8.sel[tb];if(!sl)break;const c=cCnt(tb,sl.j)[sl.s],n=c[0]+c[1]+c[2]+c[3],nm=ctOf(tb,sl.j)[sl.s][0],J=TBJ(tb,sl.j).n;logAct(sKey7(tb,sl.j,sl.s),7,c[3]/n>=.29?`Assigned ${nm} in ${J} as coursework`:`Reteach ${nm} in ${J}`,'plan');reView();break}
   case 'v10line':S.v10.k=S.v10.k===+d.k?-1:+d.k;reView();break;
   case 'v10close':S.v10.k=-1;reView();break;
@@ -1668,7 +1704,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
     logAct('td:'+c.id,pr?'p':2,`${SETN[c.cat]} on ${pr&&c.cat!=='ext'?c.s:c.t} (${g.items.length} ${pl(g.items.length,'item')}) for ${setFor(c)}`,'plan');S.td.gen=null;render();return}
   case 'tdex':{const L=S.td.ex[d.id]=S.td.ex[d.id]||[];if(L.includes(d.n))S.td.ex[d.id]=L.filter(x=>x!==d.n);else L.push(d.n);reView();break}
   case 'tdbud':S.td.bud[d.id]=+d.f;reView();break;
-  case 'prof':{S.prof=+d.i;S.stu=+d.i;S.td.gen=null;go('p');return}
+  case 'prof':{if(S.stu!==+d.i)S.v2.hl=null;S.prof=+d.i;S.stu=+d.i;S.td.gen=null;go('p');return}
   case 'profu':{const u=+d.u;at2(u,null);S.v2.sel={t:'u',id:u};go(2);return}
   case 'exon':location.assign(location.pathname+'?books'+location.hash);return;
   case 'today':location.assign(asOfUrl(isoOf(EXPORTDAY)));return;
@@ -1679,7 +1715,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
   if(e.detail===0&&!['go','gofor','log','stu','clear'].includes(a))refocus(a,d)});
 /* a folded part of a page remembers whether it is open; the grid is drawn when its fold opens, at the width it then has */
 document.addEventListener('toggle',e=>{const t=e.target;if(!t||t.tagName!=='DETAILS'||!t.dataset.fold)return;S.fold[t.dataset.fold]=t.open;if(t.dataset.fold==='v2grid'&&t.open)v2draw()},true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.view===6&&S.v7.pts.length){S.v7.pts=[];reView();return}if(S.stu!==null){S.stu=null;render()}return}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.view===6&&S.v7.pts.length){S.v7.pts=[];reView();return}if(S.view===2&&S.v2.hl){const a=document.activeElement,g=a&&a.dataset&&a.dataset.act==='v2hl'?a.dataset.g:null;S.v2.hl=null;hideTip();v2draw();if(g)refocus('v2hl',{g});return}if(S.stu!==null){S.stu=null;render()}return}
   const t=e.target;
   /* on a weak-skill row, the left and right arrows pick a day on its line and move it */
   if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&t.getAttribute&&t.getAttribute('data-act')==='v7row'){const r=+t.getAttribute('data-r'),m=WEAK[r];if(!m)return;const ok=m.sv.map((v,j)=>v===null?-1:j).filter(j=>j>=0);if(!ok.length)return;

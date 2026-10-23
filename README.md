@@ -235,7 +235,10 @@ gets none, because none of the four answers that.
   performance, their mean score on its key skills (up), with ALPS's level
   bands up the left edge and its cuts (40, 55, 65 and 80%) on the axis. The
   three groups to act on sit beside it with a button each: struggling (doing
-  the work, beginning or attempted), low engagement and coasting. A select
+  the work, beginning or attempted), low engagement and coasting. A group's
+  heading picks its students out on the chart and dims every other point; a
+  name, or a dot, does the same for one student, whom it also follows. The
+  latest pick wins, and a second click or Esc shows everyone. A select
   picks the unit, among the started ones. The grid of every student is
   folded under the chart ("Every student, by unit"): a row a student, a
   column a started unit, each cell the student's level as ALPS's battery
@@ -278,7 +281,9 @@ gets none, because none of the four answers that.
   under a skill that was once higher; the panel opens with a card naming the
   unit and subunit where the skill was introduced, the day the class met it
   and the questions on it (click it to open the grid there), then names who
-  and offers a reteach. Click a day on a line to see who was where that day;
+  and offers a reteach. "Where they stall →" opens Stall points on the
+  questions that check the skill, worst first (it shows only when such a
+  question is there to see). Click a day on a line to see who was where that day;
   a second day on the same skill compares the two, by where each student is
   on the later day and where they were before (lost it: a review set; never
   got it and fell back: a small-group reteach; familiar or proficient: a
@@ -290,21 +295,30 @@ gets none, because none of the four answers that.
   students who were doing better on the earlier day got wrong in between. A
   question counts as wrong with no credit and as a retry with half credit
   (both lower a level, so every drop has its questions on the list), the
-  names are on hover, and a question opens Stall points at it. It is all
+  names are on hover, and a question opens Stall points at it, among the other
+  questions on the skill. It is all
   drawn: the class on a day is one bar as ALPS draws a class (its five
   levels, mastered first, then unavailable, hatched) with its key, two days are two bars on one scale, the cards
   carry the bar's colours, and each question is a bar of the students it
   lists, in Stall points' colours (got it wrong, needed retries, right first
   time) with an empty part for those who did not try, its counts inside. The left and right arrows
   pick a day on a focused row, and Esc clears it. *By unit* is the outline of the textbook with a bar a row, the class by
-  ALPS level (what was Hardest content). *Faded* is the before-and-after of every skill that was
+  ALPS level (what was Hardest content); its panel offers the same reteach
+  and "Where they stall" as *Weak now* for the same skill. *Faded* is the before-and-after of every skill that was
   checked again (what was Fading skills); nothing is picked to begin with,
   and a click on a skill opens the chart of every student beside the rows.
+  Its axis starts at 40, or lower when a class average falls under it, so no
+  dot is pinned to the edge.
   The old links still open their view.
 * **Stall points opens on the worst questions**: the eight where the most
   students gave up or skipped, as one ranked list with the lesson code; the
-  outline of the textbook is the second view, and a "Where they stall" link from
-  the Skills page opens the outline at the lesson.
+  outline of the textbook is the second view. A skill's "Where they stall"
+  on the Skills page narrows both views to the questions that check that
+  skill: every one of them ranked the same way (the most retries breaking a
+  tie, so a skill nobody gives up on still shows where it takes retries), the
+  worst picked, the skill named in the answer and in a bar with "All
+  questions" beside it. The rail and a student's flag open the page on every
+  question.
 * **Ready for a unit asks which unit is next** and picks the first one not
   started after the unit the class is in; one select holds every unit, with
   "done" and "now" on the started ones. Under it is the **readiness line**
@@ -363,8 +377,10 @@ gets none, because none of the four answers that.
   students on every page is one list: a row a student, in alphabetical
   order, with a hairline under each, in columns that run down then across
   once it is long. Where the page has the number behind a student's place,
-  it sits at the right of the row and a short caption names it: key skills
-  mastered or questions tried on Engagement and performance, questions
+  it sits at the right of the row and a short caption names it: on
+  Engagement and performance, questions tried, or for a struggling student
+  the key skills mastered in a unit, the skills mastered in a lesson or the
+  score on a skill, questions
   tried against their normal on Drifting, the score on Skills, the score when
   taught and later on the faded skills, and how many of a group's skills on Ready for a unit.
   A name still opens the student; a group on Ready keeps its button to take

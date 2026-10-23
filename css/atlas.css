@@ -331,6 +331,12 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .ags{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
 .ag{display:grid;gap:12px;align-content:start;padding:16px;border:1px solid var(--rule);border-radius:4px}
 .ag .dl{margin:0}
+/* a card's heading is a switch that picks its students out on the chart beside it; on, the card is outlined in the primary colour */
+.ag .agh{width:calc(100% + 16px);margin:-6px -8px;padding:6px 8px;border:0;border-radius:4px;background:none;text-align:left;cursor:pointer;transition:background-color .15s}
+.ag .agh:hover{background:var(--hover)}
+.ag.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ag.on .agh{color:var(--blue-ink)}
+#v2top{scroll-margin-top:calc(var(--bar) + 16px)}
 /* students as a list to scan: a row a student, a hairline under each, columns that run down then across; the number behind a place
    at the right, named by a short caption; a name is plain text that still opens the student */
 .roster{list-style:none;margin:0;padding:0}

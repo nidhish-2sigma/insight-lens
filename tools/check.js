@@ -439,8 +439,8 @@ if (atlasData) {
   check('js/atlas.js', 'a day picked on a weak-skill line lists who was where; a second day on the same skill splits the class by change (lost it, reteach group, familiar or proficient, got it, held); a day on another skill compares the two on the later day; buttons only on today\'s lists, a past day offers "Compare with now"',
     /function ptSel\(\)/.test(atlasJs) && /function ptGroups\(P\)/.test(atlasJs) && /data-act="v7pt" data-r="\$\{o\.i\}" data-j="\$\{k\}"/.test(atlasJs) && /'Lost it'/.test(atlasJs) && /Reteach group · /.test(atlasJs) && /ptCard\(P,'Familiar or proficient','Partway both times, or moving up'/.test(atlasJs) && /'Got it'/.test(atlasJs) && /Held · /.test(atlasJs)
       && /j:Math\.max\(Q\[0\]\.j,j\)/.test(atlasJs) && /ptPast\('Compare with now'\)/.test(atlasJs) && /g&&now\?ptBtn\(P,g,label\)/.test(atlasJs) && /'Form a group'/.test(atlasJs) && /Give a review set/.test(atlasJs) && /e\.key==='ArrowLeft'\|\|e\.key==='ArrowRight'/.test(atlasJs));
-  check('js/atlas.js', 'a picked day lists the questions its struggling students are getting wrong (the last 30 days of class work first), two days list what the students who were doing better got wrong in between, counting no credit and half credit, and each question opens Stall points',
-    /function ptQs\(k,who,from,to\)/.test(atlasJs) && /if\(c===0\)\{r\.wrong\.add\(i\);r\.retry\.delete\(i\)\}else if\(c<1&&!r\.wrong\.has\(i\)\)r\.retry\.add\(i\)/.test(atlasJs) && /Questions they are getting wrong/.test(atlasJs) && /What they got wrong after \$\{A\}/.test(atlasJs) && /\(x===2&&y>=0&&y<2\)\|\|\(x===1&&y===0\)/.test(atlasJs) && /case 'v7q':\{const ix=\+d\.ix/.test(atlasJs) && /open7\(0,j,s\);go\(7\)/.test(atlasJs));
+  check('js/atlas.js', 'a picked day lists the questions its struggling students are getting wrong (the last 30 days of class work first), two days list what the students who were doing better got wrong in between, counting no credit and half credit, and each question opens Stall points at it, among the questions on the same skill',
+    /function ptQs\(k,who,from,to\)/.test(atlasJs) && /if\(c===0\)\{r\.wrong\.add\(i\);r\.retry\.delete\(i\)\}else if\(c<1&&!r\.wrong\.has\(i\)\)r\.retry\.add\(i\)/.test(atlasJs) && /Questions they are getting wrong/.test(atlasJs) && /What they got wrong after \$\{A\}/.test(atlasJs) && /\(x===2&&y>=0&&y<2\)\|\|\(x===1&&y===0\)/.test(atlasJs) && /case 'v7q':\{const ix=\+d\.ix,j=IT\[ix\]\?IT\[ix\]\.j:-1,k=d\.k===undefined\?undefined:\+d\.k;/.test(atlasJs) && /open7\(0,j,s,k\);go\(7\)/.test(atlasJs) && /data-act="v7q" data-ix="\$\{ix\}" data-k="\$\{k\}"/.test(atlasJs) && /\$\{qList\(recent,6,N,k\)\}/.test(atlasJs) && /QKEY\+qList\(rows,8,drop\.length,k\)/.test(atlasJs));
   check('js/atlas.js', 'a picked day is drawn: the class that day as one keyed bar as ALPS draws it (its five levels, mastered first, then unavailable), two days as two bars on one scale, the cards in the bar\'s colours, and each question as a bar of the students it lists, in Stall points\' colours, with an empty part for those who did not try',
     /const stBar=g=>/.test(atlasJs) && /\$\{stRow\(now\?'The class now':'That day',G,m\.sv\[j\]\)\}\$\{stKey\(\[G\]\)\}/.test(atlasJs) && /\$\{stRow\('On '\+A,GA,m\.sv\[P\.a\]\)\}\$\{stRow\(now\?'Now':'On '\+dayDate\(BE\(P\.b\)\),GB,m\.sv\[P\.b\]\)\}\$\{stKey\(\[GA,GB\]\)\}/.test(atlasJs)
       && /const STP=\[4,3,2,1,0\]\.map\(b=>\[b,'l'\+b,LV\[b\],LVCOL\[b\]\]\)\.concat\(\[\['early','ua','Unavailable',''\]\]\);/.test(atlasJs)
@@ -473,6 +473,47 @@ if (atlasData) {
   check('js/atlas.js', 'the three skills pages are one page with three views (weak now, by unit, faded), and the old addresses still open their view', /const toPage=k=>\{if\(k===5\)\{S\.v7\.view='unit';return 6\}if\(k===9\)\{S\.v7\.view='faded';return 6\}/.test(atlasJs) && /const vSk=\(\)=>skTabs\(\)\+/.test(atlasJs) && /OLDSLUG=\{'overview':2,'effort':2,'weak-skills':6,'worked':11\}/.test(atlasJs) && /\[\['weak','Weak now'\],\['unit','By unit'\],\['faded','Faded'\]\]/.test(atlasJs));
   check('js/atlas.js', 'weak skills run under a heading a status with no status word on each row, the faded ones say what they fell from, and empty statuses have no tab', /T\(10,y\+gh-12,`\$\{g\.st\} · \$\{g\.all\}`/.test(atlasJs) && /`faded: \$\{Math\.round\(fd\.a\)\}% → \$\{Math\.round\(fd\.b\)\}%`/.test(atlasJs) && /STS\.filter\(st=>cnt\(st\)\)/.test(atlasJs) && !/T\(xb\+BWD\+34,yc\+4,m\.st/.test(atlasJs));
   check('js/atlas.js', 'stall points opens on the worst questions as one ranked list, with the outline one click away, and a link into the outline opens that view', /\[\['worst','Worst questions'\],\['outline','By unit'\]\]/.test(atlasJs) && /\.slice\(0,8\);/.test(atlasJs) && /S\.v8\.view='outline'\}/.test(atlasJs));
+  // where they stall on a skill (asked 2026-10-23: the link used to open the lesson that first named the skill): Stall points narrowed to the questions that check it
+  check('js/atlas.js', 'a skill\'s "Where they stall" opens Stall points narrowed to the questions that check that skill, worst first, the worst picked, with a bar naming the skill and "All questions"; the rail and a student\'s flag open it on every question, and no link points at the lesson that first named the skill',
+    /const whereLink=k=>stallN\(k\)\?`<button class="lnk" type="button" data-act="gosk" data-k="\$\{k\}">Where they stall →<\/button>`:'';/.test(atlasJs) && (atlasJs.match(/\$\{whereLink\((k0|m\.k)\)\}/g) || []).length === 2
+      && /case 'gosk':\{const k=\+d\.k,w=worstQs\(tree7\(0,k\),k\);if\(!w\.length\)break;S\.v8\.k=k;S\.v8\.view='worst';S\.v8\.tb=0;S\.v8\.sel\[0\]=\{j:w\[0\]\.j,s:w\[0\]\.s\};go\(7\);return\}/.test(atlasJs)
+      && /case 'v8k':S\.v8\.k=null;reView\(\);break;/.test(atlasJs) && /case 'go':if\(\+d\.v===7\)S\.v8\.k=null;go\(\+d\.v\);break;/.test(atlasJs) && /S\.v8\.k=k===undefined\?null:k;/.test(atlasJs)
+      && /data-act="v8k">All questions<\/button><\/p>`;/.test(atlasJs) && /\+ctl\+kbar\+leg\+duo\(/.test(atlasJs) && !/data-act="gosub" data-j="\$\{jOf\(/.test(atlasJs) && !/\bjOf\b/.test(atlasJs));
+  {
+    const vm = require('node:vm'), boot = 'renderHead();fromHash();render();';
+    const runSk = search => {
+      const nodes = new Map(), node = id => { if (!nodes.has(id)) nodes.set(id, { innerHTML: '', textContent: '', hidden: false, clientWidth: 1450, classList: { toggle() {} }, style: { setProperty() {} }, focus() {}, querySelectorAll() { return []; }, querySelector() { return null; } }); return nodes.get(id); };
+      const ctx = vm.createContext({ window: { innerWidth: 1750, addEventListener() {} }, document: { querySelector: node, getElementById: id => node('#' + id), addEventListener() {} },
+        location: { search, hash: '#skills', pathname: '/index.html', assign() {}, replace() {} }, setTimeout() { return 1; }, clearTimeout() {}, console });
+      ['data/class.js', 'data/sample.js', 'data/example.js', 'data/prereqs.js'].forEach(f => { if (fs.existsSync(path.join(root, f))) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f }); });
+      vm.runInContext(atlasJs.replace(boot, 'globalThis.SK_TEST={S,WEAK,FD,SG,hard5,KIT,SUBS,ASK,tree7,worstQs,stallN,whereLink,reteachBtn,h8,v8,v10};'), ctx, { filename: 'js/atlas.js' });
+      return ctx.SK_TEST;
+    };
+    // every skill the Skills page lists (weak now, by unit, faded): the link shows exactly when a question on Stall points checks it, and following it narrows the page to those questions
+    const stallOK = search => { const X = runSk(search), H = X.hard5(0), ks = [...new Set(X.WEAK.map(m => m.k).concat(H.T.flatMap(U => U.subs.flatMap(J => J.ks.map(K => K.k))), X.FD.map(o => o.k)))], base = X.h8(), bad = [];
+      let shown = 0;
+      ks.forEach(k => { const n = X.stallN(k), l = X.whereLink(k); if (!!n !== !!l) { bad.push(X.ASK[k] + ': link'); return; } if (!n) return; shown++;
+        const w = X.worstQs(X.tree7(0, k), k); X.S.v8.k = k; X.S.v8.view = 'worst'; X.S.v8.tb = 0; X.S.v8.sel[0] = { j: w[0].j, s: w[0].s };
+        const ans = X.h8(), html = X.v8(), on = ix => X.KIT[k].includes(ix);
+        if (!w.every(C => on(X.SUBS[C.j].its[C.s])) || (html.match(/data-act="v8c"/g) || []).length !== Math.min(8, n) || !html.includes('data-act="v8k"') || !html.includes(`>${X.ASK[k]} · ${n} question`)
+          || !(ans.startsWith(`On ${X.ASK[k]}: `) || ans === `Nobody is stalling on ${X.ASK[k]} so far.`) || /undefined|NaN/.test(ans + html)) bad.push(X.ASK[k]);
+        X.S.v8.view = 'outline'; const out = X.v8(); if (/undefined|NaN/.test(out) || !/data-act="v8unit"/.test(out)) bad.push(X.ASK[k] + ': outline'); });
+      X.S.v8.k = null; X.S.v8.view = 'worst'; if (X.h8() !== base) bad.push('the page\'s own answer changed');
+      return { bad, shown, all: ks.length }; };
+    let s1, s2, R;
+    try { s1 = stallOK(''); s2 = stallOK('?books'); R = runSk(''); } catch (e) { check('js/atlas.js', 'the Skills page\'s links run on the page\'s own code', false, e.message); }
+    if (s1) {
+    check('js/atlas.js', 'on every skill the Skills page lists, with and without the example\'s books, "Where they stall" shows when a question checks the skill, and following it lists only those questions, worst first, with the skill named in the answer and the bar', !s1.bad.length && !s2.bad.length && s1.shown > 0 && s2.shown > 0, s1.bad.concat(s2.bad).slice(0, 4).join('; '));
+    // the same reteach on every view of a skill: weak now and by unit offer it for a skill still weak or getting worse, and nowhere else
+    const rk = R.WEAK.filter(m => R.SG[m.st] === 'p').map(m => m.k), nk = R.WEAK.filter(m => R.SG[m.st] !== 'p').map(m => m.k);
+    check('js/atlas.js', 'a skill\'s panel offers the same reteach on weak now and by unit, only while the skill is still weak or getting worse, logged once under one key',
+      (atlasJs.match(/\$\{reteachBtn\((m\.k|k0)\)\}/g) || []).length === 2 && /const reteachBtn=k=>\{const r=WEAK\.findIndex\(m=>m\.k===k&&SG\[m\.st\]==='p'\);/.test(atlasJs) && rk.length > 0 && rk.every(k => /data-act="v7plan"/.test(R.reteachBtn(k))) && nk.every(k => R.reteachBtn(k) === ''));
+    // faded: a dot is never pinned to the edge of the axis, and the hover says a date, not a week
+    R.S.v10.all = true; const fh = R.v10(), ticks = [...fh.matchAll(/y="20\.0" text-anchor="middle" class="t3">(\d+)<\/text>/g)].map(m => +m[1]), lo = ticks.length ? ticks[0] : NaN, mn = Math.min(...R.FD.flatMap(o => [o.a, o.b]));
+    check('js/atlas.js', 'the faded view\'s axis starts low enough for every dot (the class\'s average when taught and later, and the followed student\'s), and its hover gives the day the class first met the skill, not a week',
+      lo <= mn && ticks[ticks.length - 1] === 100 && /const sv=rows\.flatMap\(o=>\[o\.a,o\.b\]\)\.concat\(/.test(atlasJs) && /when taught \(first met on \$\{dayDate\(KT\[o\.k\]\)\}\)/.test(atlasJs) && !/\(week \$\{KT/.test(atlasJs), `axis from ${lo}, lowest dot ${Math.round(mn)}`);
+    }
+  }
   check('js/atlas.js', 'ready for a unit asks which unit is next, picks the first not started after the one the class is in (no line of text says so), marks the started ones, and shows the readiness line under it, unfolded', /const rdDef=tb=>\{const ok=/.test(atlasJs) && /pickCtl\('v11unit',R\.u,unitOpts\(/.test(atlasJs) && /u===CU\?' \(now\)':TB0\[u\]\.on\?' \(done\)':''/.test(atlasJs) && /<\/div>\$\{R\.pre\.length\?rdLine\(R\):''\}/.test(atlasJs) && !/fold\('v11line'|The first unit not started after/.test(atlasJs));
   check('js/atlas.js', 'stretches with no class work are hatched and no line runs through them, on Drifting and on a profile, and every recent figure names its dates', /const quietRects=/.test(atlasJs) && /const RB=NBK-1,RSTART=BS\(RB\);/.test(atlasJs) && /P=live\.map\(j=>f1\(px\(j\)\)/.test(atlasJs) && /ap=live\.map\(j=>/.test(atlasJs) && /the latest work was on \$\{dayDateY\(LASTWORK\)\}/.test(atlasJs) && /`Work, \$\{RECENT\}`/.test(atlasJs));
   // time is in days and dates: today is the export date (or ?today=), recent is the last five days, breaks are read from the data, and nothing is assumed about class days or weeks
@@ -483,11 +524,52 @@ if (atlasData) {
   check('js/atlas.js', 'a picker with many options (a unit, a book) is one select grouped by book, never a row of buttons', /const pickCtl=/.test(atlasJs) && /const unitOpts=us=>MULTI&&PICK===null\?BKON\.map/.test(atlasJs) && !/seg\('v11u'|seg\('v2pick'|seg\('v10u'|seg\('bk'|seg\('v7u'/.test(atlasJs) && /pickCtl\('bksel'/.test(atlasJs) && /pickCtl\('v10unit'/.test(atlasJs));
   check('js/atlas.js', 'work on earlier or later units shows on the profile only, as catching up or working ahead', /function sideWork\(i\)/.test(atlasJs) && /Catching up: \$\{swTxt\(sw\.back\)\}/.test(atlasJs) && /Working ahead: \$\{swTxt\(sw\.ahead\)\}/.test(atlasJs) && !/Catching up/.test(atlasJs.slice(atlasJs.indexOf('function flags('), atlasJs.indexOf('/* ---------- view 2: engagement and performance'))));
   check('js/atlas.js', 'the engagement and performance page opens on the unit\'s chart and cards, with the started units as a row of buttons and the others counted', /pickCtl\('v2unit',E\.sel\.id,unitOpts\(TAUGHT\)/.test(atlasJs) && /\+\$\{ns\.length\} not started/.test(atlasJs) && /tp0\.innerHTML=none\?/.test(atlasJs));
+  // a card or a student picked beside the chart (asked 2026-10-23): the points that belong to it stay in focus and every other point is dimmed
+  check('js/atlas.js', 'on Engagement and performance a card\'s heading is a switch that picks its students out on the chart, a student followed is picked out the same way, the latest pick wins, and a second click or Esc shows everyone again',
+    /const dim2=P=>\{const g=S\.v2\.hl,F=new Set\(P\.filter\(p=>g\?p\.c\.g===g:p\.i===S\.stu\)\.map\(p=>p\.i\)\);return i=>F\.size&&!F\.has\(i\)\?' dim':''\};/.test(atlasJs)
+      && /<button class="dl agh" type="button" data-act="v2hl" data-g="\$\{g\}" aria-pressed="\$\{on\}"/.test(atlasJs) && /case 'v2hl':\{S\.v2\.hl=S\.v2\.hl===d\.g\?null:d\.g;/.test(atlasJs)
+      && /S\.stu=S\.stu===i\?null:i;if\(S\.stu!==null\)S\.v2\.hl=null;/.test(atlasJs) && /case 'prof':\{if\(S\.stu!==\+d\.i\)S\.v2\.hl=null;/.test(atlasJs) && /if\(S\.view===2&&S\.v2\.hl\)\{[^}]*S\.v2\.hl=null;hideTip\(\);v2draw\(\);/.test(atlasJs)
+      && /<g class="hit\$\{dm\(p\.i\)\}" data-act="stu"/.test(atlasJs) && /\.ag\.on\{border-color:var\(--accent\)/.test(atlas) && /\.viz \.dim\{opacity:\.28\}/.test(atlas));
+  {
+    const vm = require('node:vm'), boot = 'renderHead();fromHash();render();';
+    const runV2 = search => {
+      const nodes = new Map(), node = id => { if (!nodes.has(id)) nodes.set(id, { innerHTML: '', textContent: '', hidden: false, clientWidth: 1450, classList: { toggle() {} }, style: { setProperty() {} }, focus() {}, querySelectorAll() { return []; }, querySelector() { return null; } }); return nodes.get(id); };
+      const ctx = vm.createContext({ window: { innerWidth: 1750, addEventListener() {} }, document: { querySelector: node, getElementById: id => node('#' + id), addEventListener() {} },
+        location: { search, hash: '#engagement', pathname: '/index.html', assign() {}, replace() {} }, setTimeout() { return 1; }, clearTimeout() {}, console });
+      ['data/class.js', 'data/sample.js', 'data/example.js', 'data/prereqs.js'].forEach(f => { if (fs.existsSync(path.join(root, f))) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f }); });
+      vm.runInContext(atlasJs.replace(boot, 'globalThis.V2_TEST={S,v2draw,cellN,tbWho,TAUGHT,NM};'), ctx, { filename: 'js/atlas.js' });
+      return { X: ctx.V2_TEST, node };
+    };
+    // every started unit, with and without the example's books, read off the drawing: which points are dimmed, which card is on, which names are dimmed
+    const focusOK = search => { const { X, node } = runV2(search), bad = []; let cards = 0, studs = 0, strips = 0;
+      const same = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+      const draw = () => { X.v2draw(); const h = node('#v2top').innerHTML, pts = [...h.matchAll(/<g class="hit( dim)?" data-act="stu" data-i="(\d+)"/g)], lit = pts.filter(m => !m[1]).map(m => +m[2]);
+        const names = [...h.matchAll(/class="(?:t1|tacc)( dim)?"(?: font-weight="700")?>([^<]+)<\/text>/g)].map(m => ({ i: X.NM.indexOf(m[2]), dim: !!m[1] }));
+        return { h, all: pts.map(m => +m[2]), lit, namesOK: names.every(o => o.i >= 0 && o.dim === !lit.includes(o.i)) }; };
+      X.S.view = 2; X.S.v2.at = { u: null, j: null };
+      X.TAUGHT.forEach(u => { const n = { t: 'u', id: u }, ids = X.tbWho(0); X.S.v2.sel = n; X.S.v2.hl = null; X.S.stu = null;
+        const base = draw(); if (/<svg class="viz" [^>]*share of its labs/.test(base.h)) strips++;
+        if (base.lit.length !== base.all.length || /class="ag on"|aria-pressed="true"/.test(base.h)) bad.push(`unit ${u}: something picked or dimmed with nothing picked`);
+        ['stuck', 'off', 'coast'].forEach(g => { const mem = ids.filter(i => X.cellN(i, 0, n).g === g), on = mem.filter(i => base.all.includes(i)), out = base.all.find(i => !mem.includes(i));
+          X.S.stu = out === undefined ? null : out; X.S.v2.hl = g; const d = draw();   // a card picked while someone outside it is followed: the card has the focus
+          if (!mem.length) { if (X.S.v2.hl !== null || !same(d.lit, X.S.stu === null ? d.all : [X.S.stu]) || /class="ag on"/.test(d.h)) bad.push(`unit ${u} ${g}: on with no card`); return; }   // no card here: the pick is dropped and the followed student has the focus
+          cards++;
+          if (!(on.length ? same(d.lit, on) : d.lit.length === d.all.length) || !d.namesOK) bad.push(`unit ${u} ${g}: focus`);
+          if ((d.h.match(/aria-pressed="true"/g) || []).length !== 1 || !d.h.includes(`<div class="ag on"><button class="dl agh" type="button" data-act="v2hl" data-g="${g}" aria-pressed="true"`)) bad.push(`unit ${u} ${g}: card`); });
+        X.S.v2.hl = null;
+        base.all.forEach(i => { X.S.stu = i; const d = draw(); studs++; if (!same(d.lit, [i]) || !d.namesOK) bad.push(`unit ${u}: student ${i}`); });
+        ids.filter(i => !base.all.includes(i)).forEach(i => { X.S.stu = i; const d = draw(); if (d.lit.length !== d.all.length) bad.push(`unit ${u}: student ${i} with no point dims the rest`); }); });
+      return { bad, cards, studs, strips }; };
+    let f1, f2;
+    try { f1 = focusOK(''); f2 = focusOK('?books'); } catch (e) { check('js/atlas.js', 'the engagement and performance chart runs on the page\'s own code', false, e.message); }
+    if (f1) check('js/atlas.js', 'on every started unit, with and without the example\'s books, a card picked keeps exactly its students\' points and names in focus and dims the rest, also over a followed student outside it; a followed student keeps only their own point; nothing is dimmed with nothing picked, nor for a card or student with no point',
+      !f1.bad.length && !f2.bad.length && f1.cards > 0 && f1.studs > 0 && f2.cards > 0, `${f1.bad.concat(f2.bad).slice(0, 4).join('; ')} · ${f1.cards + f2.cards} cards, ${f1.studs + f2.studs} students, ${f1.strips + f2.strips} lab strips`);
+  }
   check('js/atlas.js', 'my actions opens on the log, and the headline counts real sets only', /const prog=`<div class="detail lead" id="log"><div class="dhead"><h3>My actions today<\/h3>/.test(atlasJs) && /return prog\+sets\+fence\}/.test(atlasJs) && /s:'My actions'/.test(atlasJs));
   // students are listed to be scanned, not as chips: one list everywhere, a row a student, alphabetical, in columns, with the number behind a place
   check('js/atlas.js', 'every list of students is one list: a row a student in alphabetical order, in columns once it is long, the number behind each place at the right under a short caption, and no chips left on any page',
     /const roster=\(rows,o\)=>\{/.test(atlasJs) && /\.sort\(\(a,b\)=>a\.n\.localeCompare\(b\.n\)\)/.test(atlasJs) && /<ul class="roster\$\{rs\.length>6&&o\.cols!==false\?' cols':''\}">/.test(atlasJs) && /const names=\(a,val\)=>roster\(/.test(atlasJs) && /const ptNames=a=>roster\(a\);/.test(atlasJs)
-      && /rcap\(g==='stuck'\?'key skills mastered':'questions tried'\)/.test(atlasJs) && /rcap\('questions tried, of their normal'\)/.test(atlasJs) && /mNow\(m\.k\),'score'/.test(atlasJs) && /mThen\(k\),'when taught → later'/.test(atlasJs) && /\{rm:\['v11rm',key\]\}/.test(atlasJs)
+      && /const gcap=E\.sel\.t==='u'\?'key skills mastered':E\.sel\.t==='j'\?'skills mastered':'score';/.test(atlasJs) && /rcap\(g==='stuck'\?gcap:'questions tried'\)/.test(atlasJs) && /E\.sel\.t==='k'\?Math\.round\(c\.st\.f\*100\)\+'%'/.test(atlasJs) && /rcap\('questions tried, of their normal'\)/.test(atlasJs) && /mNow\(m\.k\),'score'/.test(atlasJs) && /mThen\(k\),'when taught → later'/.test(atlasJs) && /\{rm:\['v11rm',key\]\}/.test(atlasJs)
       && !/class="names|class="fl-names|class="chipx|<span class="gn">/.test(atlasJs) && !/\.names\{|\.fl-names\{|\.chipx|\.gn\{/.test(atlas) && /\.roster\.cols\{columns:150px/.test(atlas) && /\.dgrid\{display:grid;grid-template-columns:minmax\(0,1fr\)/.test(atlas));
   // ready for a unit has four other versions to compare (v1 to v4), switched beside the unit and opened from the address
   check('js/atlas.js', 'ready for a unit offers the current tree and four versions of it (left to right, radial, weighted, class split) with the same rings, links, key and plan, switched in one select beside the unit, opened with ?rv=1 to 4, each with its own "How to read" of fifty words or so',

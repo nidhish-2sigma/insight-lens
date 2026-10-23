@@ -729,6 +729,52 @@ Asked the same day, with a screenshot of the level line and v4's key: "Make this
 
 Then, the same day, on the redrawn line: "use correct colors... mayeb the ones used in alps-react-app". The nodes were already ALPS's status colours (`--green` #408B4D, `--yellow` #E19F01, `--red` #DC3545 in its `src/App.css`), but the track between them was those colours at 45% opacity, a pink and a pale green that ALPS does not use. The track is now ALPS's line gray (#E0E0E0) and the nodes carry the colour at full strength; the picked node keeps ALPS's primary blue ring and hover tint (#1864F2, #E8F1FE).
 
+### The Skills page's links, checked
+
+Asked on 23 October: "understand the interactions in skills tab… It is currently showing the unit in which a skill was introduced even on clicking where they stall. That is not correct fix it. Similarly, check other parts of the page…" Every control on the three views was clicked as a teacher would click it, and where each one lands was compared with what it says.
+
+**Where they stall.** The link opened Stall points at the lesson the "Introduced in" card names and picked that lesson's most-abandoned question, whatever skill the question checks. For 21 of the 28 skills on *Weak now*, 51 of the 63 with a bar on *By unit* and 28 of the 34 on *Faded*, that question does not check the skill at all. On Class Instantiation in Java it opened "Object-Oriented Programming Terms" in 1.20, where 1 student gave up; the skill's worst question is "Community Class Object Array" in 4.3, where 20 gave up and 10 skipped. Now the link narrows Stall points to the questions that check the skill. The worst-questions view ranks every one of them in the page's own order (gave up or skipped, then gave up; the most retries break a tie, so a skill nobody gives up on still shows where it takes retries), picks the worst, and the answer says so: "On Class Instantiation in Java: 20 gave up at Community Class Object Array (4.3); 25 skipped Java Object Instantiation (1.24)." A bar above the list names the skill ("Class Instantiation in Java · 14 questions") with "All questions" beside it, as a group on Ready for a unit does. By unit shows the same questions under their units, and "All 14 by unit" opens it down to the questions. The link shows only when a question on Stall points checks the skill (84 of the 100 skills the three views list). The rail and a student's flag open Stall points on every question; with no skill picked the page is as it was.
+
+**A question from a picked day.** It opened Stall points' outline at the question's lesson, among questions on other skills. It now opens the same outline narrowed to the skill the day is about, with the question picked.
+
+**By unit had no action.** The same skill offered "Reteach" on *Weak now* and nothing on *By unit*. Both panels now use one rule (the skill is still weak or getting worse) and one log entry, so "Reteach planned" shows on both.
+
+**Faded drew a false dot.** Its axis started at 40, and an average under 40 was drawn on the edge: Class Instantiation's later check, 10%, sat on 40 under an answer that says "71% when taught and is 10% now". The axis now starts lower (at 20 or 0) when a dot would fall under 40. The cost: with Class Instantiation on screen the other rows' dumbbells are shorter. Its hover said "(week 8)" for the day number 8; it now says "first met on 9 Sep".
+
+**The grid the "Introduced in" card opens.** Opened on a skill, its struggling card said "key skills mastered: 0 of 1" beside every name. It now gives each student's score on the skill ("score"), and "skills mastered" on a lesson; a unit keeps "key skills mastered".
+
+**Left as they were.**
+- A click on a row's line picks a day rather than the row. The line is for days (asked for on 15 October); the name and the count pick the row.
+- A picked day counts a question as wrong when it earned no credit; Stall points counts "gave up" when it was never right. So a question opened from a day's list can show other numbers on Stall points, which also counts the whole class over all time. Both rules were set on purpose earlier.
+- The "Introduced in" card: a decision, below.
+
+**"Introduced in" is a decision, not a fix.** The card names the started lesson, earliest by the class's dates, among the lessons whose three listed skills include it. The database has no "introduced in": `unit_skill_coverage` has teaching and assessing weights per lesson. Of the 63 skills the page draws, the named lesson has no class question on the skill for 4 (Class Instantiation in Java: 1.20 Unit Summary 1b; Iterate Over Array Elements: 2.23 Loops Multiple Choice Exercises, while every class question on it is in Unit 4), and for 23 the class answered a question on the skill in an earlier lesson. The book's weights do not settle it either: Class Instantiation is first taught (weight 0.7) in 1.12 Objects - Instances of Classes, and Java Math.random (weight 3.6) in 1.11 Using the Math Class, and this class did neither lesson (3 of 36 students tried a question in each). Two readings:
+
+- (a) Where the class first met it: the first lesson in book order the class did with a question on the skill (1.13 for Class Instantiation). Of the 48 skills that have a started lesson both teaching and asking them by the database's weights, this picks that lesson for 38; the card picks it for 34. It needs no new export, but it changes the day a skill was first met, which pace and the profile read.
+- (b) Where the book teaches it, saying when the class skipped that lesson ("1.12 · not done by the class"): the first lesson in book order that both teaches the skill and asks a question on it. 53 of the 63 skills have one, and the class did not do it for 11 of them, among them Class Instantiation (1.12), Modulo Operation, the skill of the class's worst stall point (1.3), and Java Math.random (1.11). That turns the card into a finding with one of the four actions (assign the lesson as content to practice). The other 10 skills would fall back on (a). It needs the export to carry the teaching weights.
+
+**Checks.** Two rewritten, because their rules changed on purpose: a day's question opens Stall points among the questions on its skill, and the number beside a struggling student follows the column picked. Four added: the link and its handlers; a run of the page's own code on every skill the page lists, with and without the example's books (the link shows exactly when a question checks the skill, and following it lists only those questions with the skill named in the answer and the bar); the shared reteach; and the faded axis and its hover. 21,000 of 21,000 pass.
+
+Pictures: `reports/img/after-stall-skill.png` is Stall points from Class Instantiation in Java's "Where they stall"; `after-hardest.png` and `after-fading.png` were taken again (By unit's panel has its Reteach, Faded's axis starts at 0). The first screen of *Weak now* is unchanged, pixel for pixel.
+
+### Picking out a card or a student on Engagement and performance
+
+Asked on 23 October: "add a way to higlight the points based on the tables on the right side. If a table or a student gets selected, all point(s) related to that must be shown in focus while other points must be dimmed."
+
+**A card.** Each card's heading (Struggling, Low engagement, Coasting; on a unit of labs, its one card) is a switch, with "Click to pick them out on the chart" on hover. On, the card is outlined in ALPS's primary blue; its students' dots and names keep their colour and every other dot and name fades to 28%. Dimmed dots are drawn first, so none covers a dot in focus, and names in focus are placed first. A second click, or Esc, shows everyone. The pick holds through a change of unit, subunit, skill or engagement line while the new column has that card, and is dropped where it has none.
+
+**A student.** A name, in a card or the grid, or a dot follows the student as before, and on this chart it now fades every other dot. The followed student's name now stands clear of the blue ring round their dot; it touched the ring before.
+
+**Both.** The latest pick wins. Following a student, by a name, a dot or the profile's next and previous, takes the chart from a picked card; picking a card while someone is followed shows the card, with their ring faded if they are not in it. "Stop following" leaves a picked card on.
+
+**On a narrow window**, where the cards sit under the chart, a pick brings the chart back into view when its top is off screen, as a group on Ready for a unit does.
+
+**Left as it is.** In the example's book C, Unit 2, every student is too early to tell, so the chart has no dots: a card there can be picked and dims nothing. In the class as recorded, every student a card names has a dot.
+
+**Checks.** Two added: the switch and its handlers; and a run of the page's own code on every started unit, with and without the example's books (18 cards, 324 followed students, 3 units of labs): a picked card keeps exactly its students' dots and names in focus, also over a followed student outside it; a followed student keeps only their own; nothing is dimmed with nothing picked, nor for a card or student with no dot. Breaking the dimming of names, letting a followed student win over a card, or leaving the labs strip undimmed each fails it. "How to read" says "A card's heading picks them out" and stays at sixty words. 21,002 of 21,002 pass.
+
+Pictures: `reports/img/after-effort-card.png` has Struggling picked; `after-effort-student.png` follows Andrew. With nothing picked the first screen is unchanged, pixel for pixel.
+
 ### What is still open
 
 - The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's now, but read on this mock's score, not ALPS's.
@@ -738,6 +784,7 @@ Then, the same day, on the redrawn line: "use correct colors... mayeb the ones u
 - The word budget for a first screen: names are most of the words now, and a different budget is needed for pages whose answer is a list of people.
 - Phones.
 - The skill graph's edges are an LLM's. Whether to show its confidence, or to leave out edges that run against the book's order, is open.
+- What "Introduced in" should name: where the class first met a skill, or where the book teaches it and whether the class did that lesson (see "The Skills page's links, checked").
 
 ### Pictures
 
