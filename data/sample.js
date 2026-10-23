@@ -1,7 +1,7 @@
 /* INVENTED sample data for the mock. Nothing in this file comes from the database.
 
-   It exists so that "My actions" (view 11) has enough rows to show its chart. Every row is one of the four things a teacher can do in
-   the product: a reteach, coursework, content to practice, or a group. The database holds one targeted
+   It exists so that "My actions" (view 11) has enough rows to show its chart. Every row is one of the three things a teacher can do in
+   the product: coursework, content to practice, or a group. The database holds one targeted
    practice set for this class, with too little later work to judge it, so on real data alone the chart is one
    row that says "too early to tell".
 
@@ -13,8 +13,8 @@
    est:  extra points gained against the comparison group; lo and hi are the range it could plausibly be.
    The dates follow the class's real timeline (unit 1 in September, unit 2 from late September to early November, unit 4 from 10 November). */
 window.ATLAS_SAMPLE = { interventions: [
-  { n: 'Reteach: if statements', sn: 'the if-statement reteach', who: 'all', when: '6 Oct', est: 9, lo: 4, hi: 14,
-    dose: 'One lesson, tracing branches line by line',
+  { n: 'Practice set: if statements', sn: 'the if-statement practice set', who: 'all', when: '6 Oct', est: 9, lo: 4, hi: 14,
+    dose: 'One set of 8 questions, tracing branches line by line',
     cmp: 'the class’s checks on the skill before and after, against its trend on other skills',
     rec: 'Keep it.' },
   { n: 'Parsons warm-up before code tasks', sn: 'Parsons warm-ups', who: 'all', when: '13 Oct to 9 Nov', est: 5, lo: 1, hi: 9,

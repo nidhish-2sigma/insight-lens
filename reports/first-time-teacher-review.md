@@ -858,6 +858,26 @@ Then, the same day, with a screenshot of a skill's panel (Block Delimiters in Ja
 
 **The class now, drawn as a day is.** A skill's panel on *Weak now* and *By unit* draws the class now as a picked day's panel does: "The class now · 18% of the 33 checked mastered" over one bar of every student by level, the counts in it, mastered first, then unavailable (hatched), with its key. The line of counts under the thin bar is gone, since the bar holds them; the bar now also shows the 3 with fewer than two checks, whom the old line left out. Its styles went with it. A check added: the panel's bar on every skill *By unit* can pick and every weak skill, read off the bar against the levels the page has; counting a single check as a level fails it. 21,007 of 21,007 pass.
 
+Then, the same day: "remove reteach buttons as there is no action related to that. Grouping is fine".
+
+**No reteach; groups stay.** The product has no reteach, so no button offers one and no action logs one. The product's actions are now three: coursework, content to practice and a group.
+
+| Where | Before | Now |
+|---|---|---|
+| Engagement and performance, Struggling card | Reteach in a small group | Form a group |
+| Skills, a skill's panel (*Weak now*, *By unit*) and the head of its table | Reteach | Nothing |
+| Skills, one day on today's list, beginning or attempted | Reteach in a small group, or Reteach to everyone when they were half of those checked or more | Form a group; nothing when they are half or more, since that is the class, not a group |
+| Skills, two days ending today | Reteach in a small group, for the "Reteach group" | Form a group, for the same students, now named by their level: "Beginning or attempted" |
+| Skills, two skills | "one reteach covers both skills" | "one group covers both skills" (the button was already Form a group) |
+| Stall points, a question students gave up on | Reteach this | Nothing; Assign it as coursework stays on a question students often skip |
+| Ready for a unit, Accept plan | Logged a whole-class reteach of each skill under 60% | Logs the small group and the stretch set only |
+
+"Form a group" is the label the two-skill cards already used, and a group logs as "Group for … : names", as theirs did. The plan's "Reteach to everyone" card on Ready for a unit stays: it is advice on what to teach the whole class, not a button. The students table still opens on those beginning or attempted for a skill that is still weak, and the page purposes are unchanged. The invented sample row "Reteach: if statements" on My actions is now "Practice set: if statements", with the same numbers.
+
+**Checks.** The check on the product's actions now fails on any reteach button, "planned" pill or logged reteach, and wants Form a group on the struggling card. Four added or rewritten: no skill's panel on *Weak now* or *By unit* offers a reteach (run on every weak skill); on every point picked on today's lists, the beginning-or-attempted group gets Form a group exactly while it is under half of those checked (two days: whenever it has anyone); the struggling card on every started unit says Form a group; Stall points' one action is coursework on a question often skipped. The point checks now open each point's own row, as a click does: before, most of them read the first row's panel. Nine mutations, each putting a reteach back or showing a group button in the wrong place, each fail. 21,008 of 21,008 pass.
+
+Pictures: `after-skills.png`, `after-hardest.png`, `after-skills-table.png`, `after-skills-table-question.png`, `after-skills-two-days.png`, `after-skills-table-two-days.png`, `after-effort.png`, `after-effort-card.png`, `after-effort-student.png`, `after-stall-points.png` and `after-stall-skill.png` were taken again.
+
 ### What is still open
 
 - The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's now, but read on this mock's score, not ALPS's.

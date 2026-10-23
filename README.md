@@ -191,12 +191,15 @@ does the thing. What the first look does not need is one click away, in a
 fold that remembers whether it is open. The budget behind this, and the
 measurements, are in `reports/first-time-teacher-review.md`.
 
-Every button is one of the four things a teacher can do in the product: a
-reteach (to everyone, or in a small group), coursework (a practice set built
-from the item bank), content to practice (the unit's own work, assigned), or
-a group. Nothing is sent, launched, marked or changed in the course, and a
-page offers a button only where one of the four fits: a drifting student
-gets none, because none of the four answers that.
+Every button is one of the three things a teacher can do in the product:
+coursework (a practice set built from the item bank), content to practice
+(the unit's own work, assigned), or a group. The product has no reteach, so
+no page offers one: the students beginning or attempted on a skill, or
+struggling in a unit, get "Form a group" while they are a small group, and no
+button once they are half of the students checked or more. Nothing is sent,
+launched, marked or changed in the course, and a page offers a button only
+where one of the three fits: a drifting student gets none, because none of
+the three answers that.
 
 * **Top bar**: the ALPS frame, the class, and My actions (everything you log
   on any page). Nothing is saved or sent. The way to the example with more
@@ -282,32 +285,32 @@ gets none, because none of the four answers that.
   unit and subunit where the skill was introduced, the day the class met it
   and the questions on it (click it to open the grid there), then the class
   now drawn as a picked day is (one bar of every student by level, the counts
-  in it, unavailable hatched, with its key), a reteach, and the way into the
+  in it, unavailable hatched, with its key), and the way into the
   skill's table (below). *By unit*'s panel draws the class now the same way. "Where they stall →" opens Stall points on the
   questions that check the skill, worst first (it shows only when such a
   question is there to see). Click a day on a line to see who was where that day;
   a second day on the same skill compares the two, by where each student is
-  on the later day and where they were before (lost it: a review set; never
-  got it and fell back: a small-group reteach; familiar or proficient: a
-  practice set; got it; held), and a day on another skill compares the two
+  on the later day and where they were before (lost it: a review set;
+  beginning or attempted, never got it or fell back: form a group; familiar
+  or proficient: a practice set; got it; held), and a day on another skill compares the two
   skills on the later day (beginning or attempted on both: form a group). Buttons appear on today's
   lists only; a past day offers "Compare with now". The class on a day is one
   bar as ALPS draws a class (its five levels, mastered first, then
   unavailable, hatched) with its key, and the bar is the count: one day has no
-  cards, only today's actions under it (a reteach, a practice set), each
+  cards, only today's actions under it (form a group, a practice set), each
   naming its group on hover. Two days are two bars on one scale and likewise
   have no cards: the change between them is the groups of the point's table,
   and today's actions are buttons under the bars. Two skills, which have no
   bar, keep a card an overlap, whose name opens the table on it. "Students
-  and questions" opens the table on the group the panel acts on. No card or
+  and questions" opens the table on the group the panel is about. No card or
   line repeats a count a bar shows. A point's table is the skill's
   table read as of its day, the later of two: a level column for each day, or
   for each skill with both skills' questions, the panel's groups, and the
   panel's actions. A question counts from the day it was first tried, with
   the result it ended with, as the levels count it. The left and right arrows
   pick a day on a focused row, and Esc clears it. *By unit* is the outline of the textbook with a bar a row, the class by
-  ALPS level (what was Hardest content); its panel offers the same reteach
-  and "Where they stall" as *Weak now* for the same skill. A followed student
+  ALPS level (what was Hardest content); its panel offers the same "Where
+  they stall" as *Weak now* for the same skill. A followed student
   has a column there as on Stall points: on a skill, the mark for where they
   are (a dot for beginning or attempted, a ring for familiar or proficient),
   and on a subunit or unit how many of its skills each mark stands for, a
@@ -330,8 +333,8 @@ gets none, because none of the four answers that.
   questions are the class's (a quarter of the class started them), grouped
   under their lessons in the order the class met them; a tick adds the ones
   only a few started. The first row counts who is not yet correct on each
-  question. It opens on the students the view acts on (beginning or
-  attempted; on *Faded*, those who slipped), with every group a click away,
+  question. It opens on the students the view is about (beginning or
+  attempted on a skill still weak; on *Faded*, those who slipped), with every group a click away,
   the weakest first; a column's heading sorts by it, and a question's heading
   picks it: its name, lesson and results over the table, those not yet
   correct first, and the way to Stall points. A name follows the student, as
@@ -506,7 +509,7 @@ tokens.
 
 Where a page acts on a group of levels it names the levels: *mastered*;
 *familiar or proficient* (a practice set); *beginning or attempted* (a
-reteach). Groups and verdicts ALPS has no word for keep theirs: on track,
+group). Groups and verdicts ALPS has no word for keep theirs: on track,
 keep going, coasting, too early to tell, and the pace and weak-skill
 statuses. The buttons keep their verbs.
 
