@@ -775,6 +775,89 @@ Asked on 23 October: "add a way to higlight the points based on the tables on th
 
 Pictures: `reports/img/after-effort-card.png` has Struggling picked; `after-effort-student.png` follows Andrew. With nothing picked the first screen is unchanged, pixel for pixel.
 
+### A skill's students and questions as one table
+
+Asked on 23 October, with a screenshot of ALPS's results table for an assignment (Student, Status, Score, Completed, Observations, Feedback, Last activity, Results by activity, and "Show activities"): "On the skills page, to show the students and questions and other details can we use something like this? Check all the columns carefully and decide which to keep and show how. Use modal format if needed. Things must look clean and very intuitive for a teacher to quickly interact and understand everything."
+
+**Where it lives.** Each view's panel keeps the answer: the skill, its status and action, where it was introduced, and the class now as one bar (By unit gains that bar, as *Weak now* has). The long lists of names that followed (beginning or attempted, familiar or proficient, weak around a date but not now, slipped 20+) are gone from the panels. In their place is one button, "Students and questions", which opens the table in a dialog, as "Show activities" opens ALPS's results by activity. The table needs about 1,000px for a skill's 14 questions and up to 1,550px for 33, which a panel beside a chart cannot give. A dialog is Material's own place for a detail on demand. The picked-day panels on *Weak now* are left as they were.
+
+**The columns, one by one.**
+
+| ALPS | Here | Why |
+|---|---|---|
+| Student, with initials | **Student**, the name only | The name is the row. The initials repeat it and carry nothing to act on. A name follows the student, as everywhere. |
+| Status (Graded, Not started) | **Level**: ALPS's battery and the word | A skill has no submission. Its status is the student's level, the thing the panel's action is about. Not tried and Unavailable stand in for Not started. |
+| Score (of 12), with an orange mark | Inside **Level**: the score behind the level, and a red arrow when it slipped | The level is the score in bands, so one column carries both and sorts once. The mark on a score becomes the one flag a teacher acts on here: the score fell 20 points or more since the skill was taught (a review, not a reteach). Its hover gives the two scores. |
+| Completed | **Tried**: "9 of 14" | For a skill, completed means the questions tried. It also separates a student who is weak from one who has not done the work. |
+| Observations | **Trend**: the level five days at a time since the class met the skill | The thing worth observing on a skill is its course. Red when it fell two levels, green when it rose two. It tells "lost it" from "never had it". |
+| Feedback (AI feedback) | Dropped | There is no feedback on a skill in the data, and an empty column would only take room. |
+| Last activity ("323 d ago") | **Last tried**: a date | The mock speaks in dates. Counted back from today (13 October 2026), every student would read 250 days or more. |
+| Results by activity | **A mark a question** | The heart of it. Each question's format has ALPS's icon (code, multiple choice, fill in the blank, Parsons, click or drag) and a number, under its lesson. Each mark is the credit the question gave the score: right first time, needed retries, got it wrong, or nothing when not tried (Stall points' colours). The questions are the class's: the 14 of Class Instantiation's 30 that a quarter of the class tried. A tick adds the 10 only a few tried. Of the 1,080 cells all 30 would need, 675 are empty. |
+| Show activities | The panel's "Students and questions" | The panel is the table with the activities hidden; the button shows them. |
+| (not in ALPS) | A **Got it wrong** row at the top | Which question to reteach from is the first thing a teacher looks for. The count under each question reads at a glance (22 under question 14); its hover gives the whole split. |
+
+**How it behaves.** It opens on the students the view's action is for. That is beginning or attempted when the panel offers a reteach, and those who slipped when *Faded* offers a review set; otherwise it opens on everyone. Every group, with its count, is one click away. The weakest come first. A column's heading sorts by it and a second click turns the order round; a student the column has nothing on (no level, no trend, never tried) stays last. A question's heading, or any mark under it, picks the question. Its name, lesson and split then show over the table, the students who got it wrong come first, and a link goes to it on Stall points. The head, the Got it wrong row and the names stay put while the table scrolls. The panel's action is beside the skill's name, so a teacher can act from the table. Esc, the cross or the scrim closes it, and the focus goes back to the button. Tab stays inside it.
+
+**Checks.** The old check that every list of students is a roster lost its two clauses for the Skills panels, because those lists moved into the table on purpose; the rest of that rule stands. Two checks added. One covers the way in from all three views, the panels without their lists, the five column headings, and the dialog's Esc, Tab and closing when the page changes. The other runs the page's own code on every skill the page lists, with and without the example's books (187 skills, 370 tables, 57,313 marks). It checks that the questions are the class's (or, ticked, all tried); the rows, the order, every level, score and slip arrow, and every mark against the attempt it came from; the Got it wrong row; each group's rows and count; and the group the table opens on. Breaking the marks, the arrow, the order, the Got it wrong row or the question filter each fails it. A fill-in-the-blank icon first drawn as 5.6px text failed the rule that no text is under 12px; it is now drawn as a shape. 21,004 of 21,004 pass.
+
+Pictures: `reports/img/after-skills-table.png` is the table for Class Instantiation in Java as it opens; `after-skills-table-question.png` has question 5 picked. `after-skills.png` and `after-hardest.png` were taken again, since their panels changed.
+
+Then, the same day, with a screenshot of ALPS's key for results (Correct on first attempt, Correct after retries, Rapid retries: all retries within 3 seconds, Not yet correct, Started, Not started, Result unknown): "Use these labels instead of introducing new ones and remove trend and tried part".
+
+**ALPS's results, in ALPS's words.** Each mark is now ALPS's result on the question, drawn as ALPS draws it: a green square with a tick, a pale one with the retry arrow, the same with an amber badge for rapid retries, a red one with a cross, an empty one for not started. On the 10,194 records the table can show, that is 5,144 correct on first attempt, 4,789 correct after retries (350 of them rapid) and 261 not yet correct. The key carries those labels as ALPS writes them. The first row is "Not yet correct", and a picked question lists its results in the same words. "Not tried" is now "Not started" and "Last tried" is ALPS's "Last activity". "No level yet" is split into ALPS's "Unavailable" (one check) and "Not started". Outside the table, the picked-day bars and Stall points keep their own words.
+
+**What the export allows.** ALPS's rapid retries are "all retries within 3 seconds", which needs the time on each attempt. The export has each student's total time on a question and the time on the first attempt. So a retry is rapid here when the time on all the retries came to three seconds or less, which makes every one of them within three seconds. Some rapid retries are missed: 672 records would count if the average retry were taken instead. ALPS's "Started" (a question opened and not answered) and "Result unknown" (an attempt with no result) are not in the export, so neither is drawn or keyed.
+
+**A mark is no longer the credit.** The score behind a level still counts a quick question when correct on the first attempt (half on the second), and a code or Parsons task when correct within three attempts (half within six). A multiple-choice question correct on its third attempt is "Correct after retries" in the table and gives no credit; the Level heading's hover says so.
+
+**Trend and Tried are gone**, with their sorts. The table keeps Student, Level (with the score and the slip arrow) and Last activity before the questions.
+
+**Checks.** The two checks on the table were rewritten for the new rules. One pins ALPS's five labels and the rule for each, the "Not yet correct" row, the three columns, and no Trend, Tried or older label anywhere in the table's code. The other compares every mark with ALPS's result on its attempt, every count in the "Not yet correct" row, and the Unavailable and Not started groups, on every skill with and without the example's books, and needs all five results to occur. A different rapid threshold, the wrong state counted in the first row, a Tried column put back, or a relabelled result each fails. 21,004 of 21,004 pass.
+
+Pictures: `after-skills-table.png` and `after-skills-table-question.png` were taken again.
+
+Then, the same day, with a screenshot of the panel for two days picked on Class Instantiation in Java's line (the two bars, then a card of 6 names and a card of 22): "for single or multiple points, show similar kind of thing".
+
+**A point's panel is the skill's, for its day.** One day, two days on a skill, or a day on two skills keep their bars, "Compare with now" and their groups. Each group is now a card with its count, what it means and its action, but no names. The group's name opens the point's table on that group, and "Students and questions" opens it on the group the panel acts on. The question lists and their bars ("Questions they are getting wrong", "What they got wrong after…") are gone, because the table's "Not yet correct" row and marks show the same thing for every question.
+
+**The table, read as of the point.** A point's table is the skill's table on the point's day, the later of two:
+
+- **One day:** the level the line has for that day ("Level on 3 Oct").
+- **Two days:** a level column for each day, sorted by the later one, so "Mastered 82% → Beginning 33%" reads across a row. For the 8 who lost Class Instantiation between 13 Oct and 17 Nov, 7 are not yet correct on question 14 (4.3, Community Class Object Array).
+- **Two skills:** a level column for each skill, and both skills' questions under a band naming each skill.
+
+The groups are the panel's own (beginning or attempted, familiar or proficient, mastered; lost it, reteach group, familiar or proficient, got it, held; on both, on one only), each with its count. On today's lists, the dialog carries the action of the group shown. The questions are the ones a quarter of the class had started by the day. A question counts from the day it was first tried, with the result it ended with, as the levels on that day already count it. 95% of the records start and end on one day; on Class Instantiation, 9 of the 12,755 cells across every day a teacher can pick were correct after retries with attempts after the day.
+
+**Checks.** Four rewritten, because their rules changed on purpose:
+- A picked day counts who was where on cards that open the table and list no names.
+- A point's questions are in its table, read as of its day; the question lists and their bars are gone.
+- The bars of a picked day keep ALPS's levels, and the colours of the question bars left with them.
+- The roster rule no longer names the point panel's lists.
+
+The runtime check on the table now also builds point tables on every weak skill, with and without the example's books: three single days, two days and a pair of skills each. It checks each level against the line's own for its day, each mark against the attempt made by then, the questions started by a quarter of the class by then, the panel's groups with their counts, and that no point panel lists names. Marks read as of now, both day columns on the earlier day, the reteach group without those who fell back, questions not cut at the day, or names put back on a card each fails. 21,004 of 21,004 pass.
+
+Pictures: `after-skills-two-days.png` was taken again (13 Oct to 17 Nov on Class Instantiation), and `after-skills-table-two-days.png` is its table.
+
+Then, the same day, with a screenshot of *By unit* with Andrew followed, where Selection and Iteration's row carried a block of 49 dots and the column's heading ran into "Not mastered": "For a specific student on the skills page, show similar kind of formatting as in stalled points", and then "faded and weak now are fine as they are. Just change for by unit".
+
+**A followed student on By unit, as on Stall points.** A skill keeps one mark (a dot for beginning or attempted, a ring for familiar or proficient, none when mastered). A subunit or unit now shows how many of its skills each mark stands for: "● 7 ○ 6" in place of a dot per skill, as Stall points shows "✕ 2 ◌ 43" for a unit. A skill counts once however many lessons list it, so for Andrew, Using Objects and Methods reads 13 where it drew 18 dots, and Selection and Iteration 30 where it drew 49, the same skills being listed under several of their lessons. The marks are a little larger (10px), and the column is wider (66px, with 84px for "Not mastered"), so the heading and the counts sit on one line. *Weak now* and *Faded* are as they were.
+
+**Checks.** Two added: the counts and the single marks in the code, and a run of the view with every student followed, opened down to its skills (6,372 rows), each row's marks against the levels the page has. A mark a skill put back on a unit, or a skill counted twice, each fails. 21,006 of 21,006 pass.
+
+Then, the same day, with a screenshot of a one-day panel (Constructor Overloading on 15 Sep: the bar, then cards for beginning or attempted · 15, familiar or proficient · 12 and mastered · 8, and "Unavailable · 1"): "mastered and all are already shown in the stacked bar plot. remove the redundant thing".
+
+**The bar is the count.** A one-day panel has no cards: the bar already counts every level, and its key names them. Today's actions, which lived on two of those cards, are a row of buttons under the bar ("Reteach in a small group" or "Reteach to everyone", "Give a practice set"), each naming its group and how many on hover, and each becomes "Reteach planned" or "Practice set planned" once logged. A past day has "Compare with now" and the table, nothing else. The "Unavailable" line under one day and under two days is gone too: the hatched part of the (later) bar is that count. Two days and two skills keep their cards, since the change between the days and the overlap of two skills are in no bar.
+
+**Checks.** The check on how a picked day is drawn was rewritten: the bars are the counts, one day has no cards, no line repeats who is unavailable, and today's actions are buttons under the bar. The runtime check now also reads every point panel it draws for a card on one day or an "Unavailable" line. A mastered card put back, or the line, each fails. 21,006 of 21,006 pass.
+
+Then, the same day, with a screenshot of two days on Constructor Overloading (15 to 20 Sep: the two bars, then cards for the reteach group · 16, familiar or proficient · 11, got it · 1 and held · 8): "same issue with twos as well".
+
+**Two days, two bars, no cards.** The two bars carry the counts, and who moved between the days is already the table's groups (Lost it, Reteach group, Familiar or proficient, Got it, Held, each with its count), so the cards are gone. A past pair has "Compare … with now" and the table; a pair ending today has its actions as buttons under the bars (Give a review set, Reteach in a small group, Give a practice set), each naming its group on hover, with the sentence the card had ("For the 18 in the reteach group: 6 beginning or attempted both times, 12 familiar or proficient on 13 Oct and beginning or attempted now"). Two skills, which have no bar, keep their cards. The check on who was where was rewritten (the change groups are the table's, today's actions are buttons, two skills keep cards), and the runtime check now fails a card on one day or two. 21,006 of 21,006 pass.
+
+Then, the same day, with a screenshot of a skill's panel (Block Delimiters in Java: a thin bar under "The class now" and the line "6 mastered · 4 proficient · 10 attempted · 13 beginning"): "use similar format for this stack bar as well".
+
+**The class now, drawn as a day is.** A skill's panel on *Weak now* and *By unit* draws the class now as a picked day's panel does: "The class now · 18% of the 33 checked mastered" over one bar of every student by level, the counts in it, mastered first, then unavailable (hatched), with its key. The line of counts under the thin bar is gone, since the bar holds them; the bar now also shows the 3 with fewer than two checks, whom the old line left out. Its styles went with it. A check added: the panel's bar on every skill *By unit* can pick and every weak skill, read off the bar against the levels the page has; counting a single check as a level fails it. 21,007 of 21,007 pass.
+
 ### What is still open
 
 - The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's now, but read on this mock's score, not ALPS's.

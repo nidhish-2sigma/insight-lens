@@ -447,7 +447,8 @@ const S={view:2,stu:null,log:[],
   v10:{u:'all',all:false,k:-1},
   v11:{lv:'P',grp:null,tb:0,u:{},rm:{},acc:{},ver:RV0},
   v12:{r:0,f:'all'},
-  td:{gen:null,rm:{},ex:{},bud:{}},fold:{},prof:0};
+  td:{gen:null,rm:{},ex:{},bud:{}},fold:{},prof:0,
+  tbl:null};   // a skill's table, open over the page: {k, from, f (who is shown), s and dir (the sort), q (a question picked), all}
 const R5=()=>RULE0;
 const $=s=>document.querySelector(s);
 /* the width a chart has to fill: the inside of the view. Charts are drawn to this width, so they fill the page and their text stays the size of the text around them */
@@ -494,11 +495,11 @@ const HOW=['', /* id 0: the overview, removed */
 'Everyone in the unit on show, placed by engagement, the share of its questions they tried (across), and performance, their mean score on its key skills (up), with ALPS’s level bands on the left. Red regions need a step; the cards name who and offer it. A card’s heading picks them out. Folded below, every student by unit, keyed above.',
 'One row per student working less than their own normal. The line is the questions they tried per five days, on any unit; the gray band is their own normal range. Red is where it stays under half their normal while the class is working. Hatched stretches had no class work.',
 'Pick a unit and date. Only its key skills and earlier skills used here count. Solid bars show mastered now; dashed bars estimate gains by your date, assuming learning continues at each student’s latest observed pace. Black is the goal; dotted is today’s share. Hover for the evidence dates.',
-'Units open into subunits, and subunits into their skills. Each bar splits the students checked by ALPS level, darkest for mastered; the figure is the share not mastered. A skill no question checks has no bar, nor one that fewer than eight students were checked on.',
-'One row a skill a fifth of the class is weak in. The line is the share of students checked on it who have mastered it, five days at a time; lower is worse. The figure: who is beginning or attempted now. Click a day for who was where; a second to compare.',
+'Units open into subunits, and subunits into their skills. Each bar splits the students checked by ALPS level, darkest for mastered; the figure is the share not mastered. A skill no question checks has no bar, nor one fewer than eight students were checked on. Students and questions: every student by question.',
+'One row a skill a fifth of the class is weak in. The line is the share of students checked on it who have mastered it, five days at a time; lower is worse. Click a day for who was where; a second to compare. Students and questions: every student by question.',
 'Worst questions first: where the most students gave up (tried, never right) or skipped (never tried). Each bar splits the class: red gave up, amber skipped, pale green needed retries, green first time. By unit opens the whole outline. Only questions a quarter of the class tried count.',
 '', /* id 8: removed */
-`One row a skill eight or more students met again ${LATER} and whose average fell 8 points or more. The open dot is the average when taught, the solid dot the later check. Tick Show all for every rechecked skill. Click a skill for every student.`,
+`One row a skill eight or more students met again ${LATER} and whose average fell 8 points or more. The open dot is the average when taught, the solid dot the later check. Tick Show all for every rechecked skill. Click a skill for every student. Students and questions: every student by question.`,
 'Pick the unit you teach next and the level it needs. Under it: the skills it builds on, weakest first, then what those build on. A ring is the share at that level or above: red under 60%, amber under 80%, green ready. A group’s button shows the tree for that group.',
 'Everything you logged today, newest first. Below it, each practice set you targeted: the dot is the extra points gained against students who did not do it, the bar the range it could be; a bar right of zero worked. Sample rows are invented and fenced off.'];
 if(MULTI){const BK=` The Textbook row keys each textbook to a letter; a textbook narrows the page to its units and the skills they use. A level counts every textbook’s questions, so it does not change with the textbook. A unit of labs is work done, not a check: a gray bar, no level.`;
@@ -532,9 +533,6 @@ const roster=(rows,o)=>{o=o||{};if(!rows.length)return `<p class="none">${o.none
 const rcap=t=>t?`<span class="rcap">${t}</span>`:'';
 const names=(a,val)=>roster(a.map(n=>({n,v:val?val(n):''})));
 const whoCol=(t,c,a,val,cap)=>`<div><p class="dl"><i class="sw${/lv-/.test(c)?' lv':''}" style="background:${c}"></i>${t} · ${a.length}${rcap(cap)}</p>${names(a,val)}</div>`;
-/* a student's score on a skill now, and when it was taught against later, for the lists that carry it */
-const mNow=k=>n=>{const c=CUR[ID[n]][k];return c===null||c===undefined?'':Math.round(c*100)+'%'};
-const mThen=k=>n=>{const a=MT[ID[n]][k],b=ML[ID[n]][k];return a===null||b===null||a===undefined||b===undefined?'':`${Math.round(a*100)}% → ${Math.round(b*100)}%`};
 const stat=(l,v)=>`<div class="stat"><span class="l">${l}</span><span class="v">${v}</span></div>`;
 const takes=a=>`<ol class="takes">${a.map((t,i)=>`<li><span class="nb">${i+1}</span><span>${t}</span></li>`).join('')}</ol>`;
 const fig=s=>`<div class="fig">${s}</div>`;
@@ -549,6 +547,7 @@ down:'<svg class="ic down" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10
 sad:'<svg class="ic sad" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="4.2" cy="4.8" r=".85" fill="currentColor"/><circle cx="7.8" cy="4.8" r=".85" fill="currentColor"/><path d="M3.8 8.7 Q6 6.9 8.2 8.7" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>',
 check:'<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.3 6.4 L4.9 9 L9.7 3.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 x:'<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><path d="M3.2 3.2 L8.8 8.8 M8.8 3.2 L3.2 8.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+grid:'<svg class="ic" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 1.6 H5.1 V5.1 H1.6 Z M6.9 1.6 H10.4 V5.1 H6.9 Z M1.6 6.9 H5.1 V10.4 H1.6 Z M6.9 6.9 H10.4 V10.4 H6.9 Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>',
 leak:'<svg class="ic" viewBox="0 0 12 12" aria-hidden="true" style="width:14px;height:14px"><path d="M2.5 1.5 V6 Q2.5 8.5 5 8.5 H10 M7.5 6 L10 8.5 L7.5 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
 const GL={
 0:'<rect x="2" y="1" width="9" height="7" rx="1" fill="currentColor"/><rect x="13" y="1" width="9" height="7" rx="1" fill="currentColor" opacity=".5"/><rect x="2" y="10" width="9" height="7" rx="1" fill="currentColor" opacity=".5"/><rect x="13" y="10" width="9" height="7" rx="1" fill="currentColor" opacity=".5"/>',
@@ -897,20 +896,23 @@ const WARNI='<svg class="wi" viewBox="0 0 12 12" width="12" height="12" aria-hid
 const hbar=(o,lv)=>{const w=v=>f1(v/o.a*100);return `<span class="hb b${lv}" aria-hidden="true">${[4,3,2,1,0].map(b=>o.l[b]?`<i style="width:${w(o.l[b])}%;background:${LVCOL[b]}"></i>`:'').join('')}</span>`};
 /* where else a skill lives, shown only when this textbook teaches it or checks it but not both */
 const tag5=()=>'';
-/* the followed student: one mark per skill not mastered (dot = beginning or attempted, ring = familiar or proficient) */
+/* the followed student, as Stall points shows one: on a skill, the mark for where they are (dot = beginning or attempted, ring = familiar or
+   proficient, none when mastered); on a subunit or unit, how many of its skills each mark stands for, a skill once however many lessons list it */
 const smk5=(i,ks)=>ks.map(K=>{if(K.p===null)return '';const m=mast(i,K.k),c=m?m.cat:'N';return c==='E'?'<i class="sd e"></i>':c==='H'?'<i class="sd h"></i>':''}).join('');
-const ssr5=(i,ks)=>{const c={E:0,H:0};ks.forEach(K=>{if(K.p===null)return;const m=mast(i,K.k);if(m&&c[m.cat]!==undefined)c[m.cat]++});const t=[c.E?c.E+' beginning or attempted':'',c.H?c.H+' familiar or proficient':''].filter(Boolean).join(', ');return t?`<span class="sr">${NM[i]}: ${t}</span>`:''};
+const cnt5=(i,ks)=>{const c={E:0,H:0},seen=new Set();ks.forEach(K=>{if(K.p===null||seen.has(K.k))return;seen.add(K.k);const m=mast(i,K.k);if(m&&c[m.cat]!==undefined)c[m.cat]++});return c};
+const smR5=(i,ks)=>{const c=cnt5(i,ks);return (c.E?`<span class="pmn"><i class="sd e"></i>${c.E}</span>`:'')+(c.H?`<span class="pmn"><i class="sd h"></i>${c.H}</span>`:'')};
+const ssr5=(i,ks)=>{const c=cnt5(i,ks),t=[c.E?c.E+' beginning or attempted':'',c.H?c.H+' familiar or proficient':''].filter(Boolean).join(', ');return t?`<span class="sr">${NM[i]}: ${t}</span>`:''};
 const lsw=b=>`<i class="sw lv" style="background:${LVCOL[b]}"></i>`,gsw=g=>`<i class="sw lv" style="background:${GBG[g]}"></i>`;
 const lvTxt=l=>[4,3,2,1,0].filter(b=>l[b]).map(b=>`${l[b]} ${LV[b].toLowerCase()}`).join(' · ');
 const LEG5=`<span class="lt">Students</span>${[4,3,2,1,0].map(b=>`<span>${lsw(b)}${LV[b]}</span>`).join('')}`;
 function v6list(tb){const H=hard5(tb),T=H.T,ids=tbWho(tb),Tb=TB[tb],E=ex5(tb,H),k0=sel5(tb,H),hard=S.v6.sort!=='course',sel=S.stu,fol=sel!==null&&ids.includes(sel);
   const ord=a=>hard?a.slice().sort((x,y)=>(y.p===null?-1:y.p)-(x.p===null?-1:x.p)):a;
   const pc=o=>`<span class="hp">${o.p===null?'':pc5(o.p)}</span>`;
-  const sc=ks=>fol?`<span class="hs">${smk5(sel,ks)}${ssr5(sel,ks)}</span>`:'';
+  const sc=(ks,one)=>fol?`<span class="hs">${one?smk5(sel,ks):smR5(sel,ks)}${ssr5(sel,ks)}</span>`:'';
   const nvw=ks=>'';   // a unit's skills with no question are noted on their own rows, not flagged beside the unit's name
   const off=(lv,name,txt)=>`<div class="hr l${lv} off"><span class="hn"><span class="chs"></span>${name}</span><span class="hx">${txt}</span><span class="hp"></span>${fol?'<span class="hs"></span>':''}</div>`;
   const skRow=K=>{const on=K.k===k0,s=K.s;
-    return `<li><button type="button" class="hr l2${on?' on':''}" data-act="v6sk" data-k="${K.k}" aria-pressed="${on}"${tp(`<b>${ASK[K.k]}</b><br>${K.p===null?(chk5(K.k)?'Fewer than eight students have been checked on it':'Taught, but no question or activity checks it'):lvTxt(s.l)}<br><span>${whereTxt(K.k)}</span>`)}><span class="hn"><span class="chs"></span><span>${ASK[K.k]}${tag5(tb,K.k)}</span></span>${K.p===null?(chk5(K.k)?'<span class="hx">Too few checked yet</span>':`<span class="hx w">${WARNI}No item checks it</span>`):hbar(eo(s),2)}${pc(K)}${sc([K])}</button></li>`};
+    return `<li><button type="button" class="hr l2${on?' on':''}" data-act="v6sk" data-k="${K.k}" aria-pressed="${on}"${tp(`<b>${ASK[K.k]}</b><br>${K.p===null?(chk5(K.k)?'Fewer than eight students have been checked on it':'Taught, but no question or activity checks it'):lvTxt(s.l)}<br><span>${whereTxt(K.k)}</span>`)}><span class="hn"><span class="chs"></span><span>${ASK[K.k]}${tag5(tb,K.k)}</span></span>${K.p===null?(chk5(K.k)?'<span class="hx">Too few checked yet</span>':`<span class="hx w">${WARNI}No item checks it</span>`):hbar(eo(s),2)}${pc(K)}${sc([K],true)}</button></li>`};
   const subRow=J=>{if(!J.on||!J.ks.length)return `<li>${off(1,J.J.n,J.on?'No skills yet':'Not started')}</li>`;const o=E.J.includes(J.j);
     return `<li><button type="button" class="hr l1" data-act="v6sub" data-j="${J.j}" aria-expanded="${o}"><span class="hn">${CHEV}<span>${J.J.n}${nvw(J.ks)}</span></span>${J.p===null?'<span class="hx">No evidence yet</span>':hbar(J,1)}${pc(J)}${sc(J.ks)}</button>${o?`<ul>${ord(J.ks).map(skRow).join('')}</ul>`:''}</li>`};
   const unitRow=U=>{if(!U.on)return `<li class="hu">${off(0,`<b>${U.U.nb}</b>`,'Not started')}</li>`;const o=E.U.includes(U.u);
@@ -922,7 +924,8 @@ function v6list(tb){const H=hard5(tb),T=H.T,ids=tbWho(tb),Tb=TB[tb],E=ex5(tb,H),
   const K0=T.flatMap(U=>U.subs.flatMap(J=>J.ks)).find(K=>K.k===k0),s0=K0?K0.s:EMPTYK,p0=s0.p;
   const det=`<div class="detail"><div class="dhead"><h3>${ASK[k0]}</h3>${p0===null?`<span class="pill watch">${chk5(k0)?'Too few checked yet':'No item checks it'}</span>`:`<span class="pill ${p0>=.45?'bad':p0>=.3?'watch':'good'}">${pc5(p0)} not mastered</span>`}${reteachBtn(k0)}${whereLink(k0)}</div>
   ${introCard(k0)}
-  ${p0===null?`<p class="none">${chk5(k0)?'Fewer than eight students have been checked on this skill, so the share would mislead.':'No question or activity checks this skill yet, so there is no evidence of who has it.'}</p>`:`<div class="dgrid">${whoCol('Beginning or attempted',GBG.E,s0.c.E,mNow(k0),'score')}${whoCol('Familiar or proficient',GBG.H,s0.c.H,mNow(k0),'score')}</div>`}</div>`;
+  ${p0===null?`<p class="none">${chk5(k0)?'Fewer than eight students have been checked on this skill, so the share would mislead.':'No question or activity checks this skill yet, so there is no evidence of who has it.'}</p>`:nowBar(k0)}
+  ${tblGo(k0,'unit')}</div>`;
   return (note?`<p class="hint" style="margin:0 0 10px">${note}</p>`:'')+labsLevelNote()+ctl+leg+duo(duoW(.6,560),list,det,'stick')}
 
 
@@ -954,18 +957,8 @@ function ptGroups(P){const at=(m,j,i)=>G3(STW[i][m.k][j]);
     ALL.forEach(i=>{const x=at(P.m,P.a,i),y=at(P.m,P.b,i),n=NM[i];if(y<0)g.early.push(n);else if(x===2)(y===2?g.held:g.lost).push(n);else if(y===0)(x===1?g.fell:g.never).push(n);else if(y===1)g.dev.push(n);else g.got.push(n)});return g}
   const a=ALL.filter(i=>at(P.m1,P.j,i)===0),b=ALL.filter(i=>at(P.m2,P.j,i)===0);
   return {both:a.filter(i=>b.includes(i)).map(i=>NM[i]),one:a.filter(i=>!b.includes(i)).map(i=>NM[i]),two:b.filter(i=>!a.includes(i)).map(i=>NM[i])}}
-/* the questions behind a point. For a group of students and a stretch of days: each question on the skill that one of them first tried in it, or
-   retried in a targeted set, without full credit. Got it wrong = no credit (a quick question not right on the first two tries, a code task not
-   within six); needed retries = half credit. Both lower a standing, so every drop between two days has its questions on the list */
-function ptQs(k,who,from,to){const rows=new Map(),ws=new Set(who);
-  const touch=(ix,i,c,d)=>{let r=rows.get(ix);if(!r)rows.set(ix,r={ix,wrong:new Set(),retry:new Set(),tried:new Set(),last:-1});r.tried.add(i);
-    if(c===0){r.wrong.add(i);r.retry.delete(i)}else if(c<1&&!r.wrong.has(i))r.retry.add(i);if(c<1)r.last=Math.max(r.last,d)};
-  who.forEach(i=>KIT[k].forEach(ix=>{const a=AT[i].get(ix);if(a&&a[6]>from&&a[6]<=to)touch(ix,i,credit(a),a[6])}));
-  D.sets.forEach(st=>st.rows.forEach(([i,ix,ok1,ever,d])=>{if(d>from&&d<=to&&ws.has(i)&&KIT[k].includes(ix))touch(ix,i,ok1?1:ever?.5:0,d)}));
-  return [...rows.values()].filter(r=>r.wrong.size||r.retry.size).sort((p,q)=>q.wrong.size-p.wrong.size||q.retry.size-p.retry.size||q.last-p.last)}
-/* the panel's pictures. The class on a day is one bar, every student once, as ALPS draws it: the five levels, mastered first, and unavailable (hatched).
-   A question is one bar of the students its list is about: got it wrong, needed retries, right first time (Stall points' colours), and an
-   empty part for those who did not try it. A part shows its count when it is wide enough to hold it */
+/* the panel's pictures. The class on a day is one bar, every student once, as ALPS draws it: the five levels, mastered first, and unavailable
+   (hatched). A part shows its count when it is wide enough to hold it */
 const sbSeg=(cls,n,N)=>n>0?`<i class="${cls}" style="width:${f1(n/N*100)}%">${n/N>=.025?n:''}</i>`:'';
 const STP=[4,3,2,1,0].map(b=>[b,'l'+b,LV[b],LVCOL[b]]).concat([['early','ua','Unavailable','']]);
 const stN=(g,k)=>(k==='early'?g.early:g.lv[k]).length;
@@ -973,49 +966,35 @@ const stSw=c=>c?`<i class="sw lv" style="background:${c}"></i>`:'<i class="sw ua
 const stBar=g=>{const N=STP.reduce((a,[k])=>a+stN(g,k),0);return N?`<span class="sb" role="img" aria-label="${STP.filter(([k])=>stN(g,k)).map(([k,,l])=>`${stN(g,k)} ${l.toLowerCase()}`).join(', ')}">${STP.map(([k,c])=>sbSeg(c,stN(g,k),N)).join('')}</span>`:''};
 const stRow=(label,g,pct)=>{const ch=g.ny.length+g.dev.length+g.sec.length;return `<div class="sbrow"><p class="sbl"><b>${label}</b> · ${pct}% of the ${ch} checked mastered</p>${stBar(g)}</div>`};
 const stKey=gs=>`<div class="legend sbkey">${STP.filter(([k])=>gs.some(g=>stN(g,k))).map(([,,l,c])=>`<span>${stSw(c)}${l}</span>`).join('')}</div>`;
-const qBar=(r,N)=>{const w=r.wrong.size,t=r.retry.size,f=r.tried.size-w-t,no=N-r.tried.size;return `<span class="sb q" role="img" aria-label="${[[w,'got it wrong'],[t,'needed retries'],[f,'right first time'],[no,'did not try']].filter(x=>x[0]>0).map(x=>x.join(' ')).join(', ')}">${sbSeg('gu',w,N)}${sbSeg('rt',t,N)}${sbSeg('ft',f,N)}</span>`};
-const QKEY=`<div class="legend sbkey"><span><i class="sw" style="background:var(--st-gu)"></i>Got it wrong</span><span><i class="sw" style="background:var(--st-rt)"></i>Needed retries</span><span><i class="sw" style="background:var(--ok-fill)"></i>Right first time</span><span><i class="sw empty"></i>Did not try</span></div>`;
-/* a question in a list: its name and lesson over its bar, the names on hover; it opens Stall points at it, among the other questions on the skill k */
-const qRow=(r,N,k)=>{const ix=r.ix,j=IT[ix].j,lk=j>=0&&!!SUBS[j]&&SUBS[j].on&&SUBS[j].its.includes(ix),w=[...r.wrong].map(i=>NM[i]),t=[...r.retry].map(i=>NM[i]),f=r.tried.size-w.length-t.length,no=N-r.tried.size;
-  const tip=`<b>${IT[ix].name}</b>${j>=0?' · '+SUBS[j].s:''}${w.length?`<br>Got it wrong: ${andList(w)}`:''}${t.length?`<br>Needed retries: ${andList(t)}`:''}<br>${f} right first time${no?`, ${no} did not try`:''}${lk?'<br><span>Click to see it on Stall points</span>':''}`,nm=`${IT[ix].name} <span class="qc">${j>=0?SUBS[j].s:''}</span>`;
-  return `<li${tp(tip)}>${lk?`<button class="lnk" type="button" data-act="v7q" data-ix="${ix}" data-k="${k}">${nm}</button>`:`<span>${nm}</span>`}${qBar(r,N)}</li>`};
-const qList=(rows,max,N,k)=>`<ul class="qlist">${rows.slice(0,max).map(r=>qRow(r,N,k)).join('')}</ul>${rows.length>max?`<p class="hint">and ${rows.length-max} more</p>`:''}`;
-/* one day: what the students not mastered got wrong, the last 30 days of class work first (the six blocks with work up to that day) */
-function ptQOne(P){const k=P.m.k,j=P.j,who=ALL.filter(i=>STW[i][k][j]>=0&&STW[i][k][j]<4);if(!who.length)return '';
-  const lb=[];for(let q=j;q>=0&&lb.length<6;q--)if(ONB[q])lb.push(q);const since=lb.length?BS(lb[lb.length-1]):0,recent=ptQs(k,who,since-1,BE(j)),earlier=ptQs(k,who,-1,since-1),N=who.length;
-  return `<div class="ag"><p class="dl">Questions they are getting wrong</p><p class="hint" style="margin:-8px 0 0">Each bar is the ${N} not mastered, on one question</p>${recent.length||earlier.length?QKEY:''}
-    ${recent.length?`<p class="hint">Since ${dayDate(since)}, the last 30 days of class work</p>${qList(recent,6,N,k)}`:`<p class="none">Nothing on it tried since ${dayDate(since)}.</p>`}
-    ${earlier.length?fold('v7qe',`Earlier · ${earlier.length} ${pl(earlier.length,'question')}`,`<div style="margin-top:8px">${qList(earlier,8,N,k)}</div>`):''}</div>`}
-/* two days: what the students who were doing better on the earlier day got wrong between the days */
-function ptQTwo(P){const k=P.m.k,drop=ALL.filter(i=>{const x=G3(STW[i][k][P.a]),y=G3(STW[i][k][P.b]);return (x===2&&y>=0&&y<2)||(x===1&&y===0)});if(!drop.length)return '';
-  const A=dayDate(BE(P.a)),rows=ptQs(k,drop,BE(P.a),BE(P.b));
-  return `<div class="ag"><p class="dl">What they got wrong after ${A}</p><p class="hint" style="margin:-8px 0 0">Each bar is the ${drop.length} who were doing better on ${A}: lost it or fell back</p>
-    ${rows.length?QKEY+qList(rows,8,drop.length,k):'<p class="none">No answer on it between the days.</p>'}</div>`}
+/* a skill's panel draws the class now the way a picked day is drawn: every student by level (unavailable: fewer than two checks), counts in the bar */
+const nowBar=k=>{const g={lv:[[],[],[],[],[]],ny:[],dev:[],sec:[],early:[]};ALL.forEach(i=>{const m=mast(i,k),x=m&&m.ev>=2&&m.c!==null?lvOf(m.c):-1;if(x>=0)g.lv[x].push(NM[i]);(x<0?g.early:x>3?g.sec:x>1?g.dev:g.ny).push(NM[i])});
+  const ch=g.ny.length+g.dev.length+g.sec.length;return ch?`<div class="sbs">${stRow('The class now',g,Math.round(g.sec.length/ch*100))}${stKey([g])}</div>`:''};
 const ptKey=(P,g)=>`v7p:${P.kind==='skills'?P.m1.k+'+'+P.m2.k:P.m.k}:${g}:${P.kind==='time'?P.a+'-'+P.b:P.j}`;
-const ptNames=a=>roster(a);
 const ptBtn=(P,g,label)=>`<p class="fl-act">${isLogged(ptKey(P,g))?'<span class="pill good">Planned</span>':`<button class="btn small" type="button" data-act="v7act" data-g="${g}">${label}</button>`}</p>`;
-/* a card a group: what it is, what it means, the names, and the one action it needs, on today's lists only */
-const ptCard=(P,title,hint,names,g,label,now)=>!names.length?'':`<div class="ag"><p class="dl">${title} · ${names.length}</p>${hint?`<p class="hint" style="margin:-8px 0 0">${hint}</p>`:''}${ptNames(names)}${g&&now?ptBtn(P,g,label):''}</div>`;
+/* a card a group: what it is, what it means, how many, and the one action it needs, on today's lists only. The names, and how each did on every
+   question, are in the point's table: the group's name opens it on them (tg, the group's name in the table when it has no action) */
+const ptCard=(P,title,hint,names,g,label,now,tg)=>!names.length?'':`<div class="ag"><p class="dl"><button class="lnk agl" type="button" data-act="tblopen" data-k="${P.kind==='skills'?P.m1.k:P.m.k}" data-f="pt" data-g="${tg||g}"${tp('See them in the table, a question at a time')}>${title} · ${names.length}</button></p>${hint}${g&&now?ptBtn(P,g,label):''}</div>`;
+const ph=t=>t?`<p class="hint" style="margin:-8px 0 0">${t}</p>`:'';
+/* a day's bar is already its count by level (two days, two bars), so neither has cards: today's actions are a row of buttons under the bars,
+   each for the group its hover names, and logged once */
+const ptActs=(P,acts)=>{const b=acts.filter(a=>a[1].length).map(([g,names,label,done,who])=>isLogged(ptKey(P,g))?`<span class="pill good">${done}</span>`:`<button class="btn small" type="button" data-act="v7act" data-g="${g}"${tp(`For the ${names.length} ${who}`)}>${label}</button>`);return b.length?`<div class="tc-act">${b.join('')}</div>`:''};
 const ptPast=label=>`<div class="tc-act"><button class="btn small primary" type="button" data-act="v7cmp">${label}</button><span class="hint">Actions are on today’s lists</span></div>`;
 function ptPanel(P){const G=ptGroups(P),back=`<button class="lnk" type="button" data-act="v7now">Back to now</button>`;
   if(P.kind==='one'){const m=P.m,j=P.j,now=j===NBC-1,ch=G.ny.length+G.dev.length+G.sec.length,whole=G.ny.length>=ch/2;
     return `<div class="detail"><div class="dhead"><h3>${ASK[m.k]}</h3><span class="pill">${now?'Now':'On '+dayDate(BE(j))}</span>${back}</div>
-    <div class="sbs">${stRow(now?'The class now':'That day',G,m.sv[j])}${stKey([G])}</div>${now?'':ptPast('Compare with now')}
-    <div class="ags">${ptCard(P,gsw('E')+'Beginning or attempted',whole?'Half of the checked students or more':'',G.ny,'ny',whole?'Reteach to everyone':'Reteach in a small group',now)}${ptCard(P,gsw('H')+'Familiar or proficient','Partway to mastered',G.dev,'dev','Give a practice set',now)}${ptQOne(P)}</div>
-    ${G.sec.length?fold('v7sec',`${gsw('F')}Mastered · ${G.sec.length}`,`<div style="margin-top:8px">${roster(G.sec)}</div>`):''}
-    ${G.early.length?`<p class="hint sbline">${stSw('')}Unavailable · ${G.early.length}: fewer than two checks by then</p>`:''}</div>`}
+    <div class="sbs">${stRow(now?'The class now':'That day',G,m.sv[j])}${stKey([G])}</div>${now?ptActs(P,[['ny',G.ny,whole?'Reteach to everyone':'Reteach in a small group','Reteach planned',`beginning or attempted${whole?': half of the checked students or more':''}`],['dev',G.dev,'Give a practice set','Practice set planned','familiar or proficient: partway to mastered']]):ptPast('Compare with now')}
+    ${tblGoPt(P)}</div>`}
   if(P.kind==='time'){const m=P.m,now=P.b===NBC-1,A=dayDate(BE(P.a)),B=now?'now':'on '+dayDate(BE(P.b)),re=G.never.concat(G.fell),GA=dayG(m,P.a),GB=dayG(m,P.b);
-    const reCard=re.length?`<div class="ag"><p class="dl">Reteach group · ${re.length}</p>${G.never.length?`<p class="hint" style="margin:-8px 0 0">Never got it · ${G.never.length}: beginning or attempted both times</p>${ptNames(G.never)}`:''}${G.fell.length?`<p class="hint" style="margin:${G.never.length?0:-8}px 0 0">Fell back · ${G.fell.length}: familiar or proficient on ${A}, beginning or attempted ${B}</p>${ptNames(G.fell)}`:''}${now?ptBtn(P,'re','Reteach in a small group'):''}</div>`:'';
+    /* the two bars are the counts, as one day's bar is: the change between the days (lost it, the reteach group, got it, held) is the groups of the
+       point's table, and today's actions are buttons under the bars, each naming its group on hover */
     return `<div class="detail"><div class="dhead"><h3>${ASK[m.k]}</h3><span class="pill">${A} to ${now?'now':dayDate(BE(P.b))}</span>${back}</div>
-    <div class="sbs">${stRow('On '+A,GA,m.sv[P.a])}${stRow(now?'Now':'On '+dayDate(BE(P.b)),GB,m.sv[P.b])}${stKey([GA,GB])}</div>${now?'':ptPast(`Compare ${A} with now`)}
-    <div class="ags">${ptCard(P,'Lost it',`Mastered on ${A}, not ${B}: they knew it once`,G.lost,'lost','Give a review set',now)}${reCard}${ptQTwo(P)}${ptCard(P,'Familiar or proficient','Partway both times, or moving up',G.dev,'dev','Give a practice set',now)}${ptCard(P,'Got it',`Not mastered on ${A}, mastered ${B}`,G.got,'','',now)}</div>
-    ${G.held.length?fold('v7held',`Held · ${G.held.length}: mastered both times`,`<div style="margin-top:8px">${roster(G.held)}</div>`):''}
-    ${G.early.length?`<p class="hint">Unavailable · ${G.early.length}</p>`:''}</div>`}
+    <div class="sbs">${stRow('On '+A,GA,m.sv[P.a])}${stRow(now?'Now':'On '+dayDate(BE(P.b)),GB,m.sv[P.b])}${stKey([GA,GB])}</div>${now?ptActs(P,[['lost',G.lost,'Give a review set','Review set planned',`who lost it: mastered on ${A}, not ${B}`],['re',re,'Reteach in a small group','Reteach planned',`in the reteach group: ${G.never.length} beginning or attempted both times, ${G.fell.length} familiar or proficient on ${A} and beginning or attempted ${B}`],['dev',G.dev,'Give a practice set','Practice set planned','familiar or proficient both times, or moving up']]):ptPast(`Compare ${A} with now`)}
+    ${tblGoPt(P)}</div>`}
   const now=P.j===NBC-1,same=G.both.length&&!G.one.length&&!G.two.length;
   return `<div class="detail"><div class="dhead"><h3>${ASK[P.m1.k]} and ${ASK[P.m2.k]}</h3><span class="pill">${now?'Now':'On '+dayDate(BE(P.j))}</span>${back}</div>
   ${now?'':ptPast('Compare them now')}${same?`<p class="dtext">The same ${G.both.length} students are beginning or attempted on both: one reteach covers both skills.</p>`:''}
-  <div class="ags">${ptCard(P,'Beginning or attempted on both','One group for both skills',G.both,'both',same?'Form a group for both':'Form a group',now)}${ptCard(P,`Beginning or attempted on ${ASK[P.m1.k]} only`,'',G.one,'','',now)}${ptCard(P,`Beginning or attempted on ${ASK[P.m2.k]} only`,'',G.two,'','',now)}</div>
-  ${!G.both.length&&!G.one.length&&!G.two.length?'<p class="none">Nobody is beginning or attempted on either skill that day.</p>':''}</div>`}
+  <div class="ags">${ptCard(P,'Beginning or attempted on both',ph('One group for both skills'),G.both,'both',same?'Form a group for both':'Form a group',now)}${ptCard(P,`Beginning or attempted on ${ASK[P.m1.k]} only`,'',G.one,'','',now,'one')}${ptCard(P,`Beginning or attempted on ${ASK[P.m2.k]} only`,'',G.two,'','',now,'two')}</div>
+  ${!G.both.length&&!G.one.length&&!G.two.length?'<p class="none">Nobody is beginning or attempted on either skill that day.</p>':''}${tblGoPt(P)}</div>`}
 
 function v7(){const sel=S.stu,uf=S.v7.u,uok=k=>uf==='all'||uOf(k)<=+uf,inU=WEAK.filter(m=>uok(m.k)),cnt=st=>inU.filter(m=>m.st===st).length;if(S.v7.f!=='all'&&!cnt(S.v7.f))S.v7.f='all';const ff=S.v7.f;
   /* the unit filter shows the skills introduced through a unit: a student may redo an earlier unit's work at any time, so a time axis cannot carry units, and the units are a filter instead */
@@ -1066,11 +1045,11 @@ function v7(){const sel=S.stu,uf=S.v7.u,uok=k=>uf==='all'||uOf(k)<=+uf,inU=WEAK.
   s+='</svg>';
   let det='';
   if(rows.length&&P)det=ptPanel(P);
-  else if(rows.length){const i=S.v7.r,m=WEAK[i],g=SG[m.st],sk=statK(m.k,ALL);
+  else if(rows.length){const i=S.v7.r,m=WEAK[i],g=SG[m.st];
     det=`<div class="detail"><div class="dhead"><h3>${ASK[m.k]}</h3><span class="pill ${SC[g][3]}">${m.st}</span>${reteachBtn(m.k)}${whereLink(m.k)}</div>
     ${introCard(m.k)}
-    <div class="evs"><div class="ev"><span>The class now</span>${hbar(eo(sk),2)}<span class="hint">${lvTxt(sk.l)}</span></div></div>
-    <div class="dgrid">${m.now.length?whoCol('Beginning or attempted',GBG.E,m.now,mNow(m.k),'score'):'<p class="none">Nobody is weak in it now.</p>'}${m.peak.length?whoCol(`Weak around ${dayDate(m.pwd)}, not now`,'var(--neutral)',m.peak,mNow(m.k),'score now'):''}</div></div>`}
+    ${nowBar(m.k)}
+    ${tblGo(m.k,'weak')}</div>`}
   const more=inF.length>rows.length||S.v7.more?`<div class="controls" style="margin:8px 0 0"><button class="btn small" type="button" data-act="v7more" aria-expanded="${S.v7.more}">${S.v7.more?'Show the top few':`Show all ${inF.length}`}</button></div>`:'';
   return ctl+leg+duo(da,fig(s)+more,det,'stick')}
 
@@ -1215,12 +1194,132 @@ function v10det(o,w){const k=o.k,kd=fadeKind(o.d),sel=S.stu,W=w||520,L=50,R=22,T
   const need=PREK.has(k),act=kd==='fade'?(isLogged('v10:'+k)?'<span class="pill good">Review set planned</span>':`<button class="btn small primary" type="button" data-act="v10plan" data-k="${k}">Give a review set</button>`):'';
   const side=`<div class="fside"><div class="dhead"><h3>${SK[k]}</h3><span class="pill ${kd==='fade'?'bad':kd==='up'?'good':''}">${Math.round(o.a)}% → ${Math.round(o.b)}%</span><button class="x shut" type="button" data-act="v10close" aria-label="Close ${SK[k]}">${IC.x}</button></div>
     ${introCard(k)}<p class="hint">${o.n} students rechecked${need?` · ${TB0[CU].s} builds on it`:''}</p>
-    ${o.sl.length?whoCol('Slipped 20+ points','var(--bad)',o.sl,mThen(k),'when taught → later'):'<p class="none">Nobody slipped 20 points or more.</p>'}<div class="tc-act">${act}</div></div>`;
+    ${tblGo(k,'faded')}<div class="tc-act">${act}</div></div>`;
   /* beside the rows the panel is one column: the skill and its action, the chart, then who slipped. Under them it is the chart with the rest to its right */
   const shut=`<button class="x shut" type="button" data-act="v10close" aria-label="Close ${SK[k]}">${IC.x}</button>`;
   if(w)return `<div class="detail"><div class="dhead"><h3>${SK[k]}</h3><span class="pill ${kd==='fade'?'bad':kd==='up'?'good':''}">${Math.round(o.a)}% → ${Math.round(o.b)}%</span>${act}${shut}</div>
-    ${introCard(k)}<p class="hint">${o.n} students rechecked${need?` · ${TB0[CU].s} builds on it`:''}</p>${fig(s)}${o.sl.length?whoCol('Slipped 20+ points','var(--bad)',o.sl,mThen(k),'when taught → later'):'<p class="none">Nobody slipped 20 points or more.</p>'}</div>`;
+    ${introCard(k)}<p class="hint">${o.n} students rechecked${need?` · ${TB0[CU].s} builds on it`:''}</p>${fig(s)}${tblGo(k,'faded')}</div>`;
   return `<div class="detail"><div class="fdet">${fig(s)}${side}</div></div>`}
+
+/* ---------- a skill's table: every student by question, in a dialog ----------
+   ALPS's results table, in ALPS's own words, for a skill now or for a point picked on its line. A row a student: their level and the score behind
+   it (an arrow when the score had slipped 20 points or more since the skill was taught) and their last activity; then ALPS's result a question. A
+   point reads the table as of its day, the later of two: the level is the one the line has for that day, and a question counts from the day it was
+   first tried, with the result it ended with, as the levels count it (95% of the records start and end on one day). Two days have a level column
+   each, two skills a level column each and both skills' questions. The questions are the class's (a quarter of the class had started them by then),
+   by lesson in the order the class met them; a tick adds the ones only a few started. The first row counts who of the students shown is not yet
+   correct on each. It opens from a panel on the students that panel's action is for, with the action beside the name */
+const QIC={Code:'<path d="M4.2 3 L1.6 6 L4.2 9 M7.8 3 L10.4 6 L7.8 9" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"/>',
+  MCQ:'<rect x="1.5" y="1.5" width="9" height="9" rx="1.6" style="fill:none;stroke:currentColor;stroke-width:1.2"/><path d="M3.7 6.1 L5.3 7.7 L8.4 4.4" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round"/>',
+  FITB:'<rect x="1" y="3" width="10" height="6" rx="1.4" style="fill:none;stroke:currentColor;stroke-width:1.2"/><path d="M3.3 7 H6.4" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round"/>',
+  Parsons:'<path d="M1.8 3.2 H10.2 M3.8 6 H10.2 M1.8 8.8 H8.2" style="fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round"/>',
+  'Click or drag':'<path d="M6 1.4 V10.6 M1.4 6 H10.6 M4.6 2.8 L6 1.4 L7.4 2.8 M4.6 9.2 L6 10.6 L7.4 9.2 M2.8 4.6 L1.4 6 L2.8 7.4 M9.2 4.6 L10.6 6 L9.2 7.4" style="fill:none;stroke:currentColor;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round"/>'};
+const QFN={MCQ:'Multiple choice',FITB:'Fill in the blank',Parsons:'Parsons problem',Code:'Code','Click or drag':'Click or drag'};
+const qIcon=f=>`<svg class="qi" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">${QIC[f]||''}</svg>`;
+/* a question's lesson, also for one in a book that is not in view */
+const qLsn=ix=>{const j=IT[ix].j,s=D.subs[D.items[ix].sub];return j>=0?{c:SUBS[j].s,n:SUBS[j].n}:{c:esc(BL[IT[ix].tb]+' · '+s.code),n:esc(BL[IT[ix].tb]+' · '+s.code+' '+s.name)}};
+/* ALPS's result for a student on a question, read off their attempts: correct on the first attempt; correct after retries, or rapid retries when
+   all the time on those retries came to three seconds or less (so every one of them was within three seconds); not yet correct; not started.
+   ALPS's other two, started and result unknown, need what the export does not carry: a question opened and not answered, an attempt with no result */
+const RS={c1:'Correct on first attempt',cr:'Correct after retries',rr:'Rapid retries: all retries within 3 seconds',nc:'Not yet correct',ns:'Not started'};
+const rsOf=a=>!a?'ns':a[9]===1?'c1':a[4]?(a[7]-a[10]<=3?'rr':'cr'):'nc';
+/* ALPS's marks for them: a filled square with a tick or a cross, a pale one with the retry arrow (an amber badge when rapid), an empty one */
+const RIC=(()=>{const sq=(f,l)=>l?`<rect x=".5" y="2.5" width="17" height="17" rx="3.5" style="fill:${f};stroke:${l}"/>`:`<rect x="0" y="2" width="18" height="18" rx="4" style="fill:${f}"/>`,
+    ln='fill:none;stroke:var(--surface);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round',
+    rt='<path transform="translate(1.56 3.56) scale(.62)" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" style="fill:var(--good)"/>',
+    svg=b=>`<svg class="qm" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true">${b}</svg>`;
+  return {c1:svg(sq('var(--good)')+`<path d="M5.1 11.3 L7.9 14.1 L13 8.6" style="${ln}"/>`),cr:svg(sq('var(--green-tint)','var(--ok-fill)')+rt),
+    rr:svg(sq('var(--green-tint)','var(--ok-fill)')+rt+'<circle cx="16" cy="4" r="3.6" style="fill:var(--watch);stroke:var(--surface);stroke-width:1.2"/><path d="M16 2.3 V5.7 M14.3 4 H17.7" style="fill:none;stroke:var(--surface);stroke-width:1.3;stroke-linecap:round"/>'),
+    nc:svg(sq('var(--bad)')+`<path d="M6.3 8.3 L11.7 13.7 M11.7 8.3 L6.3 13.7" style="${ln}"/>`),ns:svg(sq('var(--surface)','var(--axis)'))}})();
+/* the questions on a skill a table shows as of day d: the class's (a quarter of the class had started them), or with all, every one anybody had
+   started; by lesson in the order the class met them, then as the lesson lists them */
+function tblQs(k,all,d){if(d===undefined)d=LASTDAY;const sub=ix=>D.items[ix].sub,by=ix=>IWHO[ix].filter(i=>AT[i].get(ix)[6]<=d),first={};
+  const qs=KIT[k].filter(ix=>by(ix).length>=(all?1:N/4));qs.forEach(ix=>{const s=sub(ix),t=by(ix).map(i=>AT[i].get(ix)[6]).sort((a,b)=>a-b),m=t[t.length>>1];if(first[s]===undefined||m<first[s])first[s]=m});
+  return qs.sort((a,b)=>first[sub(a)]-first[sub(b)]||sub(a)-sub(b)||D.subs[sub(a)].items.indexOf(a)-D.subs[sub(b)].items.indexOf(b))}
+/* a table's question columns: each skill's, the second skill's without the ones the first already has */
+const tblQ=(C,all)=>{const seen=new Set();return C.ks.flatMap(k=>tblQs(k,all,C.d).filter(ix=>!seen.has(ix)).map(ix=>{seen.add(ix);return {ix,k}}))};
+/* a student's level on a skill as of day d, as the page has it (from every check by then, -1 with fewer than two), and whether the score had slipped */
+const tlvAt=(i,k,d)=>{const e=estOf(i,k,d),ev=e?e.ev:0;return {ev,sc:e?e.c:null,lv:ev>=2?lvOf(e.c):-1,cat:catFrom(ev,e?e.c:0),slip:!!e&&e.ml!==null&&e.mt-e.ml>=.2,mt:e?e.mt:null,ml:e?e.ml:null}};
+/* a row: ALPS's result on each question as of the table's day, a level for each level column, and the last day by then they answered a question on the skills */
+function tblRow(i,C,Q){const d=C.d,a=Q.map(q=>{const x=AT[i].get(q.ix);return x&&x[6]<=d?x:null});let last=-1;
+  C.ks.forEach(k=>KIT[k].forEach(ix=>{const x=AT[i].get(ix);if(x&&x[6]<=d)last=Math.max(last,x[8]<=d?x[8]:x[6])}));
+  return {i,a,o:a.map(rsOf),L:C.cols.map(c=>tlvAt(i,c.k,c.d)),last}}
+/* the skill's name in the dialog carries what the view it was opened from says of it, and that view's action */
+const tblTop=(k,from)=>{if(from==='faded'){const o=FD.find(q=>q.k===k);if(!o)return '';const kd=fadeKind(o.d);
+    return `<span class="pill ${kd==='fade'?'bad':kd==='up'?'good':''}">${Math.round(o.a)}% → ${Math.round(o.b)}%</span>`+(kd!=='fade'?'':isLogged('v10:'+k)?'<span class="pill good">Review set planned</span>':`<button class="btn small primary" type="button" data-act="v10plan" data-k="${k}">Give a review set</button>`)}
+  const m=WEAK.find(q=>q.k===k),s=statK(k,ALL);
+  return (from==='weak'&&m?`<span class="pill ${SC[SG[m.st]][3]}">${m.st}</span>`:s.p!==null?`<span class="pill ${s.p>=.45?'bad':s.p>=.3?'watch':'good'}">${pc5(s.p)} not mastered</span>`:'')+reteachBtn(k)};
+/* what a table is about. From a skill's panel, the skill now; from a point, the skill on that day, the skill on two days, or two skills on one day.
+   Each has its title and pill, its level columns, the day its results are read as of, its groups (the panel's own, then unavailable and not
+   started), the group it opens on, and the action each group has on today's lists */
+function tblCfg(T){const P=T.P,ids=a=>new Set(a.map(n=>ID[n]));
+  const noLv=x=>[['Q','Unavailable',r=>r.L[x].lv<0&&r.L[x].cat==='Q'],['N','Not started',r=>r.L[x].lv<0&&r.L[x].cat!=='Q']];
+  if(!P){const k=T.k,lv=c=>r=>r.L[0].lv>=0&&r.L[0].cat===c,fd=FD.find(o=>o.k===k);
+    return {ks:[k],d:LASTDAY,title:ASK[k],top:tblTop(k,T.from),cols:[{k,d:LASTDAY,lab:'Level'}],act:()=>'',
+      groups:[['E','Beginning or attempted',lv('E')],['H','Familiar or proficient',lv('H')],['F','Mastered',lv('F')],['sl','Slipped 20+',r=>r.L[0].slip]].concat(noLv(0)),
+      def:T.from==='faded'?(fd&&fadeKind(fd.d)==='fade'?['sl']:[]):WEAK.some(m=>m.k===k&&SG[m.st]==='p')?['E']:[]}}
+  const G=ptGroups(P),now=(P.kind==='time'?P.b:P.j)===NBC-1,
+    btn=(g,l)=>!now?'':isLogged(ptKey(P,g))?'<span class="pill good">Planned</span>':`<button class="btn small primary" type="button" data-act="v7act" data-g="${g}">${l}</button>`;
+  if(P.kind==='one'){const k=P.m.k,d=BE(P.j),ch=G.ny.length+G.dev.length+G.sec.length,whole=G.ny.length>=ch/2,s={ny:ids(G.ny),dev:ids(G.dev),sec:ids(G.sec)};
+    return {ks:[k],d,title:ASK[k],top:`<span class="pill">${now?'Now':'On '+dayDate(d)}</span>`,cols:[{k,d,lab:now?'Level':'Level on '+dayDate(d)}],
+      groups:[['ny','Beginning or attempted',r=>s.ny.has(r.i)],['dev','Familiar or proficient',r=>s.dev.has(r.i)],['sec','Mastered',r=>s.sec.has(r.i)]].concat(noLv(0)),def:['ny'],
+      act:g=>g==='ny'?btn('ny',whole?'Reteach to everyone':'Reteach in a small group'):g==='dev'?btn('dev','Give a practice set'):''}}
+  if(P.kind==='time'){const k=P.m.k,a=BE(P.a),b=BE(P.b),s={lost:ids(G.lost),re:ids(G.never.concat(G.fell)),dev:ids(G.dev),got:ids(G.got),held:ids(G.held)};
+    return {ks:[k],d:b,title:ASK[k],top:`<span class="pill">${dayDate(a)} to ${now?'now':dayDate(b)}</span>`,cols:[{k,d:a,lab:'On '+dayDate(a)},{k,d:b,lab:now?'Now':'On '+dayDate(b)}],
+      groups:[['lost','Lost it'],['re','Reteach group'],['dev','Familiar or proficient'],['got','Got it'],['held','Held']].map(([g,l])=>[g,l,r=>s[g].has(r.i)]).concat(noLv(1)),def:['lost','re','dev'],
+      act:g=>g==='lost'?btn('lost','Give a review set'):g==='re'?btn('re','Reteach in a small group'):g==='dev'?btn('dev','Give a practice set'):''}}
+  const k1=P.m1.k,k2=P.m2.k,d=BE(P.j),same=G.both.length&&!G.one.length&&!G.two.length,s={both:ids(G.both),one:ids(G.one),two:ids(G.two)};
+  return {ks:[k1,k2],d,title:`${ASK[k1]} and ${ASK[k2]}`,top:`<span class="pill">${now?'Now':'On '+dayDate(d)}</span>`,cols:[{k:k1,d,lab:ASKS[k1]},{k:k2,d,lab:ASKS[k2]}],
+    groups:[['both','Beginning or attempted on both'],['one',`Beginning or attempted on ${ASKS[k1]} only`],['two',`Beginning or attempted on ${ASKS[k2]} only`]].map(([g,l])=>[g,l,r=>s[g].has(r.i)]),def:['both'],
+    act:g=>g==='both'?btn('both',same?'Form a group for both':'Form a group'):''}}
+function tblHTML(){const T=S.tbl,C=tblCfg(T),Q=tblQ(C,T.all),nc=tblQ(C,false).length,nq=tblQ(C,true).length,R=ALL.map(i=>tblRow(i,C,Q)),G=C.groups,inG=(g,r)=>g==='all'||G.find(x=>x[0]===g)[2](r),cnt=g=>R.filter(r=>inG(g,r)).length;
+  if(T.f!=='all'&&(!G.some(x=>x[0]===T.f)||!cnt(T.f)))T.f='all';if(T.q!==null&&!Q.some(q=>q.ix===T.q)){T.q=null;T.s=T.s0;T.dir=1}
+  /* each column sorts worst first (the weakest, the longest since, not yet correct then rapid retries); a second click turns it round. A student the
+     column has nothing on (no level yet, not started) stays last */
+  const RK={nc:0,rr:1,cr:2,c1:3},x=Q.findIndex(q=>q.ix===T.q),lx=T.s[0]==='l'&&T.s!=='last'?+T.s.slice(2):-1;
+  const key=r=>T.s==='last'?r.last:T.s==='q'?RK[r.o[x]]:r.L[lx].sc,out=r=>lx>=0?r.L[lx].lv<0:T.s==='q'?r.o[x]==='ns':T.s==='last'?r.last<0:false;
+  const rows=R.filter(r=>inG(T.f,r)).sort((p,q)=>out(p)-out(q)||(T.s==='name'?NM[p.i].localeCompare(NM[q.i]):key(p)-key(q))*T.dir||NM[p.i].localeCompare(NM[q.i])),n=rows.length;
+  const arr=T.dir>0?IC.up:IC.down,sh=(s,l,tip)=>{const on=T.s===s;return `<th scope="col" class="c-${s==='name'?'stu':s}"${on?` aria-sort="${T.dir>0?'ascending':'descending'}"`:''}><button class="sh${on?' on':''}" type="button" data-act="tbls" data-f="${s}"${tp(tip+(on?'<br><span>Click again to turn the order round</span>':''))}>${l}${on?arr:''}</button></th>`};
+  const segs=[['all',`All · ${N}`]].concat(G.filter(x=>cnt(x[0])).map(([g,l])=>[g,`${l} · ${cnt(g)}`]));
+  const key2=`<div class="legend tkey">${['c1','cr','rr','nc','ns'].map(o=>`<span>${RIC[o]}${RS[o]}</span>`).join('')}<span><span class="slip">${IC.down}</span>Slipped 20+ points</span></div>`;
+  const bar=`<div class="dlg-bar">${seg('tblf',T.f,segs,'Students shown')}${nq>nc?`<label class="chk" for="tblall"${tp(`Adds the ${nq-nc} questions on it that only a few students started`)}><input type="checkbox" id="tblall"${T.all?' checked':''}> All ${nq} questions</label>`:''}${key2}</div>`;
+  /* the results of the students shown on a question, in ALPS's words: not yet correct first, the others when there are any */
+  const tally=p=>{const m=o=>rows.filter(r=>r.o[p]===o).length;return [`${m('nc')} not yet correct`].concat(['rr','cr','c1','ns'].filter(o=>m(o)).map(o=>`${m(o)} ${o==='rr'?'rapid retries':RS[o].toLowerCase()}`))};
+  /* a question picked: its name, its lesson and the results on it, with the way to Stall points */
+  const strip=x<0?'':(()=>{const ix=T.q,j=IT[ix].j,lk=j>=0&&!!SUBS[j]&&SUBS[j].on&&SUBS[j].its.includes(ix),t=tally(x);
+    return `<div class="tbl-q">${qIcon(IT[ix].f)}<b>${x+1} · ${IT[ix].name}</b><span class="hint">${qLsn(ix).n}</span><span class="tq-n"><b class="gw">${t[0]}</b>${t.slice(1).map(v=>' · '+v).join('')}</span>${lk?`<button class="lnk" type="button" data-act="v7q" data-ix="${ix}" data-k="${Q[x].k}">See it on Stall points →</button>`:''}<button class="x" type="button" data-act="tblqx" data-id="${ix}" aria-label="Back to every question">${IC.x}</button></div>`})();
+  /* the head: the skills over their questions when there are two, the lessons over theirs, then the columns */
+  const runs=f=>{const b=[];Q.forEach(q=>{const v=f(q),l=b[b.length-1];if(l&&l.v===v)l.n++;else b.push({v,q,n:1})});return b},w0=C.cols.length+1;
+  const skb=C.ks.length>1?`<tr class="bands"><th class="c-stu"></th><th colspan="${w0}"></th>${runs(q=>q.k).map(b=>`<th colspan="${b.n}" class="bd sk"${tp(ASK[b.v])}><span>${ASKS[b.v]}</span></th>`).join('')}</tr>`:'';
+  const lsb=`<tr class="bands${skb?' b2':''}"><th class="c-stu"></th><th colspan="${w0}"></th>${runs(q=>q.k+':'+D.items[q.ix].sub).map(b=>`<th colspan="${b.n}" class="bd"${tp(qLsn(b.q.ix).n)}><span>${qLsn(b.q.ix).c}</span></th>`).join('')}</tr>`;
+  const qh=(q,p)=>{const ix=q.ix,on=T.q===ix;return `<th scope="col" class="q${on?' qon':''}"${on?' aria-sort="ascending"':''}><button class="qh" type="button" data-act="tblq" data-id="${ix}" aria-pressed="${on}" aria-label="Question ${p+1}: ${IT[ix].name}"${tp(`<b>${p+1} · ${IT[ix].name}</b><br>${QFN[IT[ix].f]} · ${qLsn(ix).n}<br><span>${on?'Click to show every question again':'Click to see who is not yet correct'}</span>`)}>${qIcon(IT[ix].f)}<span>${p+1}</span></button></th>`};
+  const LVTIP='ALPS’s level, from the score on every question that checks the skill. A quick question counts when correct on the first attempt, half on the second; a code or Parsons task when correct within three attempts, half within six. Beginning under 40, Attempted 40, Familiar 55, Proficient 65, Mastered 80. Fewer than two checks: unavailable';
+  const head=`<thead>${skb}${lsb}<tr class="hd${skb?' b2':''}">${sh('name','Student','Sorted by name')}${C.cols.map((c,y)=>sh('lv'+y,c.lab,(C.ks.length>1?`<b>${ASK[c.k]}</b><br>`:c.d<LASTDAY?`<b>On ${dayDate(c.d)}</b><br>`:'')+LVTIP)).join('')}${sh('last','Last activity','The last day they answered a question on '+(C.ks.length>1?'either skill':'the skill')+(C.d<LASTDAY?', up to '+dayDate(C.d):''))}${Q.map(qh).join('')}</tr></thead>`;
+  /* the first row: how many of the students shown are not yet correct on each question, held under the head while the rows scroll */
+  const sum=`<tr class="sum${skb?' b2':''}"><th scope="row" class="c-stu">Not yet correct</th><td colspan="${w0}"></td>${Q.map((q,p)=>{const m=rows.filter(r=>r.o[p]==='nc').length;return `<td class="q${p===x?' qon':''}" data-act="tblq" data-id="${q.ix}"${tp(`<b>${p+1} · ${IT[q.ix].name}</b><br>Of the ${n} shown: ${tally(p).join(' · ')}`)}>${m?`<b class="gw">${m}</b>`:'<span class="t3">0</span>'}</td>`}).join('')}</tr>`;
+  const lvCell=(r,y)=>{const L=r.L[y];return L.lv>=0?`<span class="tlv">${batt(LVC[L.lv])}<span>${LV[L.lv]}</span><span class="sc">${Math.round(L.sc*100)}%</span>${L.slip?`<span class="slip"${tp(`<b>${NM[r.i]}</b> slipped 20+ points<br>${Math.round(L.mt*100)}% when taught → ${Math.round(L.ml*100)}% ${LATER}`)}>${IC.down}</span>`:''}</span>`
+    :L.cat==='Q'?`<span class="tlv t3">${batt('U')}<span>Unavailable</span></span>`:'<span class="t3">Not started</span>'};
+  /* a cell: ALPS's mark, and on hover which attempt was correct, or how many there were, and the days */
+  const cell=(r,p)=>{const a=r.a[p],o=r.o[p],ix=Q[p].ix,cl=p===x?' qon':'',t=!a||o==='c1'?'':o==='nc'?`${a[5]} ${pl(a[5],'attempt')}`:`Correct on attempt ${a[9]}`;
+    return `<td class="q${cl}" data-act="tblq" data-id="${ix}"${tp(`<b>${NM[r.i]}</b> · ${p+1} · ${IT[ix].name}<br>${RS[o]}${a?`<br><span>${t?t+' · ':''}${dayDate(a[6])}${a[8]>a[6]&&a[8]<=C.d?' to '+dayDate(a[8]):''}</span>`:''}`)}><span class="rs" role="img" aria-label="${RS[o]}">${RIC[o]}</span></td>`};
+  const row=r=>`<tr${S.stu===r.i?' class="on"':''}><th scope="row" class="c-stu">${nmBtn(NM[r.i])}</th>${C.cols.map((_,y)=>`<td>${lvCell(r,y)}</td>`).join('')}<td class="num">${r.last<0?'–':dayDate(r.last)}</td>${Q.map((_,p)=>cell(r,p)).join('')}</tr>`;
+  const table=Q.length?`<div class="tbl-sc"><table class="sktbl" aria-label="${C.title}: ${n} students by ${Q.length} questions">${head}<tbody>${sum}${rows.map(row).join('')}</tbody></table></div>`:`<p class="none dlg-none">No question on it was started by a quarter of the class${C.d<LASTDAY?' by then':''}. Tick “All ${nq} questions” to see the ones a few started.</p>`;
+  return `<div class="dlg-scrim" data-act="tblclose"></div><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgt" tabindex="-1"><div class="dhead dlg-h"><h2 id="dlgt">${C.title}</h2>${C.top}${C.act(T.f)}<button class="x shut" type="button" data-act="tblclose" aria-label="Close">${IC.x}</button></div>${bar}${strip}${table}</div>`}
+/* the dialog is drawn into #dlg, over the page; the page under it keeps still. Opened from a button, it gives the focus back to it when it closes */
+function renderTbl(){const el=$('#dlg'),ht=$('html');if(!el)return;if(ht)ht.classList.toggle('dlg-on',!!S.tbl);if(!S.tbl){if(!el.hidden){el.hidden=true;el.innerHTML=''}return}
+  const sc=el.querySelector('.tbl-sc'),pos=sc?[sc.scrollLeft,sc.scrollTop]:null;el.innerHTML=tblHTML();el.hidden=false;
+  const sc2=el.querySelector('.tbl-sc');if(sc2&&pos){sc2.scrollLeft=pos[0];sc2.scrollTop=pos[1]}}
+/* it opens on the group asked for (a point's card), or on the first group its panel acts on that has anybody in it, or on everyone */
+function openTbl(k,from,g){const P=from==='pt'?ptSel():null;if(from==='pt'&&!P)return;const T={k,from,P,f:'all',s:'lv0',s0:'lv0',dir:1,q:null,all:false,ret:{k,f:from,g}},C=tblCfg(T);
+  const R=ALL.map(i=>tblRow(i,C,[])),has=x=>{const G=C.groups.find(y=>y[0]===x);return !!G&&R.some(G[2])};
+  T.f=g&&has(g)?g:C.def.find(has)||'all';T.s=T.s0=P&&P.kind==='time'?'lv1':'lv0';T.all=!tblQ(C,false).length;S.tbl=T;hideTip();renderTbl();const d=$('#dlg .dlg');if(d)d.focus({preventScroll:true})}
+function closeTbl(){const o=S.tbl?S.tbl.ret:null;S.tbl=null;hideTip();renderTbl();if(!o)return;const b=document.querySelector(`#view [data-act="tblopen"][data-k="${o.k}"][data-f="${o.f}"]${o.g?`[data-g="${o.g}"]`:':not([data-g])'}`);if(b)b.focus({preventScroll:true})}
+/* a point's way in: the same button, with how many questions its table holds as of its day */
+const tblGoPt=P=>{const C=tblCfg({P,from:'pt'}),nc=tblQ(C,false).length,nq=nc||tblQ(C,true).length,k=P.kind==='skills'?P.m1.k:P.m.k;if(!nq)return '';
+  return `<div class="tblgo"><button class="btn" type="button" data-act="tblopen" data-k="${k}" data-f="pt"${tp('Every student, ALPS’s result a question, as of '+(C.d<LASTDAY?dayDate(C.d):'now'))}>${IC.grid}Students and questions</button><span class="hint">${N} students · ${nq} ${pl(nq,'question')}</span></div>`};
+/* the way in, on each view's panel, as ALPS's "Show activities" opens its results by activity: how many students and questions it holds */
+const tblGo=(k,from)=>{if(!KIT[k].some(ix=>IWHO[ix].length))return '';const nc=tblQs(k,false).length,nq=nc||tblQs(k,true).length;
+  return `<div class="tblgo"><button class="btn" type="button" data-act="tblopen" data-k="${k}" data-f="${from}"${tp(`Every student, ALPS’s result a question: ${nc?`the ${nc} of the ${KIT[k].length} questions on it that a quarter of the class or more started`:`the ${nq} questions on it anybody started`}`)}>${IC.grid}Students and questions</button><span class="hint">${N} students · ${nq} ${pl(nq,'question')}</span></div>`};
 
 /* ---------- view 11 (Q10): readiness tree, for any unit of any textbook ----------
    The unit sits at the top, the skills it builds on below it, and the skills those build on at the bottom.
@@ -1604,8 +1703,8 @@ function frame(k,body){return `<div class="vhead"><h2 class="q">${VQ(k)}</h2><de
 /* a slider's track is filled up to its thumb: the stylesheet draws it from --p, which is kept here */
 const rngFill=e=>e.style.setProperty('--p',((e.value-e.min)/Math.max(1,e.max-e.min)*100).toFixed(1)+'%');
 function renderView(){const k=S.view,el=$('#view');if(k==='p'){el.innerHTML=vProf();return}el.innerHTML=frame(k,VF[k]());if(DRAW[k])DRAW[k]();el.querySelectorAll('input[type=range]').forEach(rngFill)}
-function render(){tips.clear();tipN=0;hideTip();renderThread();renderRail();renderView();renderLogChip()}
-const reView=()=>{tips.clear();tipN=0;hideTip();renderView()};
+function render(){tips.clear();tipN=0;hideTip();renderThread();renderRail();renderView();renderLogChip();renderTbl()}
+const reView=()=>{tips.clear();tipN=0;hideTip();renderView();renderTbl()};
 
 /* ---------- tooltip ---------- */
 const tipEl=$('#tip');let tipT=null;
@@ -1622,14 +1721,22 @@ window.addEventListener('scroll',hideTip,{passive:true});
 const toPage=k=>{if(k===5){S.v7.view='unit';return 6}if(k===9){S.v7.view='faded';return 6}if(k===6)S.v7.view='weak';return k};
 /* the Drifting page, opened without a day in the address while the class is idle or slowed: move to the latest day it can judge */
 const demoDay=k=>k===3&&!ASOF&&!JUDGE&&DEMODAY!==TODAY;
-function go(k){k=toPage(k);if(demoDay(k)){location.assign(asOfUrl(isoOf(DEMODAY)).split('#')[0]+'#'+SLUG[k]);return}S.view=k;try{history.replaceState(null,'',k==='p'?'#s-'+encodeURIComponent(NM[S.prof]):'#'+SLUG[k==6&&S.v7.view==='unit'?5:k==6&&S.v7.view==='faded'?9:k])}catch(_){}render();const v=$('#view');if(v&&v.getBoundingClientRect().top<64)v.scrollIntoView({block:'start'})}
+function go(k){k=toPage(k);S.tbl=null;if(demoDay(k)){location.assign(asOfUrl(isoOf(DEMODAY)).split('#')[0]+'#'+SLUG[k]);return}S.view=k;try{history.replaceState(null,'',k==='p'?'#s-'+encodeURIComponent(NM[S.prof]):'#'+SLUG[k==6&&S.v7.view==='unit'?5:k==6&&S.v7.view==='faded'?9:k])}catch(_){}render();const v=$('#view');if(v&&v.getBoundingClientRect().top<64)v.scrollIntoView({block:'start'})}
 const ATTRS=['v','i','k','r','s','f','u','j','n','g','t','id'];
-function refocus(a,ds){const sel=`[data-act="${a}"]`+ATTRS.filter(x=>ds[x]!==undefined).map(x=>`[data-${x}="${String(ds[x]).replace(/"/g,'')}"]`).join('');let el=null;try{el=document.querySelector('#view '+sel)||document.querySelector(sel)}catch(_){}if(el&&el.focus)el.focus({preventScroll:true})}
+function refocus(a,ds){const sel=`[data-act="${a}"]`+ATTRS.filter(x=>ds[x]!==undefined).map(x=>`[data-${x}="${String(ds[x]).replace(/"/g,'')}"]`).join('');let el=null;try{el=(S.tbl&&document.querySelector('#dlg '+sel))||document.querySelector('#view '+sel)||document.querySelector(sel)}catch(_){}if(el&&el.focus)el.focus({preventScroll:true})}
 const refocusId=id=>{const el=document.getElementById(id);if(el)el.focus({preventScroll:true})};
 const maxGaveUp=j=>{const g=cCnt(0,j).map(c=>c[2]);return g.indexOf(Math.max(...g))};
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,d=Object.assign({},t.dataset);
   switch(a){
-  case 'stu':{const i=+d.i;S.stu=S.stu===i?null:i;if(S.stu!==null)S.v2.hl=null;render();break}   // the student just followed takes the chart's focus from a picked card
+  case 'stu':{const i=+d.i,inT=!!t.closest('#dlg');S.stu=S.stu===i?null:i;if(S.stu!==null)S.v2.hl=null;render();   // the student just followed takes the chart's focus from a picked card
+    if(inT){const b=document.querySelector(`#dlg [data-act="stu"][data-i="${i}"]`);if(b)b.focus({preventScroll:true})}break}   // followed from a skill's table, the focus stays on the name there
+  /* a skill's table: open and close it, pick who is shown, sort by a column, pick a question (sorted by it, its details over the table) */
+  case 'tblopen':openTbl(+d.k,d.f,d.g);return;
+  case 'tblclose':closeTbl();return;
+  case 'tblf':if(!S.tbl)break;S.tbl.f=d.f;renderTbl();break;
+  case 'tbls':{const T=S.tbl;if(!T)break;if(T.s===d.f)T.dir=-T.dir;else{T.s=d.f;T.dir=1}T.q=null;renderTbl();break}
+  case 'tblq':{const T=S.tbl,ix=+d.id;if(!T)break;if(T.q===ix){T.q=null;T.s=T.s0}else{T.q=ix;T.s='q'}T.dir=1;renderTbl();break}
+  case 'tblqx':{const T=S.tbl,ix=+d.id;if(!T)break;T.q=null;T.s=T.s0;T.dir=1;renderTbl();const h=document.querySelector(`#dlg .qh[data-id="${ix}"]`);if(e.detail===0&&h)h.focus({preventScroll:true});return}
   case 'clear':S.stu=null;render();break;
   case 'go':if(+d.v===7)S.v8.k=null;go(+d.v);break;   // the rail opens Stall points on every question
   case 'gofor':S.stu=+d.i;if(+d.v===7)open7(0,CJ,maxGaveUp(CJ));if(+d.v===10){S.v11.tb=0;S.v11.u[0]=rdDef(0)}go(+d.v);break;
@@ -1715,7 +1822,9 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
   if(e.detail===0&&!['go','gofor','log','stu','clear'].includes(a))refocus(a,d)});
 /* a folded part of a page remembers whether it is open; the grid is drawn when its fold opens, at the width it then has */
 document.addEventListener('toggle',e=>{const t=e.target;if(!t||t.tagName!=='DETAILS'||!t.dataset.fold)return;S.fold[t.dataset.fold]=t.open;if(t.dataset.fold==='v2grid'&&t.open)v2draw()},true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.view===6&&S.v7.pts.length){S.v7.pts=[];reView();return}if(S.view===2&&S.v2.hl){const a=document.activeElement,g=a&&a.dataset&&a.dataset.act==='v2hl'?a.dataset.g:null;S.v2.hl=null;hideTip();v2draw();if(g)refocus('v2hl',{g});return}if(S.stu!==null){S.stu=null;render()}return}
+document.addEventListener('keydown',e=>{if(S.tbl&&e.key==='Escape'){closeTbl();return}
+  if(S.tbl&&e.key==='Tab'){const f=[...document.querySelectorAll('#dlg button,#dlg input')].filter(b=>!b.disabled&&b.offsetParent!==null),i=f.indexOf(document.activeElement);if(f.length&&(e.shiftKey?i<=0:i<0||i===f.length-1)){e.preventDefault();f[e.shiftKey?f.length-1:0].focus()}return}
+  if(e.key==='Escape'){if(S.view===6&&S.v7.pts.length){S.v7.pts=[];reView();return}if(S.view===2&&S.v2.hl){const a=document.activeElement,g=a&&a.dataset&&a.dataset.act==='v2hl'?a.dataset.g:null;S.v2.hl=null;hideTip();v2draw();if(g)refocus('v2hl',{g});return}if(S.stu!==null){S.stu=null;render()}return}
   const t=e.target;
   /* on a weak-skill row, the left and right arrows pick a day on its line and move it */
   if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&t.getAttribute&&t.getAttribute('data-act')==='v7row'){const r=+t.getAttribute('data-r'),m=WEAK[r];if(!m)return;const ok=m.sv.map((v,j)=>v===null?-1:j).filter(j=>j>=0);if(!ok.length)return;
@@ -1738,9 +1847,10 @@ document.addEventListener('change',e=>{const t=e.target,id=t.id;
   else if(id==='v4sort'){S.v4.sort=t.value;reView();refocusId('v4sort')}
   else if(id==='v8sort'){S.v8.sort=t.value;reView();refocusId('v8sort')}
   else if(id==='v10all'){S.v10.all=t.checked;reView();refocusId('v10all')}
-  else if(id==='v6sort'){S.v6.sort=t.value;reView();refocusId('v6sort')}});
+  else if(id==='v6sort'){S.v6.sort=t.value;reView();refocusId('v6sort')}
+  else if(id==='tblall'){if(S.tbl){S.tbl.all=t.checked;renderTbl();refocusId('tblall')}}});
 function fromHash(){const h=location.hash||'',ps=h.match(/^#s-(.+)$/);let pn=null;if(ps){try{pn=decodeURIComponent(ps[1])}catch(_){pn=ps[1]}}if(pn!==null&&ID[pn]!==undefined){S.view='p';S.prof=ID[pn];S.stu=S.prof;return}const nm=Object.keys(SLUG).find(k=>'#'+SLUG[k]===h),old=OLDSLUG[h.slice(1)],m=h.match(/^#q(\d{1,2})$/),k=nm!==undefined?+nm:old!==undefined?old:m?+m[1]:2;S.view=VM[k]?toPage(k):2;if(demoDay(S.view))location.replace(asOfUrl(isoOf(DEMODAY)))}
-window.addEventListener('hashchange',()=>{fromHash();render()});
+window.addEventListener('hashchange',()=>{S.tbl=null;fromHash();render()});
 let rzT=null,rzW=window.innerWidth;
 window.addEventListener('resize',()=>{if(window.innerWidth===rzW)return;rzW=window.innerWidth;clearTimeout(rzT);rzT=setTimeout(reView,160)});
 /* defaults that depend on the class: the engagement and performance grid starts on all units, with the one where the most students are struggling picked */

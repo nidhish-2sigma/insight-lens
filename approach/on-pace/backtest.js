@@ -1,16 +1,17 @@
 // Backtest of the On pace projection: the page's current method, "no change", and the proposed method.
 //
-//   node approach/backtest.js                       the comparison tables (takes a few minutes)
-//   node approach/backtest.js --example 2025-11-15 30   one goal, student by student: the worked example in method.md
-//   node approach/backtest.js --keep --recover --catchup   add the parts that were tested and left out (see evaluation.md)
-//   node approach/backtest.js --json rows.json      also write every projection to a file
+//   node approach/on-pace/backtest.js                       the comparison tables (takes a few minutes)
+//   node approach/on-pace/backtest.js --example 2025-11-15 30   one goal, student by student: the worked example in method.md
+//   node approach/on-pace/backtest.js --keep --recover --catchup   add the parts that were tested and left out (see evaluation.md)
+//   node approach/on-pace/backtest.js --json rows.json      also write every projection to a file
+//   node approach/on-pace/backtest.js --pace-days 15        measure the class's pace over another window (30 by default)
 //
 // How it works: it runs the page's own code (js/atlas.js with data/class.js) in a sandbox "as of" a past day (?today=),
 // projects each student's mastered count on each target unit's goal to a later day, and compares that with what the page
 // itself counts on the later day. Everything the proposed method learns comes from evidence up to the as-of day only.
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('node:vm');
-const root = process.env.REPO || path.join(__dirname, '..');
+const root = process.env.REPO || path.join(__dirname, '..', '..');
 const SRC = fs.readFileSync(path.join(root, 'js/atlas.js'), 'utf8'), BOOT = 'renderHead();fromHash();render();';
 if (!SRC.includes(BOOT)) throw new Error('js/atlas.js has changed: its entry point is not where this script expects it');
 const EXPOSE = 'S,ALL,TODAY,EVD,TB0,D,estOf,lvOf,dayOf,paceOf,paceScope,paceUnits,paceMemo,CU';
@@ -33,6 +34,7 @@ const FIRST_WEEK = 7;   // a skill a student will master is usually mastered wit
 const PRIOR = 10;       // a student's first-week rate is shrunk toward the class's with the weight of 10 skills
 const QUARTER = .25;    // the class has met a skill once a quarter of the class has met it
 const STEP = 5;         // the optional learned rates use history windows that start every 5 days
+const PACE_DAYS = ARGS.includes('--pace-days') ? +ARGS[ARGS.indexOf('--pace-days') + 1] : 30;   // the class's pace is read over this many days
 
 const out = [], example = [];
 for (const t0 of FROM) {
@@ -64,8 +66,8 @@ for (const t0 of FROM) {
       const sc = A.paceScope(u), rel = u < A.CU ? 'done' : u === A.CU ? 'current' : u === A.CU + 1 ? 'next' : 'later';
       A.S.v4.u = u; A.S.v4.day = d1; A.paceMemo.clear();
       // 3. the schedule: how many of this goal's skills the class will meet by the goal date, at its pace of the last 30 days ("pace"), or all of them ("plan")
-      const metNow = sc.ks.filter(k => classMet[k] !== null && classMet[k] <= T).length, metAgo = sc.ks.filter(k => classMet[k] !== null && classMet[k] <= T - 30).length;
-      const left = sc.ks.length - metNow, reach = Math.min(left, (metNow - metAgo) / 30 * h);
+      const metNow = sc.ks.filter(k => classMet[k] !== null && classMet[k] <= T).length, metAgo = sc.ks.filter(k => classMet[k] !== null && classMet[k] <= T - PACE_DAYS).length;
+      const left = sc.ks.length - metNow, reach = Math.min(left, (metNow - metAgo) / PACE_DAYS * h);
       const planHeld = sc.ks.every(k => { const d = classMetDay(B, k); return d !== null && d <= B.TODAY; });
       for (const i of A.ALL) {
         const actual = sc.ks.filter(k => mastered(B, i, k, B.TODAY)).length, cur = A.paceOf(i).proj;

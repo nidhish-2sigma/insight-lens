@@ -280,8 +280,10 @@ gets none, because none of the four answers that.
   units, because a student may redo an earlier unit's work at any time), with "faded: 71% → 10%"
   under a skill that was once higher; the panel opens with a card naming the
   unit and subunit where the skill was introduced, the day the class met it
-  and the questions on it (click it to open the grid there), then names who
-  and offers a reteach. "Where they stall →" opens Stall points on the
+  and the questions on it (click it to open the grid there), then the class
+  now drawn as a picked day is (one bar of every student by level, the counts
+  in it, unavailable hatched, with its key), a reteach, and the way into the
+  skill's table (below). *By unit*'s panel draws the class now the same way. "Where they stall →" opens Stall points on the
   questions that check the skill, worst first (it shows only when such a
   question is there to see). Click a day on a line to see who was where that day;
   a second day on the same skill compares the two, by where each student is
@@ -289,27 +291,51 @@ gets none, because none of the four answers that.
   got it and fell back: a small-group reteach; familiar or proficient: a
   practice set; got it; held), and a day on another skill compares the two
   skills on the later day (beginning or attempted on both: form a group). Buttons appear on today's
-  lists only; a past day offers "Compare with now". A day also lists the
-  questions on the skill that its students who have not mastered it are
-  getting wrong, the last 30 days of class work first; two days list what the
-  students who were doing better on the earlier day got wrong in between. A
-  question counts as wrong with no credit and as a retry with half credit
-  (both lower a level, so every drop has its questions on the list), the
-  names are on hover, and a question opens Stall points at it, among the other
-  questions on the skill. It is all
-  drawn: the class on a day is one bar as ALPS draws a class (its five
-  levels, mastered first, then unavailable, hatched) with its key, two days are two bars on one scale, the cards
-  carry the bar's colours, and each question is a bar of the students it
-  lists, in Stall points' colours (got it wrong, needed retries, right first
-  time) with an empty part for those who did not try, its counts inside. The left and right arrows
+  lists only; a past day offers "Compare with now". The class on a day is one
+  bar as ALPS draws a class (its five levels, mastered first, then
+  unavailable, hatched) with its key, and the bar is the count: one day has no
+  cards, only today's actions under it (a reteach, a practice set), each
+  naming its group on hover. Two days are two bars on one scale and likewise
+  have no cards: the change between them is the groups of the point's table,
+  and today's actions are buttons under the bars. Two skills, which have no
+  bar, keep a card an overlap, whose name opens the table on it. "Students
+  and questions" opens the table on the group the panel acts on. No card or
+  line repeats a count a bar shows. A point's table is the skill's
+  table read as of its day, the later of two: a level column for each day, or
+  for each skill with both skills' questions, the panel's groups, and the
+  panel's actions. A question counts from the day it was first tried, with
+  the result it ended with, as the levels count it. The left and right arrows
   pick a day on a focused row, and Esc clears it. *By unit* is the outline of the textbook with a bar a row, the class by
   ALPS level (what was Hardest content); its panel offers the same reteach
-  and "Where they stall" as *Weak now* for the same skill. *Faded* is the before-and-after of every skill that was
+  and "Where they stall" as *Weak now* for the same skill. A followed student
+  has a column there as on Stall points: on a skill, the mark for where they
+  are (a dot for beginning or attempted, a ring for familiar or proficient),
+  and on a subunit or unit how many of its skills each mark stands for, a
+  skill once however many lessons list it. *Faded* is the before-and-after of every skill that was
   checked again (what was Fading skills); nothing is picked to begin with,
   and a click on a skill opens the chart of every student beside the rows.
   Its axis starts at 40, or lower when a class average falls under it, so no
   dot is pinned to the edge.
   The old links still open their view.
+* **A skill's students and questions are one table.** Each view's panel
+  keeps the answer (the class bar, the action) and opens "Students and
+  questions", a dialog shaped like ALPS's results table and in its words: a
+  row a student, their level as ALPS's battery with the score behind it (a
+  red arrow when the score slipped 20 points or more since the skill was
+  taught), their last activity on it, then ALPS's result a question:
+  correct on first attempt, correct after retries, rapid retries (all
+  retries within 3 seconds; here, when the time on the retries came to three
+  seconds or less), not yet correct, not started. ALPS's other two results,
+  started and result unknown, need what the export does not carry. The
+  questions are the class's (a quarter of the class started them), grouped
+  under their lessons in the order the class met them; a tick adds the ones
+  only a few started. The first row counts who is not yet correct on each
+  question. It opens on the students the view acts on (beginning or
+  attempted; on *Faded*, those who slipped), with every group a click away,
+  the weakest first; a column's heading sorts by it, and a question's heading
+  picks it: its name, lesson and results over the table, those not yet
+  correct first, and the way to Stall points. A name follows the student, as
+  everywhere. Esc or the cross closes it.
 * **Stall points opens on the worst questions**: the eight where the most
   students gave up or skipped, as one ranked list with the lesson code; the
   outline of the textbook is the second view. A skill's "Where they stall"
