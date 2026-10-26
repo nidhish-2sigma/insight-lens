@@ -33,7 +33,7 @@ function load(search = '', width = 1450) {
     location: { search, hash: '#pace', pathname: '/index.html', assign() {}, replace() {} },
     setTimeout() { return 1; }, clearTimeout() {}, console
   });
-  for (const file of ['data/class.js', 'data/sample.js', 'data/example.js']) {
+  for (const file of ['data/class.js', 'data/example.js']) {
     vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
   }
   vm.runInContext(instrumented, context, { filename: 'js/atlas.js' });
@@ -173,7 +173,11 @@ check('calendar, target, sorting and follow controls update the rendered view', 
   app.change({ id: 'v4unit', value: String(initialUnit) });
   assert(p.flags(0).some(f => f.v === 4 && f.t.includes(p.TB0[initialUnit].s)));
   assert.equal(app.node('#thread').hidden, false);
+  // the followed student's pace is a flag in the bar above their profile, so the profile shows it as a tile only when the bar isn't there
+  assert(p.S.prof !== 0 || !p.vProf().includes('Pace · ' + p.TB0[initialUnit].s));
+  p.S.stu = null;
   assert(p.vProf().includes('Pace · ' + p.TB0[initialUnit].s));
+  p.S.stu = 0;
 });
 
 check('invalid, empty and past dates preserve the last valid goal', () => {
@@ -195,7 +199,7 @@ check('wide and narrow tracks have a finite common skill scale and every student
     assert.equal((svg.match(/data-act="stu"/g) || []).length, p.ALL.length);
     assert.equal((svg.match(/<svg class="viz"/g) || []).length, width === 1450 ? 2 : 1);
     assert(!/NaN|Infinity|undefined/.test(svg));
-    assert(svg.includes('Required skills mastered'));
+    assert(svg.includes('Goal skills mastered'));
     assert(svg.includes('Goal: ' + p.paceScope(p.S.v4.u).ks.length));
   }
 });

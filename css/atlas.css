@@ -13,7 +13,7 @@
 
    The script (js/atlas.js) asks for colours by its own names (--good, --bad, --watch, --accent and so on); the second half
    of :root answers those names from the theme, so the script carries no colour of its own. */
-:root{
+:root{--green-line:#C9DECD; --then:#E4E4E4;
   color-scheme:light;
   /* the theme: the tokens of css/lens.css */
   --ink:#212121; --ink-2:#424242; --muted:#666666; --line:#E0E0E0; --axis:#BDBDBD; --surface:#ffffff; --page:#FAFAFA; --wash:#FAFAFA;
@@ -26,6 +26,7 @@
   --eng-0:#D7D7D7; --eng-1:#FFFDE7; --eng-2:#FFF59D; --eng-3:#FDD836; --eng-4:#F9A925;
   /* a level with no number, as ALPS draws it: unavailable is hatched pale gray in a dashed outline, not attempted is empty in a solid one */
   --ua-1:#EEEEEE; --ua-2:#F8F8F8; --ua-line:#BDBDBD; --na-fill:#FAFAFA; --na-line:#E0E0E0;
+  --tr-1:#FBE3E5; --tr-2:#F4B9BE; --tr-3:#E8848C;   /* a share given up on or skipped, light to dark, up to the red of gave up */
   /* Material UI: shape, elevation, type, and the height of the app bar */
   --radius:4px;
   --e1:0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12);
@@ -39,7 +40,7 @@
   --outline:#AEC9FA;              /* the border of an outlined button: ALPS's primary at .35 (--primary-blue-80) */
   --chip:#EBEBEB;                 /* the fill of a neutral chip: black at .08, as ALPS's MUI chips */
   /* the names the screens use, answered from the theme */
-  --bg:var(--page); --surface-2:#F5F5F5; --band:var(--wash);
+  --bg:#F2F3F5; --surface-2:#F5F5F5; --band:var(--wash);   /* the page under the cards: Material's gray, a step darker than the fills inside them */
   --ink-3:var(--muted); --rule:var(--line);
   /* what you picked, and the student you follow, are in the primary colour, as Material marks a selection */
   --accent:var(--blue); --accent-ink:#ffffff; --accent-soft:#E8F1FE;
@@ -57,6 +58,7 @@
   --ok-fill:#8CB994;
   --on-ny:#ffffff;
   --st-gu:var(--red); --st-sk:var(--amber); --st-rt:#C6DCCA;
+  --sk-2:#F4DDA6; --f9-a:#BDBDBD; --m-bad:#F2B8BD; --m-watch:#F4D48A; --m-bad2:#FBE6E8; --m-watch2:#FCF1D6; --m-good:#D9E8DB;   /* pale amber below the often-skipped line; the funnel's steps; the course map's tiles */
   --ct0:#212121; --ct1:#212121; --ct2:#212121; --ct3:#212121; --ct4:#212121;
   --f1:#E3F2FD; --f2:#90CAF9; --f3:#4D8AF5; --f4:#1876D2; --f5:#0D47A1;
   --ft1:#212121; --ft2:#212121; --ft3:#212121; --ft4:#ffffff; --ft5:#ffffff;
@@ -84,7 +86,9 @@ h1,h2,h3,h4{margin:0;font-weight:500;text-wrap:balance}
 .product{padding-left:16px;border-left:1px solid var(--rule);font-size:20px;font-weight:500;line-height:1.2;letter-spacing:.0075em;white-space:nowrap}
 .classname{height:32px;line-height:30px;padding:0 12px;border:1px solid var(--axis);border-radius:16px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .spacer{flex:1}
-.demo-date{height:24px;line-height:24px;padding:0 10px;border-radius:12px;background:var(--chip);color:var(--ink-2);font-size:13px;white-space:nowrap}
+.demo-date{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px 0 10px;border:0;border-radius:12px;background:var(--chip);color:var(--ink-2);font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}
+.demo-date:hover{background:var(--hover)}
+.demo-date .ic{width:10px;height:10px}
 .logchip{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 8px 0 12px;border:0;border-radius:4px;background:transparent;color:var(--ink-2);font-size:14px;font-weight:500;letter-spacing:.02em;white-space:nowrap;cursor:pointer;transition:background-color .15s}
 .logchip:hover{background:var(--hover)}
 .logchip b{min-width:20px;height:20px;line-height:20px;padding:0 6px;border-radius:10px;background:var(--chip);color:var(--ink-2);font-size:12px;text-align:center}
@@ -106,18 +110,54 @@ h1,h2,h3,h4{margin:0;font-weight:500;text-wrap:balance}
 
 /* ---------- the page: one sheet of paper, answer first ---------- */
 .page{display:grid;gap:16px;padding:24px 24px 48px;min-width:0}
-.view{background:var(--surface);border-radius:var(--radius);box-shadow:var(--e1);padding:24px;min-width:0;scroll-margin-top:calc(var(--bar) + 16px)}
+.view{min-width:0;scroll-margin-top:calc(var(--bar) + 16px)}
+/* Material: each chart and what goes with it is a raised card on the gray page; a section with several charts is one card */
+.mcard{min-width:0;margin:0 0 16px;padding:20px 24px 24px;border-radius:var(--radius);background:var(--surface);box-shadow:var(--e1)}
+.mcard:last-child{margin-bottom:0}
+.mcard>details.fold{margin:0;padding:0;border-top:0}
+.mcard>.detail.lead:first-child,.mcard>.detail:first-child{margin-top:0;padding-top:0;border-top:0}
+.view>.vhead>.q,.view>.prof>.phead .pname{font-size:20px;font-weight:500;line-height:1.4;letter-spacing:.0075em;color:var(--ink)}
 .view:focus{outline:none}
 #log{scroll-margin-top:calc(var(--bar) + 16px)}
-.vhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 16px}
+.vhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:6px}
+.vhead>.q{flex:1 1 380px;min-width:0}
+.view>.vhead>.q{flex:1 0 auto;max-width:100%}
+.view>.vhead{margin-bottom:16px}
+/* a page's filters, on the right of its title; the cards come after the row */
+.vctl{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 16px;min-width:0;max-width:100%;margin-left:auto}
+.phead>.vctl{align-self:center}
+.cthd{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;min-height:36px;margin:0 0 12px}
+.cthd>.ctt{margin:0}
+.cthd>.ctt .pill{margin-left:8px;vertical-align:1px}
+.cthd .sel select{max-width:240px}
+/* a card that folds: the chevron and the name are one button */
+.mcard.pv{scroll-margin-top:calc(var(--bar) + 12px)}
+.mcard.pv.shut>.cthd{margin:0}
+.pvt{display:inline-flex;align-items:center;gap:10px;margin:-6px -12px;padding:6px 12px;border:0;border-radius:4px;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;transition:background-color .15s}
+.pvt:hover{background:var(--hover)}
+.pvt .chev{width:12px;height:12px;flex:none;color:var(--ink-2);transition:transform .15s}
+.pvt[aria-expanded="true"] .chev{transform:rotate(90deg)}
 .q{margin:0;font-size:14px;font-weight:400;color:var(--ink-3)}
 .answer{margin:4px 0 20px;font-size:20px;font-weight:500;line-height:1.4;letter-spacing:.0075em;max-width:84ch}
+/* a page's answer as cards: what it is, the answer, and what it means; a count takes its status colour, a name's card takes it on its edge */
+.icards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 20px}   /* four to a row on every page, so a card is one size everywhere */
+.icard{min-width:0;padding:14px 16px 16px;border-left:4px solid var(--axis);border-radius:4px;background:var(--surface);box-shadow:var(--e1)}
+.icard.bad{border-left-color:var(--bad)}.icard.watch{border-left-color:var(--watch)}.icard.good{border-left-color:var(--good)}
+.icl{margin:0 0 8px;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.icv{display:flex;align-items:flex-start;gap:8px;margin:0;font-size:16px;font-weight:500;line-height:1.35;color:var(--ink)}
+.icv .ni{flex:none;width:16px;height:16px;margin:2px 0 0}   /* hung beside the name, so a second line lines up with the first */
+.icn{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.icv .tg{margin-left:6px;font-size:13px;font-weight:400;color:var(--ink-3)}
+.icv.num{display:block;font-size:26px;line-height:1.15;font-variant-numeric:tabular-nums}
+.ics{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:6px 0 0;font-size:13px;line-height:1.4;color:var(--ink-2)}
+.ics b{font-weight:600;color:var(--ink)}
+.icard.bad .icv.num,.icard.bad .ics b{color:var(--bad-ink)}.icard.watch .icv.num,.icard.watch .ics b{color:var(--watch-ink)}.icard.good .icv.num,.icard.good .ics b{color:var(--good-ink)}
 details.how{font-size:14px;color:var(--ink-2);max-width:60ch}
 .vhead details.how{margin:0}
 details.how summary{display:inline-flex;align-items:center;height:30px;padding:0 8px;border-radius:4px;color:var(--link);font-size:13px;font-weight:500;letter-spacing:.02em;list-style:none;cursor:pointer;transition:background-color .15s}
 details.how summary::-webkit-details-marker{display:none}
 details.how summary:hover{background:var(--blue-tint)}
-.vhead details.how[open]{flex-basis:100%;max-width:92ch;margin:4px 0 8px}
+.vhead details.how[open]{flex-basis:100%;max-width:92ch;margin:4px 0 8px;text-align:left}
 details.how[open]{background:var(--page);border-radius:4px;padding:4px 16px 12px 8px}
 details.how p{margin:4px 0 0 8px;line-height:1.57}
 
@@ -161,7 +201,7 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .sel select:focus-visible,.sel input[type=date]:focus-visible{outline:0;border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
 .pace-skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px 32px}
 .pace-skills h3{font-size:14px;font-weight:500;margin:16px 0 8px}
-.pace-skills ul{padding-left:20px;margin:0 0 16px;font-size:14px;color:var(--ink-2);line-height:1.6}
+.pace-skills ul{list-style:none;padding-left:0;margin:0 0 16px;font-size:14px;color:var(--ink-2);line-height:1.6}   /* each skill's bulb is its mark */
 /* the slider: a 4px track, filled in the primary colour up to the thumb (the script keeps --p at the thumb's position) */
 .rng{display:grid;grid-template-columns:auto auto;align-items:center;gap:0 12px;font-size:14px;color:var(--ink-3)}
 .rng output{font-size:14px;font-weight:500;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
@@ -181,18 +221,18 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 /* ---------- legends ---------- */
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0 0 12px;font-size:13px;color:var(--ink-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
+.legend:has(+.legend){margin-bottom:6px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:2px;flex:none}
 .ln{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:2px}
 .sw.lv{box-shadow:inset 0 0 0 1px var(--line)}
 .sw.ua{background:repeating-linear-gradient(45deg,var(--ua-1) 0 3px,var(--ua-2) 3px 6px);outline:1px dashed var(--ua-line);outline-offset:-1px}
 .sw.na{background:var(--na-fill);box-shadow:inset 0 0 0 1px var(--na-line)}
 .sw.hatch{background:repeating-linear-gradient(-45deg,var(--hatch) 0 1.5px,var(--surface-2) 1.5px 4.5px)}
-.mleg{align-items:center;width:fit-content;max-width:100%;padding:8px 12px;border:1px solid var(--rule);border-radius:4px}
-.mleg .lt{font-size:12px;font-weight:500;color:var(--ink-3)}
-.mleg .lt:not(:first-child){margin-left:8px}
+.legend{align-items:center}
+.legend .lt{font-size:12px;font-weight:500;color:var(--ink-3)}
+.legend .lt:not(:first-child){margin-left:8px}
 /* the grid's key: one line to the right of its controls */
-.key2{margin:0 0 0 auto;align-items:center;gap:8px 16px}
-.key2 .lt{font-size:12px;font-weight:500;color:var(--ink-3)}
+
 
 /* ---------- chips ---------- */
 /* a status: a small filled chip, tinted by what it says */
@@ -253,13 +293,17 @@ details.how p{margin:4px 0 0 8px;line-height:1.57}
 .duo-a,.duo-b{min-width:0}
 .duo .viz{min-width:0}
 .duo::before{content:"";position:absolute;top:0;bottom:0;left:calc(var(--a) + 20px);border-left:1px solid var(--rule)}
-.duo.cards::before,.duo.even::before{display:none}
+.duo.even::before{display:none}
 .duo.even{justify-content:center}
 .duo.stick>.duo-b{position:sticky;top:calc(var(--bar) + 16px)}
 .duo-a>.detail:first-child,.duo-b>.detail:first-child{margin-top:0;padding-top:0;border-top:0}
 /* the first section of a page sits straight under the controls */
 .detail.lead{margin-top:0;padding-top:0;border-top:0}
 /* a part of a page one click away: the grid under the chart, the sample rows, the readiness line */
+/* a chart's name, over it: what it shows, in a teacher's words */
+.ctt{margin:0 0 12px;font-size:16px;font-weight:500;line-height:1.5;letter-spacing:.0094em;color:var(--ink)}
+/* a page's views, one under another: each a section with its name, open until folded */
+
 details.fold{margin-top:20px;padding-top:12px;border-top:1px solid var(--rule)}
 details.fold>summary{display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:0 12px 0 8px;border-radius:4px;color:var(--link);font-size:14px;font-weight:500;letter-spacing:.02em;list-style:none;cursor:pointer;transition:background-color .15s}
 details.fold>summary::-webkit-details-marker{display:none}
@@ -278,12 +322,8 @@ details.fold>summary:hover{background:var(--blue-tint)}
 .dgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
 .dgrid > *{min-width:0}
 .dl{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;font-weight:500;color:var(--ink-2)}
-.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin:0}
-.statrow.psum{margin:16px 0}
-.stat{min-width:0;padding:12px 16px;border-radius:4px;background:var(--page)}
-.stat .l{display:block;font-size:12px;letter-spacing:.03em;color:var(--ink-3)}
-.stat .v{display:block;font-size:16px;font-weight:500;line-height:1.5;font-variant-numeric:tabular-nums}
 .tc-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:12px}
+.fstu{margin-top:24px;padding-top:20px;border-top:1px solid var(--rule)}   /* a picked skill's students, under the skills on the same columns */
 .acts{display:flex;flex-wrap:wrap;gap:8px}
 .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:0 0 16px;font-size:14px}
 .crumbs b{font-weight:500}
@@ -298,24 +338,8 @@ details.fold>summary:hover{background:var(--blue-tint)}
 .takes{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:8px}
 .takes li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;font-size:14px;max-width:86ch}
 /* a section that opens: where the numbers come from, a student's moments, why these items */
-details.data{margin-top:16px;padding-top:12px;border-top:1px solid var(--rule)}
-details.data summary{font-size:14px;font-weight:500;color:var(--ink-2);cursor:pointer}
-details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--ink-2)}
-.foot{margin:8px 0 0;font-size:12px;letter-spacing:.03em;color:var(--ink-3)}
-.page>details.data{margin:0;padding:0 16px;border:0;border-radius:var(--radius);background:var(--surface);box-shadow:var(--e1)}
-.page>details.data summary{display:flex;align-items:center;min-height:48px;color:var(--ink);list-style:none}
-.page>details.data summary::-webkit-details-marker{display:none}
-.page>details.data summary::after{content:"";width:8px;height:8px;margin:0 4px 4px auto;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg);transition:transform .15s}
-.page>details.data[open] summary::after{margin-bottom:-4px;transform:rotate(-135deg)}
-.page>details.data[open]{padding-bottom:8px}
 
 /* ---------- tables ---------- */
-.tbl{overflow-x:auto}
-.tbl table{width:100%;min-width:620px;border-collapse:collapse;font-size:14px}
-.tbl th,.tbl td{padding:10px 16px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
-.tbl th{font-size:14px;font-weight:500;color:var(--ink)}
-.tbl td:first-child{font-weight:500;white-space:nowrap}
-.tbl tbody tr:last-child td{border-bottom:0}
 .nmx{border:0;background:none;padding:0;color:inherit;font-size:14px;font-weight:500;text-align:left;cursor:pointer}
 .nmx:hover{color:var(--link);text-decoration:underline}
 /* the action log */
@@ -325,15 +349,15 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .vp{font-size:13px;color:var(--ink-2)}
 
 /* ---------- effort and mastery: the groups to act on ---------- */
-.ags{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-.ag{display:grid;gap:12px;align-content:start;padding:16px;border:1px solid var(--rule);border-radius:4px}
+.ags{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px}
+.ag{display:grid;gap:10px;align-content:start}
 .ag .dl{margin:0}
 .ag .agl{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;letter-spacing:0;text-align:left}
 .ag .agl:hover{text-decoration:underline}
 /* a card's heading is a switch that picks its students out on the chart beside it; on, the card is outlined in the primary colour */
 .ag .agh{width:calc(100% + 16px);margin:-6px -8px;padding:6px 8px;border:0;border-radius:4px;background:none;text-align:left;cursor:pointer;transition:background-color .15s}
 .ag .agh:hover{background:var(--hover)}
-.ag.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ag.on .agh{background:var(--accent-soft)}
 .ag.on .agh{color:var(--blue-ink)}
 #v2top{scroll-margin-top:calc(var(--bar) + 16px)}
 /* students as a list to scan: a row a student, a hairline under each, columns that run down then across; the number behind a place
@@ -348,6 +372,7 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .roster .rv{flex:none;font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .roster .x{flex:none;width:24px;height:24px;border-radius:12px}
 .roster .x:hover{background:var(--bg-bad);color:var(--bad-ink)}
+.waitl{list-style:none;margin:8px 0 0;padding:0} .waitl li{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;padding:8px 0;border-bottom:1px solid var(--line)}   /* the sets that can't be judged yet, one line each with why */
 /* where a pointer can hover, a name's remove button shows on its row only */
 @media (hover:hover){.roster .x{opacity:0}.roster li:hover .x,.roster li:focus-within .x{opacity:1}}
 .rcap{margin-left:auto;padding-left:12px;font-size:12px;font-weight:400;color:var(--ink-3)}
@@ -358,12 +383,11 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .fl-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0;font-size:14px}
 
 /* ---------- drifting: one outlined row a student ---------- */
-.wl{display:grid;gap:8px}
+.wl{display:grid;gap:0}
 .wl-h,.wl-r{display:grid;grid-template-columns:140px var(--sw,290px) minmax(0,1fr);gap:8px 16px;align-items:center}
-.wl-h{padding:0 17px;font-size:12px;color:var(--ink-3)}
-.wl-r{padding:12px 16px;border:1px solid var(--rule);border-radius:4px;background:var(--surface)}
-.wl-r.on{border-color:var(--outline);background:var(--accent-soft)}
-.wl-r.watch{border-style:dashed}
+.wl-h{padding:0 8px 4px;font-size:12px;color:var(--ink-3)}
+.wl-r{padding:12px 8px;border-top:1px solid var(--rule)}
+.wl-r.on{border-radius:4px;background:var(--accent-soft)}
 .wl-who{display:grid;gap:6px;justify-items:start}
 .wl-who .nmx{font-size:16px}
 .wl-sig{display:grid;gap:8px;min-width:0}
@@ -383,10 +407,10 @@ details.data ul{display:grid;gap:4px;margin:8px 0 0;padding-left:20px;font-size:
 .hc,.hc ul{list-style:none;margin:0;padding:0}
 .hc{border-bottom:1px solid var(--rule)}
 .hc>li{border-top:1px solid var(--rule);padding:4px 0}
-.hr{display:grid;grid-template-columns:minmax(0,min(38%,460px)) minmax(120px,1fr) 64px;align-items:center;gap:4px 16px;width:100%;min-height:40px;padding:6px 12px;border:0;border-radius:4px;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-align:left}
-.hc.fol .hr{grid-template-columns:minmax(0,min(38%,460px)) minmax(120px,1fr) 84px 66px}   /* room for "Not mastered" and the student's counts, as on Stall points */
-.hc.v7 .hr{grid-template-columns:minmax(0,min(38%,460px)) minmax(120px,1fr) 58px 58px}
-.hc.v7.fol .hr{grid-template-columns:minmax(0,min(38%,460px)) minmax(120px,1fr) 58px 58px 66px}
+.hr{display:grid;grid-template-columns:minmax(0,min(40%,460px)) minmax(120px,1fr) 64px;align-items:center;gap:4px 16px;width:100%;min-height:40px;padding:6px 12px;border:0;border-radius:4px;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-align:left}
+.hc.fol .hr{grid-template-columns:minmax(0,min(40%,460px)) minmax(120px,1fr) 84px 80px}   /* room for "Not mastered" and the student's counts, as on Stall points */
+.hc.v7 .hr{grid-template-columns:minmax(0,min(40%,460px)) minmax(120px,1fr) 58px 58px}
+.hc.v7.fol .hr{grid-template-columns:minmax(0,min(40%,460px)) minmax(120px,1fr) 58px 58px 80px}
 .hc>li.hh{border-top:0;padding:0}
 .hh .hr{min-height:0;padding-top:0;padding-bottom:4px;row-gap:0}
 .hh .hp,.hh .hs{font-size:12px;font-weight:500;color:var(--ink-3);white-space:nowrap}
@@ -406,6 +430,60 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .hb{display:flex;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
 .hb.b0{height:12px;border-radius:6px}.hb.b1{height:10px;border-radius:5px}
 .hb i{display:block;height:100%;flex:none}
+.hb i.na{background:var(--na-fill);box-shadow:inset 0 0 0 1px var(--na-line)}   /* students who have not got there yet, as ALPS draws not started: an empty part with a line round it */
+/* Stall points' other versions: the part of a row their marks sit in */
+.vk{display:flex;align-items:center;min-width:0;width:100%}
+.dv .vl,.dv .vr{flex:2 1 0;display:flex;height:10px}
+.dv .vl{justify-content:flex-end;box-shadow:1.5px 0 0 var(--ink-3)}
+.dv .vz{flex:1 1 0;display:flex;height:10px;margin-left:14px}
+.dv.b0 .vl,.dv.b0 .vr,.dv.b0 .vz{height:12px}
+.dv i,.cl .vt i{display:block;height:100%;flex:none}
+.dv i.na,.cl i.na{background:var(--na-fill);box-shadow:inset 0 0 0 1px var(--na-line)}
+.dv.hd .vl,.dv.hd .vr,.dv.hd .vz{height:auto;box-shadow:none;font-size:12px;font-weight:500;color:var(--ink-3);white-space:nowrap}
+.dv.hd .vl{padding-right:8px}.dv.hd .vr{padding-left:8px}
+.cl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.cl .vc{display:flex;align-items:center;gap:6px;min-width:0}
+.cl .vt{flex:1;height:8px;border-radius:2px;background:var(--surface-2);overflow:hidden}
+.cl b{min-width:32px;font-size:12px;font-weight:500;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
+.cl b.hot{color:var(--bad-ink)}.cl b.warm{color:var(--watch-ink)}
+.cl.hd .vc{display:block;font-size:12px;font-weight:500;line-height:1.25;color:var(--ink-3)}
+.dt{position:relative;display:block;height:22px}
+.dt .vg{position:absolute;left:0;right:0;height:1px;background:var(--line)}
+.dt i{position:absolute;transform:translate(-50%,-50%)}
+.dt .vd{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 1.5px var(--surface)}
+.dt .vd.vd2{width:6px;height:6px;opacity:.5;box-shadow:none}
+.dt .vtk{width:2.5px;height:12px;border-radius:1px}
+.dt.ax{height:14px;font-size:12px;color:var(--ink-3)}
+.dt.ax i{top:7px;font-style:normal}.dt.ax i:first-child{transform:translate(0,-50%)}.dt.ax i:last-child{transform:translate(-100%,-50%)}
+.vdk{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}.vdk.vd2{width:6px;height:6px;background:var(--ink-3);opacity:.5}
+.vtkk{display:inline-block;width:2.5px;height:12px;border-radius:1px;background:var(--ink-3);flex:none}
+.pp{display:block;max-width:100%;height:auto}
+.hc.v7.vs2 .hr{grid-template-columns:minmax(0,min(30%,340px)) minmax(330px,1fr)}
+.hc.v7.vs2.fol .hr{grid-template-columns:minmax(0,min(30%,340px)) minmax(330px,1fr) 80px}
+/* Stall points' plainer versions, as simple graphs: bars on a track of the whole class, rings, columns along the course, a funnel, a course map */
+.hc.v7.vs6 .hr,.hc.v7.vs7 .hr,.hc.v7.vs9 .hr{grid-template-columns:minmax(0,min(34%,320px)) minmax(0,1fr)}
+.hc.v7.vs6.fol .hr,.hc.v7.vs7.fol .hr,.hc.v7.vs9.fol .hr{grid-template-columns:minmax(0,min(34%,320px)) minmax(0,1fr) 80px}
+.b6{display:flex;flex-direction:column;align-items:stretch;gap:4px}
+.b6l{display:flex;align-items:center;gap:10px;min-width:0}
+.b6t{display:flex;flex:none;width:180px;height:9px;border-radius:2px;background:var(--surface-2);overflow:hidden}
+.b6t i{display:block;height:100%;flex:none}
+.b6t i.na{background:var(--na-fill);box-shadow:inset 0 0 0 1px var(--na-line)}
+.b6x{min-width:0;font-size:13px;line-height:1.3;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.b6x b{font-weight:500}.b6x b.bad{color:var(--bad-ink)}.b6x b.watch{color:var(--watch-ink)}
+.b6q{color:var(--ink-3)}
+.b6.hd .b6a{position:relative;flex:none;width:180px;height:16px;font-size:12px;color:var(--ink-3)}
+.b6.hd .b6a i{position:absolute;top:0;transform:translateX(-50%);font-style:normal}.b6.hd .b6a i:first-child{transform:none}
+.b6.hd .b6x{font-size:12px;color:var(--ink-3)}
+.f9{gap:3px}.f9 .b6t{height:8px}
+.f9q{font-size:12px;color:var(--ink-3)}
+.r7{display:flex;align-items:center;gap:10px}
+.r7 svg{flex:none}
+.r7 text{font-size:12px;font-weight:500;fill:var(--ink)}.r7 text.bad{fill:var(--bad-ink)}.r7 text.watch{fill:var(--watch-ink)}
+.r7 .b6q{color:var(--ink-2)}
+.r7s{flex:none;width:36px}   /* the heading's room for the ring */
+.me8{font-weight:500;color:var(--blue-ink)}
+.duo .viz.gr8{width:auto;max-width:100%}   /* the grid at its own size, never stretched */
+.gr8 .hit:hover>rect:first-child{fill:var(--accent-soft)}
 .hp{font-size:13px;color:var(--ink-2);text-align:right;font-variant-numeric:tabular-nums}
 .l0 .hp{font-size:14px;font-weight:500;color:var(--ink)}
 .hp.hot{color:var(--bad-ink);font-weight:500}
@@ -414,11 +492,8 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .hx.w{display:inline-flex;align-items:center;gap:6px;color:var(--watch-ink);font-weight:500}
 .hr.off .hn,.hr.off .hn b{color:var(--ink-3)}
 .hs{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
-.sd{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
-.sd.e{background:var(--accent)}
-.sd.h{box-shadow:inset 0 0 0 1.8px var(--accent)}
 .pm{flex:none;display:block}
-.pmn{display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:12px;font-weight:500;color:var(--blue-ink)}
+.pmn{display:inline-flex;align-items:center;gap:2px;margin-right:4px;font-size:12px;font-weight:500;color:var(--ink-2)}   /* a count beside a key square; the student's name over the column stays blue */
 .nsrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;padding:8px 12px;font-size:13px;color:var(--ink-3)}
 .nsrow .nsl{margin-right:6px;font-weight:500}
 .nsrow i{height:22px;line-height:20px;padding:0 8px;border:1px dashed var(--axis);border-radius:11px;font-style:normal;font-size:12px}
@@ -441,14 +516,12 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 .sb .ua{background:repeating-linear-gradient(45deg,var(--ua-1) 0 4px,var(--ua-2) 4px 8px);outline:1px dashed var(--ua-line);outline-offset:-1px}
 .legend.sbkey{margin:0}
 /* ready for a unit: the key in two short lines, each led by what it keys */
-.legend.rdkey{margin-bottom:6px}
-.legend.rdkey+.legend.rdkey{margin-bottom:14px}
 /* a plan group shown on the tree: its card is ringed, its button pressed, and the tree says whose it is */
 .rdfor{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 8px;scroll-margin-top:calc(var(--bar) + 12px)}
 .pill.acc{background:var(--blue-tint);color:var(--blue-ink)}
 .pcard h4 .gsel{margin-left:auto}
 .pcard .gsel[aria-pressed="true"]{border-color:var(--outline);background:var(--blue-tint);color:var(--blue-ink)}
-.pcard.on{box-shadow:0 0 0 2px var(--accent)}
+.pcard.on h4{color:var(--blue-ink)}
 .plan-none{margin:0 0 12px}
 /* the readiness line on Ready for a unit: four stops strung on one line, each the level's battery, its name, and what the class is at it */
 .lvline{display:flex;flex-wrap:wrap;align-items:flex-start;gap:4px 16px;margin:0 0 14px}
@@ -458,46 +531,40 @@ button.hr:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
 /* the track between the stops: ALPS's line gray; the colour is on the nodes */
 .lvstop::before{content:"";position:absolute;top:15px;right:50%;width:calc(100% + 4px);height:2px;border-radius:1px;background:var(--line)}
 .lvstop:first-child::before{display:none}
-.lvdot{position:relative;z-index:1;width:14px;height:14px;margin-top:5px;border-radius:50%;background:var(--vc);box-shadow:0 0 0 3px var(--surface)}   /* ALPS's green, yellow or red, full strength */
+.lvdot{position:relative;z-index:1;width:14px;height:14px;margin-top:5px;border-radius:50%;background:var(--axis);box-shadow:0 0 0 3px var(--surface)}   /* gray: the status colours are the rings' shares */
 .lvstop .lvn{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px 6px;font-weight:500;color:var(--ink)}
 .lvstop .lvv{font-size:12px;color:var(--ink-2)}
 .lvstop:hover{background:var(--page)}
 .lvstop:hover .lvdot{box-shadow:0 0 0 3px var(--page)}
 .lvstop[aria-pressed="true"]{background:var(--blue-tint)}
-.lvstop[aria-pressed="true"] .lvdot{box-shadow:0 0 0 3px var(--blue-tint),0 0 0 5px var(--accent)}
+.lvstop[aria-pressed="true"] .lvdot{background:var(--accent);box-shadow:0 0 0 3px var(--blue-tint),0 0 0 5px var(--accent)}
 .lvstop[aria-pressed="true"] .lvn{color:var(--blue-ink)}
 /* the keys under the line: groups set apart by a hairline; v4's levels in ALPS's underline legend */
 .legend.rdkey{align-items:center}
 .ksep{display:inline-block;width:1px;height:16px;background:var(--line)}
 @media (max-width:600px){.ksep{display:none}}   /* where the key wraps, a hairline would start a line */
-.rdkey .ul{padding:7px 2px 2px;border-bottom:5px solid var(--c)}   /* as much above the word as the underline takes below, so it lines up with the rest */
-.rdkey .ul.pale{box-shadow:0 1px 0 var(--lv-f)}
+.rdkey .kn{font-weight:700} .rdkey .kn.bad{color:var(--bad-ink)} .rdkey .kn.watch{color:var(--watch-ink)} .rdkey .kn.good{color:var(--good-ink)}   /* the colours of the shares inside the rings */
 .ck-r .ck-g .hint.sbline{display:flex;align-items:center;gap:8px}
 
 /* where a skill was first introduced: a card to check at a glance, and the way to the grid there */
-.intro{display:grid;gap:2px;width:100%;padding:12px 16px;border:1px solid var(--rule);border-left:4px solid var(--blue);border-radius:4px;background:var(--page);color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer;transition:background-color .15s}
-.intro:hover{background:var(--blue-tint)}
+.intro{display:grid;gap:2px;width:100%;padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-align:left;cursor:pointer}
+.intro:hover b{color:var(--link);text-decoration:underline}
 .intro .l{font-size:12px;letter-spacing:.03em;color:var(--ink-3)}
-.intro b{font-size:18px;font-weight:500;line-height:1.4}
+.intro b{font-size:16px;font-weight:500;line-height:1.5}
 .intro .j{font-size:14px;color:var(--ink-2)}
 .intro .m{font-size:12px;color:var(--ink-3)}
 
 /* ---------- ready for a unit: the plan ---------- */
-.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.pcard{display:grid;gap:8px;align-content:start;padding:13px 16px 16px;border:1px solid var(--rule);border-top:3px solid var(--neutral);border-radius:4px;background:var(--surface)}
-.pcard.bad{border-top-color:var(--bad)} .pcard.watch{border-top-color:var(--watch)} .pcard.good{border-top-color:var(--good)}
-.pcard h4{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;line-height:1.57}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px}
+.pcard{display:grid;gap:8px;align-content:start}
+.pcard h4{display:flex;align-items:center;gap:8px;min-height:32px;font-size:13px;font-weight:500;line-height:1.5;color:var(--ink-2)}
 .pcard p{margin:0;font-size:13px;color:var(--ink-2)}
 .planbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:4px}
 
 /* ---------- fading skills: the picked skill, under the rows on a narrow page ---------- */
-.fdet{display:grid;grid-template-columns:minmax(0,520px) minmax(220px,1fr);gap:24px;align-items:start}
-.fdet .viz.small{min-width:0;max-width:520px}
-.fdet .fig{overflow:visible}
-.fside{display:grid;gap:12px;align-content:start}
 
 /* ---------- student profile ---------- */
-.phead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.phead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:16px}
 .pname{margin:2px 0 0;font-size:24px;font-weight:500;line-height:1.334}
 .pnav{display:flex;gap:8px}
 .usnaps{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
@@ -539,6 +606,62 @@ button.usnap{cursor:pointer;transition:background-color .15s} button.usnap:hover
 .vn{font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink-3)}
 .lvl{flex:none;width:8px;height:8px;border-radius:50%;background:var(--neutral)}
 .lvl.bad{background:var(--bad)} .lvl.watch{background:var(--watch)} .lvl.good{background:var(--good)}
+/* the bar's buttons, and the version picked, on its right */
+.th-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto}
+.th-ver select{height:32px;font-size:13px}
+.thread.fv{align-items:flex-start}
+.thread.fv .th-act{align-self:center}
+/* versions 2 to 5 take the bar's full width under a line with the name and the buttons */
+.thread.fv-2,.thread.fv-3,.thread.fv-4,.thread.fv-5{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who act" "body body";gap:10px 16px}
+.thread.fv-2 .th-who,.thread.fv-3 .th-who,.thread.fv-4 .th-who,.thread.fv-5 .th-who{grid-area:who;display:flex;align-items:baseline;gap:10px}
+.thread.fv-2 .th-act,.thread.fv-3 .th-act,.thread.fv-4 .th-act,.thread.fv-5 .th-act{grid-area:act}
+.thread.fv-2>.fv2,.thread.fv-3>.fv3,.thread.fv-4>.fv4,.thread.fv-5>.fv5,.thread.fv>.hint{grid-area:body}
+.fv1-c,.fv2-r,.fv3-c,.fv4-r,.fv5-s{font:inherit;color:inherit;letter-spacing:inherit;text-align:left;cursor:pointer}   /* the versions' own buttons; the bar's buttons keep theirs */
+/* v1 · status chips: the status alone, in the app's status chip; the details on hover */
+.fv1{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1;min-width:0;align-self:center}
+.fv1-c{height:28px;padding:0 12px;border:0;border-radius:14px;background:var(--chip);font-size:13px;font-weight:500;transition:filter .15s}
+.fv1-c.bad{background:var(--bg-bad);color:var(--bad-ink)} .fv1-c.watch{background:var(--bg-watch);color:var(--watch-ink)}
+.fv1-c:hover{filter:brightness(.96)}
+/* v2 · a row a page: the page, the status, the details, in columns */
+.fv2{display:grid;flex:1;min-width:0}
+.fv2-r{display:grid;grid-template-columns:24px 210px 220px minmax(0,1fr) 12px;align-items:center;gap:12px;min-height:34px;padding:4px 8px;border:0;border-top:1px solid var(--rule);border-radius:0;background:none;font-size:13px}
+.fv2-r:first-child{border-top:0}
+.fv2-r:hover{background:var(--hover)}
+.fv2-r .glyph,.fv5-s .glyph{color:var(--ink-3)}
+.fv2-p{color:var(--ink-3)}
+.fv2-s{font-weight:500}
+.fv2-d{color:var(--ink-2)}
+.fv2-go{color:var(--ink-3);font-size:16px}
+/* v3 · columns: a strip of figures, a line between them, no boxes */
+.fv3{display:flex;flex-wrap:wrap;gap:8px 0;flex:1;min-width:0}
+.fv3-c{display:grid;gap:2px;align-content:start;min-width:150px;max-width:320px;padding:0 20px;border:0;border-left:1px solid var(--rule);background:none}
+.fv3-c:first-child{padding-left:0;border-left:0}
+.fv3-c:hover .fv3-s{text-decoration:underline}
+.fv3-p{font-size:12px;color:var(--ink-3)}
+.fv3-s{font-size:15px;font-weight:500;line-height:1.4}
+.fv3-d{font-size:13px;line-height:1.4;color:var(--ink-2)}
+/* v4 · by group: under the rail's own groups */
+.fv4{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 32px;flex:1;min-width:0}
+.fv4-h{margin:0 0 4px;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.fv4-r{display:flex;align-items:baseline;gap:8px;padding:2px 0;border:0;background:none;font-size:13px;line-height:1.5}
+.fv4-r .lvl{transform:translateY(-1px)}
+.fv4-r:hover .fv4-s{text-decoration:underline}
+.fv4-s{font-weight:500}
+.fv4-d{color:var(--ink-2)}
+.fv4-n{margin:0;font-size:13px;color:var(--ink-3)}
+/* v5 · scorecard: a slot for every page, the same for every student */
+.fv5{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;flex:1;min-width:0}
+.fv5-s{display:grid;gap:2px;align-content:start;justify-items:start;min-width:0;padding:8px 10px;border:0;border-radius:4px;background:var(--page);transition:filter .15s}
+.fv5-s:hover{filter:brightness(.97)}
+.fv5-p{font-size:12px;line-height:1.3;color:var(--ink-3)}
+.fv5-v{font-size:13px;font-weight:500;line-height:1.4}
+.fv5-m{font-size:12px;color:var(--ink-3)}
+.fv5-s.bad{background:var(--bg-bad)} .fv5-s.watch{background:var(--bg-watch)}
+.fv5-s.none .fv5-v{color:var(--ink-3)}
+/* a status takes its colour on the word, in every version */
+.fv2-s.bad,.fv3-s.bad,.fv4-s.bad,.fv5-s.bad .fv5-v{color:var(--bad-ink)}
+.fv2-s.watch,.fv3-s.watch,.fv4-s.watch,.fv5-s.watch .fv5-v{color:var(--watch-ink)}
+.fv5-s.good .fv5-v{color:var(--good-ink)}
 
 /* ---------- more than one book ----------
    The filter under the answer: each book carries its letter, which is what the compact places (a column heading, a lesson code) show.
@@ -552,7 +675,6 @@ button.usnap{cursor:pointer;transition:background-color .15s} button.usnap:hover
 .usnap.lbl{border:0;padding-left:0;color:var(--ink-3);font-weight:500}
 .bkrow{flex-basis:100%}
 .bkrow .bkl{min-width:150px;font-size:13px;font-weight:500;color:var(--ink-2)}
-.foot .fsw .lnk{font-size:12px;letter-spacing:.03em}
 
 /* ---------- a skill's table: every student by question, in a dialog ----------
    Material's dialog: a scrim over the page, a sheet at elevation 24 as wide as its table needs and no wider than the window, the page under it still.
@@ -596,10 +718,13 @@ html.dlg-on,html.dlg-on body{overflow:hidden}
 .sktbl .qh{display:grid;justify-items:center;gap:3px;width:28px;padding:5px 0 4px;border:0;border-radius:4px;background:none;color:var(--ink-2);font:inherit;font-size:12px;cursor:pointer}
 .sktbl .qh:hover{background:var(--hover);color:var(--ink)}
 .sktbl .qi{display:block;color:var(--ink-3)}
-.sktbl .qon{background:var(--accent-soft)}
+.ni{display:inline-block;width:.86em;height:.86em;margin-right:.38em;vertical-align:-.06em;color:var(--ink-3)}   /* before a name: a bulb for a skill, its format for a question */
+.viz .qi{color:var(--ink-3)}
+.sktbl .qon{background-color:var(--accent-soft)}
 .sktbl th.qon .qh,.sktbl th.qon .qi{color:var(--blue-ink)}
-.sktbl tbody tr:hover>*:not(.qon){background:var(--page)}
-.sktbl tbody tr.on>*:not(.qon){background:var(--accent-soft)}
+.sktbl tbody tr:hover>*:not(.qon){background-color:var(--page)}
+.sktbl tbody tr.on>*:not(.qon){background-color:var(--accent-soft)}
+.sktbl td.then{background-image:linear-gradient(var(--then),var(--then));background-repeat:no-repeat;background-position:center;background-size:100% 26px}   /* started by the earlier of two days: a band behind the marks, unbroken along a run */
 .sktbl .num{color:var(--ink-2);text-align:right}
 .sktbl .t3{color:var(--ink-3)}
 .sktbl .nm,.sktbl .nm:hover{height:auto;min-height:28px;padding:0;border:0;border-radius:0;background:none;color:var(--ink);font-size:14px;text-align:left}
@@ -614,6 +739,8 @@ html.dlg-on,html.dlg-on body{overflow:hidden}
 .qm{display:block;width:20px;height:20px;flex:none}
 .sktbl .rs{display:inline-flex;vertical-align:middle}
 .tkey .qm{width:18px;height:18px}
+.tkey .qm+.qm{margin-left:-3px}   /* the retry mark's shades read as one run */
+.tkey .thn{display:inline-block;width:18px;height:12px;border-radius:2px;background:var(--then)}
 .sktbl .gw,.tbl-q .gw{font-weight:500;color:var(--bad-ink)}
 
 /* ---------- tooltip and snackbar ---------- */
@@ -631,12 +758,17 @@ html.dlg-on,html.dlg-on body{overflow:hidden}
   .rail button{grid-template-columns:24px auto auto;column-gap:8px;white-space:nowrap;padding:0 10px}
   .topbar{padding:0 12px;gap:8px}
   .brand,.demo-date,.avatar{display:none}
-  .fdet{grid-template-columns:minmax(0,1fr)}
+  .icards{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:760px){.wl-h{display:none}.wl-r{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:640px){
-  .page{padding:12px 12px 40px}
-  .view{padding:16px}
+  .page{padding:16px 16px 40px}
+  .fv2-r{grid-template-columns:24px minmax(0,1fr) 12px;grid-template-areas:"g p a" "g s a" "g d a";row-gap:0}
+  .fv2-r .glyph{grid-area:g}.fv2-p{grid-area:p}.fv2-s{grid-area:s}.fv2-d{grid-area:d}.fv2-go{grid-area:a}
+  .fv4{grid-template-columns:minmax(0,1fr)}
+  .fv5{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .fv3-c{min-width:0;padding:0 12px}
+  .mcard{padding:16px}
   .log li{grid-template-columns:44px minmax(0,1fr) auto}
   .log li .vp{display:none}
   .gset li{grid-template-columns:16px minmax(0,1fr) 28px}
@@ -646,9 +778,11 @@ html.dlg-on,html.dlg-on body{overflow:hidden}
   .gset .x{grid-column:3;grid-row:1}
 }
 @media (max-width:560px){
+  .icards{grid-template-columns:minmax(0,1fr)}
+  .vctl{justify-content:flex-start;margin-left:0}
   .hr{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n p" "b b";row-gap:5px}
   .hc.fol .hr{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"n s p" "b b b"}
-  .hr .hn{grid-area:n}.hr .hb,.hr .hx{grid-area:b;margin-left:16px}.hr .hp{grid-area:p}.hr .hs{grid-area:s}
+  .hr .hn{grid-area:n}.hr .hb,.hr .hx,.hr .vk{grid-area:b;margin-left:16px}.hr .hp{grid-area:p}.hr .hs{grid-area:s}
   .l1 .hx,.l2 .hx{margin-left:34px}.hh .hx{display:none}
   .hc.v7 .hr{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"n g k" "b b b"}
   .hc.v7.fol .hr{grid-template-columns:minmax(0,1fr) auto auto auto;grid-template-areas:"n s g k" "b b b b"}

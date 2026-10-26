@@ -111,7 +111,7 @@ def read_outline(q, books):
 def read_skills(q, U, subs, items, subix, iidx):
     """What each subunit teaches and checks, the skills each item is tagged with, and what each unit builds on.
     A subunit's skills are the ones it gives most teaching weight to (unit_skill_coverage) that its questions are
-    tagged with (item_skill, only tags with a relevance score above MIN_RELEVANCE), preferring skills three or more of
+    tagged with (item_skill, only tags with a relevance score above MIN_RELEVANCE, each item keeping its tags' scores in rel), preferring skills three or more of
     its questions check. A review subunit, or a lesson in
     a book with no coverage weights (a book of labs), teaches nothing new by that measure, so it lists what it checks most.
     Skills are numbered in the order the subunits first name them, so the first book's numbers do not change when a
@@ -119,8 +119,8 @@ def read_skills(q, U, subs, items, subix, iidx):
     graded_ids = [it['id'] for it in items if it['type'] in GRADED]
     tag_rows = q("select item_id, skill_id::text, relevance_score from item_skill where item_id = any(:i) and coalesce(ignore, false) = false and relevance_score > :r order by item_id, relevance_score desc, skill_id", i=graded_ids, r=MIN_RELEVANCE)
     cov_rows = q("select unit_id, skill_id::text, coalesce(teach_weight, 0)::float8, coalesce(assess_weight, 0)::float8 from unit_skill_coverage where unit_id = any(:u)", u=[s['id'] for s in subs])
-    tags = defaultdict(list)
-    for item_id, sk, rel in tag_rows: tags[iidx[item_id]].append(sk)
+    tags, rels = defaultdict(list), {}
+    for item_id, sk, rel in tag_rows: tags[iidx[item_id]].append(sk); rels[(iidx[item_id], sk)] = round(float(rel), 2)
     cov = defaultdict(dict)
     for unit_id, sk, tw, aw in cov_rows: cov[subix[unit_id]][sk] = (tw, aw)
     skills, kidx = [], {}
@@ -141,7 +141,9 @@ def read_skills(q, U, subs, items, subix, iidx):
         for sk in taught[:SKILLS_PER_SUB]:                            # among its top skills, one that no question checks
             if n_items[sk] == 0: sb['skills'].append([kid(sk), 1, 0]); break
     for ix, it in enumerate(items):
-        it['skills'] = [kidx[sk] for sk in tags.get(ix, []) if sk in kidx][:3]
+        sks = [sk for sk in tags.get(ix, []) if sk in kidx][:3]
+        it['skills'] = [kidx[sk] for sk in sks]
+        it['rel'] = [rels[(ix, sk)] for sk in sks]   # each tag's relevance score (0.75 or 1 above the cut): a level weighs the question by it
     # what each unit builds on: skills an earlier unit teaches (as one of a subunit's listed skills) that this unit's subunits use.
     # "Earlier" is the order of the list: the book's own earlier units, and every unit of a book listed before it.
     # Left out: skills fewer than three questions check, and skills that only describe a question format (nine in ten of their
@@ -170,6 +172,22 @@ def read_skills(q, U, subs, items, subix, iidx):
     return skills
 
 
+def read_students(q, section):
+    """The section's students, in the file's order (by first name, then last), each named by first name, with the last initial when two
+    share one. Returns [{'id': section_user_id, 'name'}]."""
+    people = q("""select su.section_user_id, coalesce(nullif(u.preferred_first_name, ''), u.first_name), u.last_name
+                  from section_user su join app_user u using (app_user_id)
+                  where su.section_id = :s and su.role = 'student' and coalesce(su.ignore, false) = false and su.deleted_at is null and not u.is_virtual
+                  order by 2, 3""", s=section)
+    first_count = defaultdict(int)
+    for _, f, _l in people: first_count[(f or '').strip()] += 1
+    students = []
+    for su, f, l in people:
+        f, l = (f or 'Student').strip(), (l or '').strip()
+        students.append({'id': su, 'name': f if first_count[f] == 1 else '%s %s.' % (f, l[:1])})
+    return students
+
+
 def write(out, path, header):
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
@@ -188,17 +206,8 @@ def main():
     sec_name, cur_id, term_start, term_end = sec[0]
     books = read_books(q, SECTION, cur_id)
     multi = len(books) > 1
-    people = q("""select su.section_user_id, coalesce(nullif(u.preferred_first_name, ''), u.first_name), u.last_name
-                  from section_user su join app_user u using (app_user_id)
-                  where su.section_id = :s and su.role = 'student' and coalesce(su.ignore, false) = false and su.deleted_at is null and not u.is_virtual
-                  order by 2, 3""", s=SECTION)
-    first_count = defaultdict(int)
-    for _, f, _l in people: first_count[(f or '').strip()] += 1
-    students, sidx = [], {}
-    for su, f, l in people:
-        f, l = (f or 'Student').strip(), (l or '').strip()
-        sidx[su] = len(students)
-        students.append({'id': su, 'name': f if first_count[f] == 1 else '%s %s.' % (f, l[:1])})
+    students = read_students(q, SECTION)
+    sidx = {s['id']: n for n, s in enumerate(students)}
     if not students: sys.exit('Section %d has no students' % SECTION)
     print('class: %s · %s · %d students' % (sec_name, ' + '.join(b['name'] for b in books), len(students)))
 
@@ -278,6 +287,11 @@ def main():
         for cid, su, status in q("select coursework_id, section_user_id, status::text from coursework_status where coursework_id = any(:c) and section_user_id = any(:su) and coalesce(ignore, false) = false", c=list(cwix), su=su_ids):
             if status in ('completed', 'partially_graded', 'graded', 'returned', 'feedback_seen'): cws[cwix[cid]]['done'].add(sidx[su])
     for c in cws: c['done'] = sorted(c['done'])
+    # each set's own questions, so My actions can judge it on later work on the same skills and leave its own questions out of that work
+    if cwix:
+        for cid, item_id in q("select coursework_id, item_id from coursework_item where coursework_id = any(:c) and coalesce(ignore, false) = false", c=list(cwix)):
+            if item_id in iidx: cws[cwix[cid]].setdefault('items', set()).add(iidx[item_id])
+    for c in cws: c['items'] = sorted(c.get('items', ()))
 
     graded_ids = [it['id'] for it in items if it['type'] in GRADED]
     bug_rows = q("select item_id, status::text, left(feedback, 160) from item_bug_report where item_id = any(:i) and coalesce(ignore, false) = false", i=graded_ids)

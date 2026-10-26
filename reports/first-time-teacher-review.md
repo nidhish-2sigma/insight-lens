@@ -580,6 +580,10 @@ On the default unit, Inheritance, all agree that Methods in Classes comes first,
 
 Pictures: `reports/img/ready-v1.png` to `ready-v4.png`, Inheritance at 1440 wide. Which version to keep, or which parts to combine, is open.
 
+On 25 October v1 (left to right) and v3 (weighted) were taken out on request: the select now offers Current, v2 · Radial and v4 · Class split, and `?rv=1` or `?rv=3` opens the current tree.
+
+Then, also on request: "Use same pattern for circles on all the graphs. Also, remove the yellow, red and green colors from level needed. Instead show the numbers in those colors to tell which skills students are good at and which they are not good at." Every ring, on the current tree and on v2, is now v4's ring, the students checked on the skill split by ALPS level, so v4 was the current tree and left the select (`?rv=4` opens the current tree). The share inside each ring takes the status colour (red under 60%, amber 60 to 79%, green 80% or more), and the key's second line shows the three ranges in those colours. The level line's nodes are gray, the picked one in the primary colour; each stop still says its verdict in words.
+
 ### The ALPS app's theme and names
 
 Asked on 16 October: "Review the names and theme used in alps-react-app and use same theme (colours) and names in /Users/nidhishkumar/2Sigma/insight-lens3." ALPS was read, not changed: its colours and theme (`src/App.css`, `src/utils/colors.js`, `src/utils/mui-theme.js`), its levels (`src/utils/performance-data-processing.js`, `src/contexts/SectionContext.jsx`), and the screens that show them (the class bar, the student's battery, the level legend, Student Breakdown, the class overview's cards).
@@ -878,14 +882,531 @@ Then, the same day: "remove reteach buttons as there is no action related to tha
 
 Pictures: `after-skills.png`, `after-hardest.png`, `after-skills-table.png`, `after-skills-table-question.png`, `after-skills-two-days.png`, `after-skills-table-two-days.png`, `after-effort.png`, `after-effort-card.png`, `after-effort-student.png`, `after-stall-points.png` and `after-stall-skill.png` were taken again.
 
+On 24 October, with a screenshot of the weak-now chart (six rows of lines and no scale): "for drifting and this graph, there is no y-axis labels. Please add those in a better form so that teachers can easily understand what they are representing. Don't use too technical words from database related fields."
+
+**Each chart says what its height is.**
+
+| Chart | Heading over the lines | Scale | At the end of the line | Hover |
+|---|---|---|---|---|
+| Skills, *Weak now* | % of students who have mastered it | 100% and 0% on the first row under each status; a faint line at 100% on every row | (the count of beginning or attempted, as before) | a stretch's dates and "x% of the n students with a level on it had mastered it", as before |
+| Drifting | Questions tried in each 5 days, over the dates | on each student's line: a round top (70), their normal at the middle of the gray band (19), 0 when there is room | their last five days, in bold (5) | new: a stretch's dates, the questions tried and their normal |
+
+- **The scale once per status on Skills.** With 100% and 0% on every row, each row's 0% sat closer to the next row's 100% than to its own, and the labels read as one column of numbers. Every row shares the one scale, so the first row under each status carries it and the faint line at 100% shows it on the rest.
+- **The scale on every line on Drifting.** Each student has their own scale (a student's normal can be 6 or 38 questions), so each line says its own top, rounded up (to 70, 80 or 100, say), and their normal.
+- **The words.** The key, the hovers and "How to read" on Skills said "students checked on it", a word from the answer records. They now say "students with a level on it", ALPS's word. Drifting's key reads "Gray band: their normal range · Hatched: no class work".
+- The other students' small lines on Drifting stay without numbers; a profile's timeline already had its scale and is unchanged.
+
+**Checks.** Two added, both run on the page's own code. On *Weak now*, the first row under each status says 100% and 0%, every row has the faint line, and the heading is there. On Drifting as of 15 November 2025, the heading appears once, each of the four drifting lines says a round top over everything on it, their normal and their last five days, with hovers, and the small lines have no numbers. The weak-skills check now wants the plain words. 21,010 of 21,010 pass.
+
+Pictures: `after-skills.png`, `after-skills-two-days.png`, `after-skills-table.png`, `after-skills-table-question.png`, `after-skills-table-two-days.png`, `after-drifting.png` and `after-drifting-2025-11-14.png` were taken again.
+
+Then, the same day: "Not looking good. Present it better format", and then "The y-axis label part. Make it better".
+
+**A real scale on every row.** The first version squeezed its numbers into rows built without room for them: on Skills, a scale on one row a status with a lone faint line on the others; on Drifting, three uneven numbers (70, 19, 0) in a narrow gutter beside the hatching at the start of the line. Now each row is a small chart with an axis of its own.
+
+| Chart | Before | Now |
+|---|---|---|
+| Skills, *Weak now* | 100% and 0% on the first row of each status; 46px rows | 100%, 50% and 0% on every row, on faint lines, in rows of 60px with a line between them, so each row's numbers stay with it; the heading sits over the scale |
+| Drifting | a round top, the student's normal and 0 (when it fitted) in a 46px line | 0, half and a round top, evenly spaced on faint lines (0 · 40 · 80, or 0 · 25 · 50), in a 64px line; the normal is the gray band, and its number is on hover |
+
+The hatching for the days before the class's first work is no longer drawn at the start of a Drifting line, where it sat against the scale. The heading, the last five days at the end of the line and the hovers are unchanged.
+
+**Checks.** The three label checks were rewritten for the new form: every weak-now row says 100%, 50% and 0% with a line between rows; every drifting line's scale reads 0, half and a round top over everything on it. 21,010 of 21,010 pass.
+
+Pictures: the same seven were taken again.
+
+### Ready for a unit, on ALPS's own levels from the database
+
+Asked on 25 October: "For the readiness page, please check the data in the database and use exact data." The database was read again, through the same read-only session as the exports.
+
+**What had drifted.** The anonymised copy had been refreshed since the export of 13 October. The 36 students and every one of their 11,002 results are the same, but each student has a new anonymised name (Aimee is now Stephen, Mariah is Sandy), twelve questions carry different skill tags, five skills are new to the class's lessons, and there are two more bug reports. The skill graph, the teaching weights and the work itself had not changed. So `data/class.js`, `data/example.js` and `data/prereqs.js` were exported again, in the README's order. The new names are on every page, and the invented sample rows in `data/sample.js` now name the same students by their new names.
+
+**What the page read before.** Each ring was the page's own estimate of a student's level: the average credit on the skill's questions, banded at ALPS's cuts, with two checks needed. The database holds the level ALPS itself shows, its learner model's score for each student on each skill (`student_performance_predictions`: glmnet, publication 75, data cutoff 6 Feb 2026, the moment of the class's last work). The model scores 12,211 of the 12,225 student and skill pairs with a marked answer, and nothing else; of the 141 pairs a student answered without a score, almost all are short-answer questions, which are not marked. ALPS calls those unavailable.
+
+**What it reads now.** `tools/export-prereqs.py` writes that score for every student on every skill a tree can draw, rounded as the service rounds it, and the page bands it at 40, 55, 65 and 80. A ring is the students with a level, split by level; its share is of them; its hover counts the rest in ALPS's words, not attempted and unavailable. "Two or more checks" is gone from the page: a ring needs eight students with a level. Before the cutoff there are no levels, so read as of an earlier day the page says "ALPS's learner model has levels for this class as of 5 Feb 2026, and none for an earlier day" and draws no tree. The other pages still work out their own levels.
+
+**What that changes.** The model gives each student about the same score on most of their skills (a student's commonest score covers 65% to 77% of their skills), and nine scores in ten sit between 40 and 60. Across the class 79% of all levels are Attempted, 15% Familiar, 2.6% Proficient and 0.1% Mastered. On Inheritance:
+
+| Skill | Page's estimate, at least proficient | ALPS, at least proficient | ALPS, beginning / attempted / familiar / proficient / mastered |
+|---|---|---|---|
+| Methods in Classes | 59% of 17 | 0% of 35 | 0 / 31 / 4 / 0 / 0 |
+| Arithmetic Operators | 88% of 33 | 3% of 35 | 0 / 30 / 4 / 1 / 0 |
+| Construct and Utilize Objects | 67% of 3 (dashed) | 3% of 36 | 0 / 31 / 4 / 1 / 0 |
+| Java Main Method | not drawn | 3% of 34 | 0 / 29 / 4 / 1 / 0 |
+| Perform Integer Arithmetic | not drawn | 0% of 29 | 25 / 4 / 0 / 0 / 0 |
+
+The counts were read again straight from the database and match the page. At attempted the class is ready for most units, with "Groups first" and a group of eleven on five; at familiar and above every unit is "Not ready"; nobody is ready to go further at any level.
+
+**Checks.** The wording checks follow the new words, the small-group and plan-group checks now look at every level (at proficient there is no group to look at), and three checks are new: the file's levels are the model's, one a student on every skill; every ring bands them at ALPS's cuts; and a day before the cutoff draws no tree. 21,013 of 21,013 pass.
+
+**Taken back the next day.** Asked which levels the pages should use, given that ALPS's barely differ between skills, the answer was the class's answers, on every page. Ready for a unit reads the page's own level again, so the table above is the record of what the change would have shown. What stays from it: the re-export, the words ("with a level on it" for "checked on it"), the hover in ALPS's words (not attempted, unavailable), and the export's summary of ALPS's levels, which the sources quote.
+
+### Every page, checked against the database
+
+Asked on 26 October: "Check all other pages as well and use actual data from the database. If there is not enough data in the selected units, use other units with fair amount of data to justify the visualizations." Asked in turn which levels to use, the answer was the class's answers: every level is the page's own, worked out from the answers the database records and banded at ALPS's cuts, as before.
+
+**The records.** Every record in `data/class.js` was read again from the database with queries written for the check, not the export's: the 36 students in order, all 11,002 results field by field (right first try, within three, ever, tries, first and last day, seconds, the first right try), 1,474 days of activity, the 21 assigned sets with their finishers, 11 bug reports and the one targeted set. All match.
+
+**The figures.** Each page's headline figures were worked out again in Python from those records, by the README's definitions, and compared with the page:
+
+| Page | Figure | Page | Worked out again |
+|---|---|---|---|
+| Engagement and performance, Using Objects and Methods | on track, keep going; struggling, low engagement, coasting | 18, 3; 5, 5, 5, the same names | 18, 3; 5, 5, 5, the same names |
+| Drifting, 19 November | drifting; under half their normal | Martin, Sandy; 14 | Martin, Sandy; 14 |
+| On pace, Data Collections | goal; reach it; short, not catching up / catching up; latest check | 42 (32 + 10); 0; 31 / 5; 18 Dec | the same, and each student's count |
+| Skills, weak now | listed; weak; improving; recovered; first | 28; 25; 2; 1; Class Instantiation in Java, 26 of 36 | the same |
+| Skills, by unit | not mastered | 59%, 59%, 47% | the same |
+| Skills, faded | faded of rechecked; the first | 7 of 34; 71% to 10% | the same |
+| Stall points | gave up; skipped | 29 at Modulo Operation Patterns; 27 | the same (27 skipped two questions; the page names the first in book order) |
+| A profile, Sandy | slipped; proficient units; pace | 14 of 25; 3 of 3; 10 of 42 | the same |
+
+**ALPS's own levels** were read too and are not drawn: the learner model (`student_performance_predictions`, glmnet, cutoff 6 February 2026) gives each student nearly one score on every skill. On 95% of skills a student's score is within 5 points of their own median, every unit averages about 49 with 2–4% proficient or above (Getting Started, which the class never opened, has 1,665 scores and no answers), and 79% of all its levels are Attempted, 0.1% Mastered. The sources say so with the export's figures.
+
+**What each page opens on.** The class's work: Units 1 and 2 in September and October 2025, Unit 4 in November and December (2,892, 6,405 and 1,608 questions answered, counting a student and a question once), next to nothing in the other units, and nothing after mid-December but one answer on 5 February 2026. So:
+
+- **On pace** opened on the export date, ten months after the work, and projected a December pace to November 2026: 0 of 36 reaching the goal, 31 not catching up. It now opens, as Drifting does, on 19 November 2025, the latest day Drifting can judge, when the class was in Data Collections: 19 not catching up, 17 catching up. "Back to today" returns to the export date.
+- **Ready for a unit** opened on Inheritance, the first unit not started after the current one, whose tree had a ring on 3 students and one on 17. It now opens on the earliest unit not started after one the class has started: Class Creation, which the class skipped, with every top ring on 33 to 36 students and two on the second row ("Ready for Class Creation at proficient", twelve ready to go further). With no unit skipped the rule is the old one.
+- **My actions** showed one real set, too early to tell, and six invented rows. The invented rows and `data/sample.js` are gone. The page now judges every set the database records by the same rule: the targeted set and the 20 sets assigned to the whole class with a due date, finishers against classmates who didn't finish, on later work on the set's skills (the export now writes each set's questions). Two can be judged, 2.20 Loops Coding Practice (+10 points, range −6 to +27, 24 who finished against 9) and 2.21 Loops Multiple Choice Exercises (+6, −5 to +17, 27 against 6), both promising, not proven. For the other 18 nearly everyone finished, so nobody is left to compare with, or the later work is too thin; they are listed under "Can't be judged yet" with why. A set's detail names who didn't finish it.
+- **Engagement and performance** (the unit with the most struggling, Using Objects and Methods), **Drifting** (19 November), **Skills** and **Stall points** (all units) already open on units and days with work, and keep them.
+
+**Left as it is.** The one answer on 5 February 2026 is real, so the footer's "latest work" and the end of every time axis (17 February) keep it. The example with three more books (`?books`) still invents the work in its added books, as it says, since no real class has work in several.
+
+**Checks.** The sample file's checks give way to one that nothing on a page is invented; the levels checks read the page's own level again; and new ones hold My actions to every set the export records with each estimate inside its range, and Ready for a unit to its opening rule. 21,012 of 21,012 pass.
+
+### A followed student in the class's colours
+
+Asked on 26 October, of Stall points with a student followed: "can we use consistent colors/icons for individual students as well". The class's bars and key used red for gave up, amber for skipped, pale green for needed retries and green for first time; the followed student's column used four blue marks (a cross, a dashed ring, a half dot, a dot) with a second key row of their own. Skills · by unit copied that column for levels (a blue dot, a blue ring).
+
+Now a followed student is marked in the class key's own squares and colours. On Stall points each piece of content takes the square of the student's outcome, and a unit or subunit counts the questions they gave up on and skipped beside those squares; the key has one row, "Students and Abigail". On Skills · by unit a skill takes the square of the student's level, as in the key, and a unit or subunit counts the skills they have not mastered by group, each group's square split between its two levels' colours. The counts are in ink, and only the student's name over the column stays blue; blue still marks where a followed student is on a chart (Engagement and performance, Ready for a unit), which is a position, not a result. A pale square has the key's thin edge, so needed retries and attempted read on white. Two checks hold the column to the key: every mark is one of the four outcome colours, and with each student followed every piece of content carries that student's own outcome.
+
+### Ready for a unit, the skills a unit needs most
+
+Asked on 26 October: "how are we deciding which skills to show in this?", then, of Inheritance's tree: "This is pulling up and showing skill which is not very relevant for the unit. Like "If-Else Statements in Java" is not needed for inheritance, right? The relevance is not too much."
+
+**What it did.** The export ranked each unit's prerequisites by the graph's confidence times use and kept twelve; the page then drew four, the ones the class had enough answers on first. So on Inheritance If-Else Statements in Java, the twelfth candidate, made the top row only because 36 students had answered it: of Inheritance's 99 graded questions, 1 needs it. Accessor Method Effects (5 questions) and Java Main Method (4) did not show.
+
+**What it does now.** Relevance is counted in questions: a prerequisite is needed by a question when one of the question's skills leads to it in the graph. The export keeps a prerequisite only when three or more of the unit's questions need it (`MIN_NEED`), the skills this class's questions check first, each group ranked by how many of the unit's questions need it, then by confidence times use. The page draws the first four, whatever the evidence: a skill with too little is a dashed ring. The hover says "20 of the unit's 99 questions need it". Ranked by need alone, the top rows had filled with skills from other books of the skill set that no question here checks ("Utilize Conditional Statements", needed by 53 questions), every tree dashed, so the checked-first grouping stays.
+
+**A ring's levels.** A prerequisite that no started lesson lists had no ring even when the class had answered it: Java Main Method on Inheritance had 21 students with two or more answers and read "Not met yet in a lesson the class worked on". Its levels are now the class's answers, as for any skill, and the book under the ring still says it was not taught.
+
+**Inheritance, before and after.** Before: Methods in Classes 59%, Arithmetic Operators 88%, If-Else 89%, Construct and Utilize Objects dashed, and under If-Else, Compound Boolean Expressions and Java If Statement. After: Java Main Method 19% (4 of 99 questions), Methods in Classes 59% (20), Construct and Utilize Objects (7) and Accessor Method Effects (5) dashed, too few answers; Arithmetic Operators (3 questions) is among "+8 more". The answer names Java Main Method first, the weakest of the four. Class Creation, which the page opens on, keeps three rings on 33 to 36 students and gains a dashed one, Assign Values to Variables (10 of its 125 questions).
+
+**Checks.** A new one holds every unit's top row to the export's first four, each needed by three or more of the unit's questions; the level checks read the class's answers for a skill no lesson lists. 21,015 of 21,015 pass.
+
+### Stall points, skipped or not reached yet
+
+Asked on 26 October, after how the bars are worked out: "Maybe create a new part showing students who haven't reached there yet. It would be good to not show false info." Skipped had counted every student who never tried a question, so the last lessons the class got to read as skipped by students who had simply not got there.
+
+**The new part.** Where a student has got to is the latest started lesson they have worked in (tried one of its questions, or opened its content), in the order the class worked on the lessons. A question they never tried is skipped when they have got to its lesson or past it, and not reached yet before that. Not reached yet is the bar's last part, empty with a line round it as ALPS draws not started, in the key, the hover and the panel, where its students are named apart. The worst questions, the headline and the "Most skipped" sort count skipped alone.
+
+**What it changes here.** The class worked into Data Collections and stopped there, so every student had got past every lesson of Units 1 and 2: an untried question there was skipped on the way, and stays skipped (1.26 Weighted Level Score Calculation: 27). In Data Collections, 156 student-question pairs are not reached yet; the unit reads 10% skipped instead of 19%. Lesson 4.7 is where most of the class had not got to: Java Wrapper Class Errors was 27 skipped and is 6 skipped and 21 not reached yet, so it leaves the worst questions. (The earlier answer here said 1.20 Unit Summary 1b's 56% skipped was students who never reached it; by this rule they had worked on later lessons, so it is skipped.)
+
+**Checks.** One recomputes where each student has got to from their answers and opens, and holds every untried question to it: skipped from there on, not reached yet before. The followed student's checks take the fifth colour. 21,016 of 21,016 pass.
+
+### Stall points, ten other versions to choose from
+
+Asked on 26 October, of the stacked bars: "The main issue is that we are using same graph for different size data. One is a linear categorical data (at content level) and then unit or subunit level is a 2D categorical data. Both are using stacked plot which is not easy to interpret. Do research... give me 4-5 very different versions to select from." Then, of those five: "None of them are easy to understand for me. The end goal is for teachers to understand quickly and they are not very good with data analysis graphs. Present simply and make things intuitive. Let's create 5 more versions." And, of a first plainer five built from words, labels, a table and cards: "the visualization should be based on some graphs and all. Change all the latest 5 based on graphs."
+
+All ten sit behind one select beside the view ("Version") and open from the address with `?sv=1` to `?sv=10`. The page still opens on the current bars, and each version has its own "How to read".
+
+**What the research said.** Lengths that start from a common baseline are read far more accurately than the floating middle parts of a stacked bar ([Cleveland & McGill 1984](https://vis.arc.vt.edu/%7Enpolys/projects/safas/science.pdf); [Heer & Bostock 2010](https://homes.cs.washington.edu/~jheer/files/2010-MTurk-CHI.pdf); [Talbot et al.](https://www.tableau.com/fr-fr/research/publications/four-experiments-perception-bar-charts)). Diverging bars put the two sides of a scale on one line ([Heiberger & Robbins 2014](https://www.jstatsoft.org/article/view/v057i05)), at the cost of the middle ([Datawrapper](https://www.datawrapper.de/blog/divergingbars)). Many results per student are a matrix, read best reordered ([the reorderable matrix](https://www.r-bloggers.com/2013/06/the-reorderable-data-matrix-and-the-promise-of-pattern-discovery/); [Effenberger & Pelánek](https://is.muni.cz/publication/1820093/cs?lang=en) on student-by-question matrices; [Friendly](https://datavis.ca/papers/mosaic-history.pdf) on mosaics). A mark a person helps readers who are weak with numbers ([Galesic et al. 2009](https://journals.sagepub.com/doi/10.1177/0272989X10369000) on icon arrays; [Drucker & Fernandez](https://microsoft.com/en-us/research/?p=168633) on unit charts), and a dot a value on one scale avoids stacking ([dot plots](https://peltiertech.com/some-comments-on-dot-plots-guest-post/)).
+
+**The first five** redraw the marks and keep the page's figures: v1 diverging bars (gave up and skipped left of one line, needed retries and first time right, not reached yet apart); v2 a column an outcome, each on its own baseline; v3 dots on one scale, a lesson a small dot for each of its questions; v4 a grid of students by lessons, a lesson opening to students by its questions; v5 a square a student. On a lesson or unit v1 and v2 still pooled every student on every question, which was the complaint, and the user found none of the five quick to read. Two drawing faults are fixed in them: their class names had borrowed ones used elsewhere (`.dl`, `.ln`, `.hg`), which put gaps in v1's bars and cut v3's lines short, and v4's grid stretched to fill its column, so its names came out at about 20px.
+
+**The plainer five** are for a teacher who does not read charts, and are graphs a teacher already knows. A first set in words (traffic-light labels, a sentence a row, a figure a student, a table of counts, cards) was turned down for not being graphs, and each became a chart. None stacks or pools: a question is drawn from its own students, and a lesson or unit by its worst question or by how many of its questions are stall points or often skipped. Red and amber are strong only past the page's lines (7 or more of the 36 gave up, a stall point; 11 or more skipped, often skipped) and pale below them, so a strong colour is a problem.
+
+- **v6 · Bar chart.** Two bars a row on a gray track that is the whole class, red who gave up and amber who skipped, the count beside each, on one scale of students (0, 10, 20, 30). A lesson or unit shows the most on any one of its questions, named: "29 gave up · Modulo Operation Patterns".
+- **v7 · Rings,** as on Ready for a unit, each the whole class (gave up, skipped, got it, not reached yet), with the bigger of gave up and skipped inside. On a lesson or unit each student counts once, by the worst of theirs there: 2.6 reads 2 gave up on something, 9 skipped something (8 all of it), 25 got all they reached. A ring with nothing to flag has no number (asked the same day: "in case of no issues, let's not add the numbers").
+- **v8 · Columns along the course.** One column chart: every started lesson in course order under its unit, a red column for the most who gave up on one of its questions and an amber one for the most who skipped one, on one scale of students. The spikes are the stall points: 2.19 at 29, 4.3 at 20, and the end of Unit 1 at 26 and 27 skipped. A lesson opens to its questions, a pair each, with "All lessons" to go back.
+- **v9 · Funnel.** A question as steps: how many got to it, how many of those tried it, how many of those got it right, with the part lost at each step in amber (skipped) or red (gave up): Modulo Operation Patterns, 36 got to it, 33 tried it, 4 got it right. A lesson or unit shows its worst question's funnel.
+- **v10 · Course map.** A row a unit and a tile a lesson, its number the students who gave up on or skipped something there, each once. A tile is strong red once 7 or more gave up, strong amber once 11 or more skipped, pale red or amber when fewer did, and green, with no number, when nobody did (2.1, 2.7, 2.10). A tile opens to its questions, a tile each, coloured the same way.
+
+**A lesson counts its students, as its questions do.** Asked the same day, of v7 with 2.6 opened: "Why the top level graph is all green while the internal ones have skipped/gave up part?" A lesson's ring had counted its questions against the page's lines, and each of 2.6's 14 questions had 8 to 10 skipped and at most 1 gave up, under the lines (11 skipped, 7 gave up), so all 14 read as fine and the ring was all green, while the same 8 students (Alexis B., Dean, Ebony, Geoffrey, Lee, Misty, Monique, Raymond) had skipped every one of them. 23 lessons had that blind spot, among them 1.19 (7 students skipped all of it) and 2.23 (6). Now v7's lesson and unit rings, and v10's lesson tiles, count students, each once by the worst of theirs there: gave up on something, else skipped something, else got all they reached, else not reached yet. The cost is on whole units, where nearly everyone has given up or skipped somewhere (Unit 1: 19 gave up on something, 17 skipped something), so the label names the worst question. v6, v8 and v9 show a lesson's worst question and so never read as fine over it.
+
+**On this class.** Every version gives the same answer: Modulo Operation Patterns (2.19), 29 of 36 gave up, is the one stall point in Selection and Iteration; Data Collections holds 5 stall points (Community Class Object Array, 20 gave up, the worst); Using Objects and Methods is a skipping problem: 52 of its 111 questions are often skipped, 40 of them in the end-of-unit summaries and practice (1.20 to 1.26) and 12 in 1.15 Strings.
+
+**Checks.** Seven new ones. The select's options and `?sv=1` to `10`; a "How to read" of 53 words or fewer each; every version drawn in both views, opened down to the content, with and without a student followed, and each lesson opened on v4, v8 and v10, never showing undefined, NaN or null; and, recounted from each student's own result rather than the page's sums, v6's bars (each to scale, strong only past its line), v7's rings and v9's funnels on every question, lesson and unit, v8's columns and v10's tiles on every lesson, and every lesson opened to all of its questions, once each. A planted wrong value in any of the five graphs fails them. 21,022 of 21,022 pass.
+
+### Every view on the page
+
+Asked on 26 October, of the Skills page's view switch (Weak now, By unit, Faded): "Instead view filters to view one view at a time. In every page, make collapsible views and show all views in a scrollable way."
+
+Two pages had a switch that showed one view at a time: Skills (Weak now, By unit, Faded) and Stall points (Worst questions, By unit). The other pages have one view each; their controls (a unit, a day, a sort, a filter) narrow what one view shows and stay as they were.
+
+**Skills** now draws all three views one under another. Each is a section under its name with a chevron that folds it, and keeps its own question, "How to read" and answer, so the page reads as three short pages in a row: Weak now ("Class Instantiation in Java first: 26 of 36 beginning or attempted"), By unit ("Hardest unit: Using Objects and Methods"), Faded ("Class Instantiation in Java was 71% when taught and is 10% now"). Each keeps its own panel beside it.
+
+**Stall points** keeps one question, "How to read" and answer at the top, with the version under them, then the two sections, Worst questions and By unit, on the left of one panel that stays in view as the page scrolls, so a question picked in either section is shown once. Show and Sort sit in the By unit section, where they act.
+
+A folded section stays folded until opened again. A link into a view opens its section and scrolls to it: a student's flag or a log entry for By unit or Faded, the old addresses (`#hardest`, `#fading`), "Where they stall →" into the outline, and "All … by unit". Opened at `#hardest`, the page lands with By unit just under the top bar.
+
+**Checks.** The view switches are gone, both pages draw every view in order (each Skills section with its own answer, Stall points with one panel after both sections), and an old address opens its section. 21,023 of 21,023 pass.
+
+### A name on every chart
+
+Asked on 26 October: "Use accurate name (not more than 5-7 words) for all the graphs for a teacher to understand quickly what the graph is about."
+
+Each chart now has a name over it, over its key, saying what it shows rather than what it measures (the axes still say that):
+
+| Page | Chart | Name |
+|---|---|---|
+| Engagement and performance | Scatter of the unit picked | Each student's engagement and performance |
+| | Labs (a book of labs) | Each student's share of labs tried |
+| | The grid, folded | Each student's level and engagement, by unit |
+| Drifting | Lines of the students below their normal | Each student's work against their normal |
+| On pace | Pace tracks | Skills mastered now and by your date |
+| Skills · Weak now | Lines a skill | Weak skills: share mastered over time |
+| Skills · By unit | Level bars | Students' levels by unit and skill |
+| Skills · Faded | Before and after | Class average when taught and now |
+| | A skill's panel | Each student: when taught and now |
+| Stall points | Worst questions, current bars | Results on the worst questions |
+| | By unit, current bars | Results by unit, lesson and question |
+| Ready for a unit | The tree | Skills Class Creation builds on |
+| My actions | Effect ranges | Did the sets work? |
+| A student's profile | Timeline | Abigail: skills mastered and questions tried |
+
+Each version of Stall points names both its charts too ("Students who gave up or skipped", "Worst question in each lesson", "Got to it, tried, got it right"), and v4's, v8's and v10's By unit name follows the lesson opened. The names live in two lists in the script, and a check holds every one to three to seven words with no database words. A panel's bar ("The class now · 0% of the 36 with a level have mastered it") no longer says "checked". 21,024 of 21,024 checks pass.
+
+### Each answer as cards
+
+Asked on 26 October, of Weak now's answer ("Class Instantiation in Java first: 27 of 36 beginning or attempted. 18 skills are weak for a fifth of the class or more, 3 improving."): "for insights like these, use cards and show them in a clean format."
+
+Every page's answer, and each Skills section's, is now a row of one to four cards. A card says what it is (four words at most), gives the answer, a name or a count, and adds one line on what it means. A count takes its status colour (red, amber, green); a name stays in ink and its card takes the colour on its left edge. The numbers are the sentence's, which stays on the page for screen readers; a card may add the class size ("29 of 36").
+
+| Page | Cards |
+|---|---|
+| Engagement and performance | Struggling · 5 · in Using Objects and Methods; Low engagement · 1 · in Data Collections |
+| Drifting | Drifting · 2 · students below their own normal; Under half their normal · 14 |
+| On pace | On track · 0; Short · 36 (and Too early to tell when some are) |
+| Skills · Weak now | Teach first · Class Instantiation in Java; Weak skills · 26; Improving · 2 |
+| Skills · By unit | Hardest unit · Using Objects and Methods · 59% not mastered; Hardest skill |
+| Skills · Faded | Faded most · Class Instantiation in Java · 71% when taught → 10% now; Skills that faded · 7 of 34 |
+| Stall points | Most gave up · Modulo Operation Patterns · 29 of 36 · 2.19; Most skipped · Weighted Level Score Calculation |
+| Ready for a unit | Next unit · Class Creation · Ready at proficient (and what to reteach or group first) |
+| My actions | Promising, not proven · 2 sets; Can't be judged yet · 19 of 21 |
+
+Drifting's second card and By unit's shares add a fact the sentence leaves out; the rest restate it. A page that redraws its answer after its chart (Engagement and performance, On pace, Ready for a unit) now re-tells the cards as well as the sentence; Ready for a unit's redraw had at first shown My actions' cards, and a check now holds each page to its own. 21,025 of 21,025 checks pass.
+
+### Nothing said twice
+
+Asked on 26 October: "Now, review all the pages carefully and remove all the extraneous stuff. The graph versions must not be touched." Every page was read for text that repeats something already on screen (a chart's name, its axis, an answer card, a label, the bar for a followed student) or that belongs in "How to read". What went:
+
+| Page | Removed | Because |
+|---|---|---|
+| Skills · Weak now | "% of students who have mastered the skill (of those with a level on it), every 5 days: lower is worse" and "Click a day on a line to see who was where; click a second to compare." | The chart's name and axis say the first, "How to read" says both. The key now shows only a followed student's marks. |
+| Skills · Faded | "34 students rechecked · Unit 4 builds on it" in a skill's panel | The panel's chart is each student; the list's "Needed in Unit 4" column says the rest. |
+| On pace | "Goal: all 42 skills mastered · 32 in the target unit + 10 earlier skills. Projections assume … Latest check on these skills: …" | The goal is on the chart and in "Skills in this goal (42)", the assumption in "How to read". Only "Projections assume work resumes at each student's latest pace" stays, and only when the latest work is old, as a check requires. |
+| On pace | The six status colours, when sorted by status | Each group is named on the chart in its colour. The key comes back for the other sorts, where it is needed. |
+| Drifting | "14 more are under half their normal…" | The card counts them; the list now reads "Also under half their normal in the last five days". |
+| Engagement and performance | The unit's name over the chart | The Unit picker names it; the heading stays for a subunit or skill picked in the grid. |
+| My actions | "Every button on every page logs here.", the line "1 targeted and 20 assigned to the class, judged on later work on the same skills", the panel's repeat of the due date and how many finished, and advice that restated the pill beside it ("Promising. …", "No clear effect yet.") | Instructions and repeats. "How to read" also lost "Sample rows are invented and fenced off": there are no sample rows any more. |
+| A student's profile | The Pace and Drifting tiles while the student is followed | The bar above the profile shows both as flags; the tiles come back when nobody is followed. |
+
+Not touched: every version of Stall points (Current and v1 to v10) and of Ready for a unit, their charts, keys and names. Two checks were updated with the change, one for Weak now's measure (now held in its "How to read") and one for the profile's pace (a tile only without the bar). 21,025 of 21,025 checks and 11 of 11 pace checks pass.
+
+### Filters beside the title
+
+Asked on 26 October: "move all the filters to the right of each page and just after the title. The cards must come after it."
+
+Each page's title row now reads, left to right: the question, the page's own filters, the textbook (in the example with more books), "As of", and "How to read". The answer cards come under that row, then the page. On pages with many filters the row wraps on the right (On pace puts "Back to today" and "How to read" on a second line); on a phone it starts at the left.
+
+| Page | In the title row |
+|---|---|
+| Engagement and performance | Unit (with "+10 not started"), As of; the grid's key moved under the cards. Once the grid has drilled into a unit, the way back up stays over the chart. |
+| Drifting, My actions | As of (and "Back to today" on a past day) |
+| On pace | Target unit, By, Sort, As of |
+| Skills | As of alone at the top right; each section's own row: Weak now's units and status filter, By unit's Show and Sort, Faded's unit and Show all |
+| Stall points | Version, As of; Show and Sort beside the By unit chart's name |
+| Ready for a unit | Next unit, Version, As of; "Level needed" stays over the tree, as it shows each level's verdict |
+| A student's profile | As of beside the name, before the previous and next student |
+
+The folded grid's own controls (the engaged line and its sort) stay inside the fold, where they act. A view hands its filters over as it draws (`toHead`), and the frame places them. A new check renders every page and holds its filters to the title row, before the cards, and never in a row of controls under them. 21,026 of 21,026 checks and 11 of 11 pace checks pass.
+
+### Each chart in a card
+
+Asked on 26 October: "keep each graph in it's own card. Some sections have multiple graphs. Use one card for each the full section. Also, use material UI to make things look better."
+
+The page is now grey (`#F2F3F5`), and its question, filters and answer cards sit on it. Every chart, with its name, its key and the panel beside it, is a white card with Material's first elevation (4px corners, 24px padding, 16px between cards). Where a section holds more than one chart it is one card. No card holds another.
+
+| Page | Cards |
+|---|---|
+| Engagement and performance | The chart with its cards for each group (it opens on its name, then the key, which moved here from under the answer cards, then the counts); the grid's fold |
+| Drifting | The followed students' lines with the lists under them |
+| On pace | The two charts on one scale and "Skills in this goal" |
+| Skills | One card a section: Weak now, By unit, Faded (with both of its charts), each with its question, filters and answer cards inside; answer cards inside a card are outlined, not raised |
+| Stall points | Worst questions; By unit; the panel for the question picked, which stays in view beside them |
+| Ready for a unit | The tree and the plan; it opens on the chart's name, then "Level needed", then the key |
+| My actions | The log; the sets chart with "Can't be judged yet" |
+| A student's profile | The chart, its panel and the actions |
+
+The Material look is in the details. The page question is 20px medium, a section that folds is 18px and a chart's name 16px medium. Answer cards are raised with a coloured left edge. The filters are outlined selects and connected toggle groups.
+
+On a phone, gutters and card padding are 16px. Checking at 390px wide found one fault: the filter row could not narrow below its widest select, so Skills, On pace and Ready for a unit scrolled sideways by 4–6px. The row now narrows its selects to fit, and no page scrolls sideways at that width. Wide charts still scroll inside their own box, as before.
+
+A new check draws every page, all eleven Stall points versions, the radial Ready and a profile. It holds every chart, chart name and box a chart is drawn into to a card, checks that no card holds another, and checks that a page's answer cards stay outside the cards (inside them on Skills, where each section carries its own). Four deliberate breaks were each caught: Drifting outside a card, a card in a card, the answer cards in a card, and a profile's chart outside one. 21,027 of 21,027 checks and 11 of 11 pace checks pass.
+
+### One way to show each thing, and every card read in 2–3 seconds
+
+Asked on 26 October: "Review all the pages. The looks don't look consistent. Be consistent with how and where to show things. Also, reason all the (big/small) cards and see what it is supposed to show and whether some can infer it in 2-3s."
+
+**What was shown more than one way**
+
+| What | Before | Now, on every page |
+|---|---|---|
+| The page's header | Skills had none, only a date picker at the top right | The question, with the page's filters, the textbook, the day and "How to read" on its right; it stays on one line where it fits |
+| Answer cards | On the page, except on Skills, where each section had its own row inside its card; the profile had tiles of its own and a line about catching up | One row of up to four, on the page, before any card. Skills' row takes one answer from each chart. The profile's tiles and line are cards too |
+| A card's header | Skills: a section name, a question, filters, then the chart's name. Stall points: a section name, then the chart's name. The grid's fold: a blue link | The chart's name, with that chart's own filters on its right. A card that folds has its chevron in the same button as the name |
+| Keys | Boxed (Stall points, By unit), pushed right (Engagement), underlined (Ready), a sentence (Drifting), plain elsewhere; levels in two orders | A plain row under the header, on the left, led by what it counts; levels mastered first, as the bars and rings draw them. Engagement's scatter had the grid's key; each now keys its own marks |
+| Panels | A card of its own (Stall points); boxed groups (Engagement, Ready); an "Introduced in" box; plain elsewhere | In the card, beside the chart, after a hairline. Every group has the same parts: a swatch, its name and count, the names, its button. No boxes |
+| "Show all" | Buttons under the lists (Weak now, Drifting), a tick on Faded | A tick beside the card's name |
+| Folds | Chevron first (sections), a blue link (the grid), a chevron at the right (the footer) | Chevron first |
+| Rows of students | Boxed on Drifting | Divided by lines |
+
+**Every card, read for 2–3 seconds**
+
+A fresh reader was given only the screenshots and asked what each card says at a glance. 17 of the 21 answer cards read at once; 10 of the 11 chart cards needed close reading. The table lists what each card is for, what slowed or misled the reader, and what changed.
+
+| Page | Card | What it must say | What slowed or misled | Now |
+|---|---|---|---|---|
+| Engagement | Answer cards | How many are on track and how many need each step, in the unit on show | "Low engagement 1" was the class's current unit, next to a chart of Unit 1 showing 5. The cards added up to 33 of 36. "Tried under 60%" fitted Coasting too | The unit on show only: "On track 18 of 36 · in Using Objects and Methods; 3 more nearly there", "Struggling 5 · practising, but not mastering", "Low engagement 5 · little practice, and not there yet", "Coasting 5 · little practice, but doing well" |
+| | The scatter | Where each student is, by engagement and performance | The grey dots had no key, and "Keep going" read as a student's name | The dots keyed by group, then the levels' band. "Keep going" is "Nearly there". The count pills went; the cards carry them |
+| Drifting | Answer cards | Who is drifting, and who only slowed lately | Why the 14 aren't drifting | "Martin and Sandy, below their own normal"; "14 · others, only in the last five days" |
+| | The rows | Each drifting student's work against their normal | "No class work" was keyed but not drawn. The red began at the peak before the drop | Keyed only when hatched. The red starts at the first low stretch; the key says "Drifting: under half their normal since then" |
+| On pace | Answer cards | How many reach the goal by the date | Clear. "On track 0" and "Short 36" were one fact said twice | "On pace 0 of 36", then the chart's two groups: "Short, not catching up 19", "Short, but catching up 17" |
+| | The tracks | Each student's mastered now and projected, against the goal and what's due | "30 due by today": which today? The page was on 19 Nov 2025, but a link said "Back to today (26 Oct 2026)". The goal had four names | "30 due by 19 Nov"; "Back to 26 Oct 2026". "Goal" is the goal, from the title to the axis |
+| Skills | Answer cards | What to teach first, how many skills are weak, the hardest unit, what faded most | "26 skills" next to a chart of "All · 29" | "26 skills · of the 29 on the chart; 3 getting better"; "Faded most: … class average 71% when first met, 10% now" |
+| | Weak skills: share mastered | Which skills are weak, and how they moved | "faded: 71% → 10%" next to a line that never passed 33% | "faded: class average 71% → 10%" names its measure |
+| | Students' levels by unit and skill | The hardest units, subunits and skills | The panel was about a skill that isn't a row | Opens with nothing picked, centred; a skill clicked opens its panel |
+| | Class average when first met and now | The skills that fell after the class met them | The axis had no unit. "Later: down 8+" and "Slipped 20+" didn't say of what. −62 next to 71 → 10 | "Class average score" over the axis; "Change · points", "Students · slipped 20+"; "Now: 8 or more points lower"; −61 |
+| Stall points | Answer cards | The question most gave up on, and the most skipped | Clear | Unchanged |
+| | Results by unit, lesson and question | Where in the book students stall | The panel repeated the worst question while no row was picked | Opens with nothing picked, centred; a question clicked opens its own panel |
+| Ready | The tree and the plan | Whether the class has what the unit builds on, and what to do first | "Not taught" under a ring at 83%. "?" for "Too few levels". Only 15 of 36 named. "Accept plan" didn't say what it does | "Not taught yet"; "Too few students with a level"; "The other 21 are ready."; "Logs a stretch set for 15" |
+| My actions | Answer cards | Which sets worked, and how many can't be judged yet | Clear. "19 of 21" next to "Can't be judged yet · 18" | "Too early to tell" on the card, the chart and the fold ("18 more sets") |
+| | Extra points after each set | Whether each set raised later scores | The bars reached into "hurt" but weren't keyed. Points of what, against whom? "due 29 Oct" looked three days away. 24 and 9 next to 26 and 10 | Dot and range keyed; "extra points on later questions, against those who didn't do it"; "due 29 Oct 2025"; "24 of the 26 who finished it, 9 of the 10 who didn't" |
+| A profile | Answer cards | The student's units, recent work, and side work | "Catching up: Unit 2" next to the bar's "catching up · Unit 4". "No class work": the student's or the class's? | "On an earlier unit: Unit 2"; "No class work · nobody in the class worked" |
+| | The timeline | Their mastery and their work, over time | One axis for a percent and a count; the normal band read as 17–50 | Two rows on one time axis, each with its own scale and heading |
+| | The bar for a followed student | Why to follow them | "Shared weak skills" and "gaps" weren't explained; Struggling was amber here, red on Engagement | "Weak in 17 of the class's 26 weak skills"; "Not ready for Unit 4: 2 of the 4 skills it builds on"; red; ", if work resumes" on an old forecast |
+
+A date now carries its year whenever it isn't the year the page is read in.
+
+**Still open from the read**
+
+- Ready's "Level needed" stops can read as a progress bar.
+- Stall points' Current bars pool a unit's questions (1–5% gave up), while the list above them shows single questions (up to 81%). The simple versions (v6–v10) count students instead.
+- The same skill is "Still weak" in one panel and "100% not mastered" in the other. Each chip is right for its own chart.
+- "Key skills mastered" is out of a different number for each student: the key skills they have a level on.
+- Lesson codes such as 2.19 have no label.
+- The bar for a followed student is dense.
+
+**Checks**
+
+A new check draws every page and holds it to the layout: the title row first, one answer row before any card, every card opening on its named header, every key inside a card, no old control. It covers the example with more books, every Stall points version, the radial Ready, the grid open and a card folded. A second check holds the CSS to the same rules. Four deliberate breaks were each caught: answer cards inside a card, a card without its header, a key outside its card, and the old "Show all" button. 21,029 of 21,029 checks and 11 of 11 pace checks pass. No page scrolls sideways at 390px.
+
+### The bar for a followed student, six versions
+
+Asked on 26 October, of the bar for Drew: "Let's use different formatting for this following card. It is mixing up everything. Give 4-5 different versions of it to select from."
+
+Each current pill joins four kinds of thing with dots: a status ("Short, not catching up"), where it applies ("Unit 4"), the figures ("15 of 42 mastered now") and a forecast with its caveat ("about 15 by 25 Nov 2026, if work resumes"). Every flag now keeps its status apart from its details. A Version select in the bar, or `?fv=1` to `5`, shows one of these:
+
+| Version | Form | What it trades |
+|---|---|---|
+| Current | One pill a flag, everything joined | Complete, but every pill must be read to the end |
+| v1 · Status chips | The statuses alone, in the app's tinted status chips; the details on hover | The quickest read; the figures take a hover |
+| v2 · A row a page | A row a flag, its page, status and details in columns | The page each flag comes from; one row a flag, so the bar grows with them |
+| v3 · Columns | A strip of figures: page, status, short detail, a line between | The answer-card form without the boxes; wraps with many flags |
+| v4 · By group | Under the rail's groups (Students, Content, Act and check) | A flag sits where its page sits in the rail; a group with nothing says so |
+| v5 · Scorecard | A slot for every page in the rail's order, the same for every student | Where to look is learned once; it shows the quiet pages too, and the good news |
+
+Side by side, for Drew and Lee: `reports/img/following-versions.png`. It was taken again after the scoring changes below, which left Drew one flag (On pace) and Lee five, the most in the class. A new check renders every version for every student. It holds each status apart from its details, and the scorecard to a slot a page. A deliberate break, the chips showing the old joined text, was caught. 21,030 of 21,030 checks pass, and no version scrolls sideways at 390px.
+
+### Levels weighted by relevance, and later work that needs two answers
+
+Asked on 26 October, after Kenneth read Beginning while Ebony, who finished fewer questions, read Attempted: "There is a relevance score in the db for every item skill pair. Let's use that as well and weight the items that have more relevance higher than the one with low relevance."
+
+**Why Kenneth read Beginning.** A score averaged the answers in a student's first 21 days on a skill, then gave any later answers 60% of the weight, however few they were. Kenneth answered 13 questions on Class Instantiation in Java in the first 21 days, for 58%. The one later answer was a question Kenneth never got right, on 10 November: Community Class Object Array, where 56% of the class gave up. So Kenneth's score was 0.4 × 58% + 0.6 × 0% = 23%. Ebony stopped on 4 September with 50%, and no later answer could count against it. Unstarted questions count for nobody: a level is how well, not how much.
+
+**What changed.**
+
+- *Each answer is weighted by its question's relevance to the skill.* The export keeps the score of every tag above the cut: 1, or 0.75 for a third of the tags on the questions this class answered.
+- *A later score needs two later answers.* This is the same minimum a level already needs. It applies wherever the later score is read: the level, Faded, and the slipped-20-points mark.
+- *Until then, a later answer counts like any other.* It joins one average with the rest, weighted by relevance. A first version dropped a lone later answer, which left some levels resting on a single question; asked "why some are showing 0?" of Draw Shapes with Java Graphics, that is what it was.
+- *A level bands the whole percent it shows*, as ALPS does, so a score shown as 55% is Familiar, never Attempted.
+- *The table's hover says what each answer earned*: full, half or no credit. A code task earns full credit within 3 tries, half within 6, none after. Philip's "correct after retries" took 8 and 21 tries, so the 0% is what those tries earned, not a missing answer.
+
+**The effect.**
+
+| | Before | Now |
+|---|---|---|
+| Kenneth, Class Instantiation in Java | 23%, Beginning | 55%, Familiar |
+| Ebony, Class Instantiation in Java | 50%, Attempted | 50%, Attempted |
+| Draw Shapes with Java Graphics on 5 Nov: Eileen, Abigail | | 21% and 29%, Beginning (each had one answer then, and one later) |
+| Levels that change (of 2,388 with two or more answers) | | 262: 131 up, 131 down. Relevance alone moves 117, the later-answer rule 160 |
+| Skills: teach first | Class Instantiation in Java (26 of 36 beginning or attempted) | 2D Graphics Operations (24 of 36) |
+| Skills: hardest unit, hardest skill | Using Objects and Methods; Class Instantiation in Java | Using Objects and Methods; Enhanced For Loops |
+| Skills: faded most | Class Instantiation in Java, 71% → 10% (7 of 34 rechecked skills faded) | Loop Output, 84% → 60% (6 of 26) |
+| Engagement, Unit 1 | 18 of 36 on track, 5 struggling, 5 low engagement, 5 coasting | 19 on track, 5 nearly there, 2 struggling, 4 low engagement, 6 coasting |
+| Students flagged as slipped | 12 | 10 |
+| Ready for a unit | Ready for Class Creation at proficient | unchanged |
+
+Class Instantiation in Java was the clearest case. Most of the class met it again only in that one hard question, so one question read as the whole class forgetting it. Now it leaves the weak skills and Faded: 6 Attempted, 8 Familiar, 14 Proficient, 8 Mastered.
+
+The figures quoted in the sections above were true when written; this change moves several of them.
+
+**The data.** It is the same export as before, plus each tag's relevance (`rel` on each item in `data/class.js` and `data/example.js`, `tagRel` in `data/prereqs.js`). The database had not been refreshed: the students, outline, answers and tags matched. Two automated test bug reports filed on item 798 that morning were left out.
+
+**Checks.** A new check feeds the score controlled answers. It confirms that a question three quarters about a skill counts three quarters, that one later answer joins the one average, that two later answers count as later work, and that an answer with no relevance counts fully. Another holds a level to the band of the whole percent it shows. It also checks that the data keeps every tag's relevance in step with its skills. A deliberate break, putting back the old rule, was caught. 21,031 of 21,031 checks and 11 of 11 pace checks pass.
+
+### The tries in the skill's table, as a shade
+
+Asked on 26 October: "Can we also have a way to show how many retries so users can quickly understand why two students are showing different mastery levels." A first version put the number of tries beside each mark. Then: "no need to show the numbers. maybe be the shade dark light based on that?"
+
+ALPS's "correct after retries" mark looks the same at 4 tries and at 21, but the credit depends on the count. A code task earns full credit within 3 tries, half within 6, and none after; a quick question earns full credit on the first try and half on the second. The mark is now darker the more credit its tries earned:
+
+- *Full credit:* solid green with a white arrow, one step under a first-try tick.
+- *Half credit:* ALPS's own pale mark.
+- *No credit:* almost white, with a faint arrow.
+
+The key shows the three shades beside ALPS's label. A screen reader hears the credit, and the hover gives the try, the credit and the day. A question that counts three quarters toward the skill (its tag's relevance score is 0.75) has a ¾ beside its number. On Draw Shapes with Java Graphics:
+
+| Student | Question 1 | Question 2 (¾) | Level |
+|---|---|---|---|
+| Philip | faint (8 tries) | faint (21 tries) | 0%: no credit on either |
+| Eileen | faint (7 tries) | half (6 tries) | 21%: the half credit is on the ¾ question |
+| Abigail | half (5 tries) | faint (7 tries) | 29%: the half credit is on the full-weight question |
+
+No cell shows a number, and the table keeps its width. Sorting on a question puts the most tries first among the same mark. A check reads every retry mark in the weak skills' tables and holds its shade and its spoken credit to the student's answer, and each ¾ to the question's relevance. 21,032 of 21,032 checks pass.
+
+### A code task right at last earns a quarter
+
+Asked on 26 October, of Iterate Over Array Elements on 10 December: "why melvin and gary are showing same scores even when the one of them failed to solve the last question."
+
+Both had full credit on questions 1 and 2. Both needed many tries on question 3: Melvin 7 and Gary 29. On question 4, Gary got it right on the 11th try and Melvin never did. A code task right after six tries earned nothing, the same as never being right, so both read 2 ÷ 3.75 = 53%. ALPS's learner model doesn't score answers this way; this credit rule is the mock's own. Asked to choose, they took a quarter for a code task right after six tries, with a quick question right after its second try still earning nothing, since by then it is often found by elimination.
+
+| | Before | Now |
+|---|---|---|
+| Gary, 10 Dec | 53%, Attempted | 65%, Proficient |
+| Melvin, 10 Dec | 53%, Attempted | 60%, Familiar |
+| Levels that change | | 185, all up |
+| Weak skills on the chart | 27 | 18; Iterate Over Array Elements is no longer among them |
+| Engagement opens on | Using Objects and Methods | Data Collections (26 of 36 on track, 2 struggling) |
+
+The earlier examples move too. Kenneth reads 58%, Familiar (55% before), and Ebony still reads 50%, Attempted. On Draw Shapes with Java Graphics on 5 November, Philip reads 25% (0% before), Eileen 36% (21%) and Abigail 39% (29%).
+
+The other choices offered were a quarter for every question (442 levels up, 14 weak skills), a tenth for every question (168 up, but Gary and Melvin both Familiar) and no change.
+
+The retry mark now has four shades, keyed in ALPS's words: solid green for full credit, ALPS's pale mark for half, almost white with a faint green arrow for a quarter, and gray for none. The check that reads every retry mark found all four in the data. 21,032 of 21,032 checks pass.
+
+### The ¾ marks, dropped
+
+Asked whether to keep the ¾ beside the number of a question that counts three quarters toward the skill: "Drop." A question's head shows its number again, and the key loses its ¾ entry. The level still weighs that question at three quarters, and the head's hover still says so ("Counts three quarters toward Draw Shapes with Java Graphics"). The check that reads the table now fails if a ¾ comes back, or if a head's hover stops saying how much its question counts; both breaks were tried and caught. 21,032 of 21,032 checks pass.
+
+### A band for what each student had started by the earlier day
+
+Asked on 26 October, of Modulo Operation from 21 Sep 2025 to now: "for this part, I don't know till which unit/content the student solved for the previous date. Can we add a marker for teacher to quickly identify?"
+
+A table of two days on one skill gives each student a level on each day, but not what the earlier level was read from. Now each row has a pale gray band behind the questions the student had started by the earlier day. Those are the answers that day's level counts. The key names it "Started by 21 Sep 2025", in ALPS's own word for a first attempt. A banded mark's hover adds "In the level on 21 Sep 2025", and a screen reader hears it.
+
+The band is exact rather than a line at the last question reached, because students don't always go in order. On Modulo Operation:
+
+| Student | On 21 Sep | Now | The band |
+|---|---|---|---|
+| Abigail | Mastered, 100% | Familiar, 60% | Questions 1 to 3, all right first time; everything after came later |
+| Martin | Mastered, 83% | Proficient, 74% | Questions 1 to 6 |
+| Dean | Mastered, 81% | Familiar, 60% | Questions 1 to 3, then lesson 2.19's (9 to 18), ahead of 2.2 to 2.9 |
+| Lee | Mastered, 100% | Proficient, 76% | Question 1, then most of lesson 2.19 (10 to 18) |
+
+The table's hover, the followed student's row and a picked question's column used to repaint a cell's whole background. They now set only its colour, so the band shows through them. The table check now holds the band in every two-day table on every weak skill. The band must sit behind exactly the answers started by the earlier day, and be keyed with that day. It must also stay off one-day tables. Three deliberate breaks were caught: banding every answer, renaming the key, and banding a one-day table. 21,032 of 21,032 checks pass. Picture: `reports/img/two-day-band.png`.
+
+### A mark for what a name is
+
+Asked on 26 October: "add icon for skills and item type to quickly know where we are showing skills/items."
+
+A skill and a question can read alike. Stall points' "Most gave up" card names Modulo Operation Patterns, a question. The Skills page's weak skills include Modulo Operation, a skill. Nothing told them apart. Now a bulb comes before every skill's name. Every question's name has its format before it: code, multiple choice, fill in the blank, Parsons or click or drag. These are the marks the skill's table already had over its questions. Units and lessons have no mark, so a list that runs unit, lesson, skill reads at a glance.
+
+| Where | The mark |
+|---|---|
+| Lists, panel headings, answer cards, the skill's table, a practice set | Before the name. The practice set's format chip carries its format, and the skill under the question its bulb |
+| Weak skills and Faded charts, names set against the chart | Between the name and the chart |
+| Ready's trees | Before the name, on its ring's side |
+| Engagement's grid, a lesson's skills | Before the slanted name |
+| Stall points' grid, columns and map | At each question's column, or before its name on its tile |
+
+A name in a sentence or a hover has no mark. Each mark is one stroked path, so the table, the text and the charts draw the same shapes. Two layout changes came with it. Stall points' name column is 40% wide instead of 38%, so a name with its mark keeps to one line. On pace's goal skills dropped their bullets, since the bulb is the mark.
+
+A new check holds a mark by every name the pages draw: the rows of the weak and faded charts, the cards, a unit's skills, a skill's panel and table, every question on Stall points, and every skill on both of Ready's trees. Four deliberate breaks were caught. 21,033 of 21,033 checks pass. Pictures: `reports/img/name-icons-skills.png`, `reports/img/name-icons-stall.png`.
+
+### The answer cards, less cluttered, and no footer
+
+Asked on 26 October, of Stall points' two cards: "make the small cards better. they are not looking too good. Organize and reformat things to make it less cluttered." Then, of the line on the data and "Where the numbers come from" at the foot of every page: "also, remove these parts from all the pages."
+
+Every page's cards were changed together, since they are one component.
+
+| | Before | Now |
+|---|---|---|
+| Width | Up to 270 px, so a row of two filled half the page | One size on every page, four to a row (two on a narrow screen, one on a phone) |
+| What it is | "Most gave up", 12 px | MOST GAVE UP, an overline |
+| A name | 18 px, wrapping under its mark | 16 px, at most two lines, the mark hung beside it so the lines align |
+| The count under a name | In the gray line, "29 of 36 gave up · 2.19" | Leading the line in the status colour, "**29 of 36** gave up"; the lesson a muted tag after the name |
+| Faded most | "class average 84% when first met, 60% now" | "**84% → 60%** class average, first met to now" |
+
+A count card keeps its big figure in its status colour, and each card keeps its status edge. No card's words changed except Stall points' and Faded's lines. The checks still hold every count on a card to its page's sentence.
+
+The footer's line on the data (anonymised; read as of; the latest work; nothing saved; with several books, each one named) and the table of sources are gone from every page, and so is the link to the example. The example still opens with `?books`, and its chip in the top bar now takes the page back. A check holds that no page has a footer or the table. The check on the table's line about ALPS's levels went with the table. 21,032 of 21,032 checks pass, and no page scrolls sideways at 390 px.
+
+### Code, Parsons and DOK, checked
+
+Asked on 26 October, of Modulo Operation's table from 11 October to now: "Here the fourth question is coding one and the fifth one is parsons. Why both students have got same mastery level? In general, code is heavier than parson. We also have dok for this in the database. Please check and incorporate if needed."
+
+On 11 October Gary and Miguel both read 100%. Each had full credit on all six questions answered by then. Gary got the Parsons problem (column 5) right on the second try, and Miguel got the code task (column 4) right on the second try. A code task or Parsons problem right within three tries counts fully, so no weighting can separate two full scores.
+
+DOK is in `item_skill.dok`, from 1 to 4, for each question and skill. Columns 4 and 5 are both DOK 2, as are 19 of Modulo Operation's 21 questions. Across the textbook, DOK does not follow format. Code tasks and Parsons problems are both mostly DOK 2, and Parsons problems are DOK 3 more often (32% of their tags against 19%). In this class, Parsons problems take as many tries as code: 35% are right on the first try against 31%, with a median of two tries each.
+
+Measured against the rule as it is:
+
+| Rule | Gary, 11 Oct → now | Miguel, 11 Oct → now | Levels that change |
+|---|---|---|---|
+| As it is | 100% → 89% | 100% → 91% | |
+| Weighted by DOK (1 half, 2 as now, 3 one and a half, 4 double) | 100% → 89% | 100% → 90% | 147 (51 up, 96 down) |
+| Code counted one and a half times | 100% → 87% | 100% → 88% | 144 (76 up, 68 down) |
+| A second or third try on code or Parsons earns ¾ | 96% → 88% | 97% → 88% | 546, all down; weak skills 18 → 24 |
+
+They chose to keep the rule. Nothing changed, and the export does not carry DOK.
+
+### Stall points' rings, said once
+
+Asked on 26 October, of v7's outline: "This is looking too verbose."
+
+Each lesson's line repeated what its ring already showed, for example "19 gave up on something · 17 skipped something · 20 got all they reached · worst: Weighted Level Score Calculation", and most ran to two lines. Now each row is one line: the lesson, its ring with the count, and its worst question with its format, under a single "Worst question" heading. A question's ring stands alone, since the question is the row's name. The counts stay in the ring's parts and in the row's hover. The key's note "a lesson or unit counts each once, by the worst of theirs there" now reads "each student once, at their worst". The check on v6, v7 and v9 now holds that v7 repeats no count and names the right worst question. 21,032 of 21,032 checks pass.
+
+### Faded: one chart, twice
+
+Asked on 26 October, of the Faded card (the class's averages on the left, a scatter of every student on the right): "Instead of having two graphs for this one, can we just have two instances of the left graph. The right instance should show students on the y-axis and based on selected skills show the changes."
+
+The panel now draws the picked skill's students the way the left chart draws skills. Each row is a student with a later check: an open circle at the score when first met, a solid dot at the later check, the line between them, and the change in points in a column. Rows run biggest drop first, ordered by the change as shown, so −29 comes before −28. A dot is red for a slip of 20 points or more, green for a gain of 20 or more, and gray between, keyed above the chart. The panel opens on the students who slipped, the answer the review set is for: 18 on Loop Output, from Deanna's −89 to Drew's −23. A "Show all 36" tick beside the chart's name brings in the rest; on Loop Output that adds 17 gray rows and Geoffrey's +39. A row's hover gives both scores, and a click follows the student, as on every chart of students.
+
+A new check picks every faded skill and holds the rows: the students who slipped, or everyone with the tick; their order; each change; and the tick shown only when it adds someone. It also holds that the scatter's "No change" and "On the later check" are gone. Two deliberate breaks, ordering by the unrounded change and opening on everyone, were caught. 21,033 of 21,033 checks pass.
+
+### One number in every ring
+
+Asked on 26 October, of v7's worst questions: "why is the number inside the rings sometimes using gave up and other times skipped?"
+
+Each ring showed the larger of its two counts: 29 gave up on Modulo Operation Patterns, but 15 skipped on Pokemon Class and Lookup, where 13 gave up. The list is ordered by the two together, so it read 29, 20, 15, 27, which looked out of order, and the number changed meaning from row to row. Given the choice, they took both together. Every ring now counts the students who gave up or skipped: 32, 30, 28, 27, 26, 26, 25, 25 down the list, matching its order and the course map's tiles. On a lesson or unit it counts each student once. The number is red for a stall point and amber for an often skipped one, and the ring's parts still show the split. The key says "in the ring: gave up or skipped", and the hover gives each count. The check on v6, v7 and v9 recounts each ring this way; putting the larger count back was caught. 21,033 of 21,033 checks pass.
+
+### Faded, laid out again
+
+Asked on 26 October, of the Faded card with Loop Output picked: "this is looking weird. Let's reorganize different components of this card to make the look clean and good."
+
+Five rows of skills sat beside a panel four times their height. The panel held the skill's name, change and action in its header, where it was met, the students' chart with its own key and tick, and the way into the table. Now the left column holds both charts, one under the other: the skills, a rule, then "Each student: when first met and now" with its tick and key. The students' chart uses the skills' chart's width and columns, so names end at the same edge, the score scales span the same width, and the change sits in the same column. Beside the charts, a short panel stays in view as the students scroll by. It shows the skill and its 84% → 60%, where the class met it, and the two actions together at its foot: "Give a review set" and "Students and questions". On a narrower page the panel comes between the two charts. 21,033 of 21,033 checks pass.
+
 ### What is still open
 
-- The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's now, but read on this mock's score, not ALPS's.
+- The key-skill rule is the mock's, and the first thing to try on a second class. The level cuts are ALPS's, read on this mock's score of the answers, on every page.
+- ALPS's learner model gives each student nearly one score on every skill, so the product's own skill levels say little about a skill. That is a finding about the model, not this page; the pages read the class's answers until it changes.
 - Whether the unit band (ALPS's) or the old standing (a share of key skills secure) is the right test of a unit for this page: the band calls most of the class proficient.
 - Whether the readiness line should also let the teacher move the shares (60% and 80%), which are fixed now.
 - Which flag is a student's "why" when several fire, and whether "behind in one unit" belongs above the fold.
 - The word budget for a first screen: names are most of the words now, and a different budget is needed for pages whose answer is a list of people.
 - Phones.
+- Which version of the bar for a followed student to keep. Asked to choose, they said "keep all for now as they are", so all six stay, with the Version select.
 - The skill graph's edges are an LLM's. Whether to show its confidence, or to leave out edges that run against the book's order, is open.
 - What "Introduced in" should name: where the class first met a skill, or where the book teaches it and whether the class did that lesson (see "The Skills page's links, checked").
 
@@ -900,4 +1421,6 @@ Pictures: `after-skills.png`, `after-hardest.png`, `after-skills-table.png`, `af
 | `reports/first-time-teacher-review.md` | This review. |
 | `reports/img/review-*.png` | The first screens of every page, the whole Effort page, Stall points with a student followed, and the Overview at phone width, as captured. |
 | `reports/img/after-*.png` | The same first screens after the changes of section 8, as captured. |
+| `reports/img/name-icons-skills.png`, `name-icons-stall.png` | The Skills and Stall points pages with a bulb before every skill and its format before every question. |
+| `reports/img/two-day-band.png` | The table of Modulo Operation from 21 Sep 2025 to now, with the band behind what each student had started by 21 Sep. |
 | `reports/img/after-drifting-2025-11-14.png`, `after-profile-2025-11-14.png` | Drifting and a profile read as of 14 November 2025 (`?today=2025-11-14`), when the class was in full swing. |
