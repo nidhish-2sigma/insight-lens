@@ -10,6 +10,79 @@ server and no dependencies, and both run from `file://`.
 
 ## The current mock (`index.html`)
 
+**ALPS integration:** the current UI uses shared ALPS icons and semantic theme
+tokens, with scoped styles and an embedded mount/unmount API. See
+[the integration guide](reports/alps-integration.md) for the React adapter,
+color meanings, source synchronization and verification commands.
+
+### Current display · 27 October 2026
+
+All page insights are visible in the same responsive card format: title, value
+and explanation. No insights sit behind “More insights”; card titles and text
+wrap in full. Skills includes every insight from its three sections, and On
+pace includes every applicable status.
+
+Each page leads with the visual that answers its question. Exact figures and
+question-level evidence remain available on demand. Scoring, coverage caps,
+thresholds, forecast rules and missing-evidence distinctions are unchanged.
+
+* **Engagement:** the default scatter plots actual score (0–100) against
+  eligible practice tried (0–100%), with shaded regions, ALPS score bands and
+  names beside students needing attention. Open markers identify coverage-limited
+  levels; coincident marks show counts and expose their students on selection.
+  Student evidence uses cards for score, mastery level, checked skills and practice;
+  developing skills open their underlying questions. Filters, lab-only practice
+  distributions and exact figures remain available. The secondary curriculum
+  grid has been removed.
+* **Drifting:** date-aligned histories show the latest eight five-day blocks
+  on the same 0–200% scale, with 100% meaning each student's own usual. The
+  sustained drop is red; class-wide inactivity creates a gap and pauses
+  individual alerts. Overflow is marked. Selection opens the full history,
+  exact counts, signals, profile and explicit Follow control.
+* **On pace:** aligned tracks show mastered now, a dashed conditional estimate
+  and the common goal, on a labelled 0–N skill-count axis. Evidence dates,
+  observed rates and every goal skill remain inspectable. The even-pace
+  reference is optional. Navigation preserves the date and textbook.
+* **Skills:** support bars split the full class into beginning/attempted,
+  other assessed, one check and not attempted. Selection retains all five
+  mastery levels, histories and date/skill comparisons. By unit uses five-level
+  distributions of assessed student–skill results; selecting a unit opens a
+  keyboard-navigable student × skill heatmap. Faded uses paired initial/later
+  dots on a common 0–100 scale for both class and student comparisons.
+* **Stall points:** equal-width question bars show every outcome. Attempts
+  without a working check stay neutral. Review by unit and lesson aligns
+  unique-student counts in separate Not yet correct and Skipped columns;
+  opening a row reveals its lessons or questions. A student can appear in both
+  columns. Full pooled outcomes and counting definitions remain available.
+* **Readiness:** Tree and Radial diagrams retain the earlier prerequisite
+  rings, level distributions and taught markers. Switch layouts in the chart
+  header; use **Show all prerequisite skills** to expand the four-skill preview
+  to every direct prerequisite, including those without enough evidence.
+  Both layouts start fitted to the viewport, with zoom in, zoom out and Fit
+  controls. Zoom preserves the centre and survives evidence selection. Select
+  a ring for evidence. One expandable table retains all prerequisite relationships
+  and exact figures; plans consider every direct prerequisite.
+  Target levels, 60%/80% group thresholds and unknown evidence stay separate.
+* **My actions:** estimates and 90% ranges align around a common zero line.
+  Unestimated sets remain in Awaiting evidence. Comparisons describe
+  association. The chronological action log follows the comparison.
+* **Profiles:** linked timelines show mastered counts against taught-skill
+  counts, and activity against own usual. Selecting a period updates both
+  readings, including assessment coverage and exact question counts. Unit
+  strips open the skill heatmap; lab units open practice participation.
+  Four stable summary fields and the full unit audit remain available.
+
+Charts retain the same units and scales across their rows. Selections are
+persistent, use native keyboard controls, and preserve chart scroll positions
+when evidence redraws. Question results retain retry credit, relevance weights,
+initial/later evidence and their separate unknown states.
+
+The earlier display notes below record previous iterations. For current
+verification, run `node tools/check.js --checks`; it includes the existing
+numerical/historical checks and the focused comparison, Engagement, Skills,
+profile, readiness/actions and Stall points behavior suites. Frozen numerical
+results protect Drifting, On pace, weighted evidence and intervention estimates.
+
 ```
 open index.html
 ```
@@ -24,7 +97,7 @@ numbers are no longer invented: they are worked out from one class in the
 
 **The class on screen**: section 218, "APCS 25-26", 36 students on CS Awesome
 2.0 (13 units, 230 subunits), with work from 1 September 2025 to 5 February
-2026; the export is dated 13 October 2026, and that is "today" on the pages.
+2026; the export's recorded date supplies the initial "As of" date on the pages.
 The class has started three units (1, 2 and 4) and met 100 skills. Student
 names are the anonymised ones the database holds.
 
@@ -149,11 +222,10 @@ is counted in weeks, no class day is assumed, and no unit is treated as next.
 Students may work on any part at any time: all of it counts as work, and a
 profile says when a student is on an earlier unit or working ahead. The class's work ran from September to mid-December 2025 (one
 answer on 5 February 2026 is the last), so on the export date nothing is
-moving. Drifting and On pace are about work as it happens: opened without a
-day in the address while the class is idle, they move to the latest day
-Drifting can judge (the class working, fewer than half of it low), 19 November
-2025 here, when the class was in Data Collections; the address shows that day
-and "Back to today" returns to the export date.
+moving. Drifting and On pace keep the selected date. “View latest active
+period” explicitly opens the latest day Drifting can judge (the class working,
+fewer than half of it low), 19 November 2025 here. The address shows that
+historical date; the date control can return to the export date.
 
 ### How the figures are defined
 
@@ -163,7 +235,7 @@ and "Back to today" returns to the export date.
 | Performance on a skill | The student's score: their credit on questions tagged with the skill, each question weighted by how relevant it is to the skill (`item_skill`'s relevance score, 1 or 0.75 above the cut, kept by the export in each item's `rel`). Answers in the first 21 days and answers 21 days or more later are averaged apart; once there are two or more later answers, the later average weighs 60%. Until then a later answer counts like any other, in one average with the rest: one question doesn't decide a level, a fade or a slip, and no answer is dropped. The band is of the whole percent shown, as ALPS bands it (55% is Familiar). The level is ALPS's band of the score (`perf_thresholds`): Beginning under 40%, Attempted from 40%, Familiar from 55%, Proficient from 65%, Mastered from 80%. It takes two checks to count; with one the level is unavailable, with none not attempted. Where a page acts on a group, the levels fold into three: mastered; familiar or proficient; beginning or attempted. Every page, Ready for a unit too, reads this one level. |
 | ALPS's own levels | Read, not drawn. ALPS's learner model scores this class too (`student_performance_predictions`: glmnet, data cutoff 6 February 2026), but it gives each student nearly one score on every skill: on 95% of skills a student's score is within 5 points of their own median, every unit averages about 49 (2–4% proficient or above, even units the class never opened), and across the class 79% of its levels are Attempted and 0.1% Mastered. Its levels would tell no skill or unit from another, so the pages work the level out from the answers instead, and the sources name the model with these figures. |
 | A unit's key skills | The skills its own summary, test, exercise and practice lessons check that are also carried forward: named by two or more lessons and checked by three or more questions, or needed by a later unit. In the product this list would be the teacher's to edit; here it is worked out from the book. |
-| A student's level in a unit | ALPS's unit band, read on the key skills the class has been checked on so far: the level of the student's mean score on the ones they have a level on, capped by the share of them that is (ALPS's coverage caps: under 25% at most Attempted, under 50% at most Familiar, under 80% at most Proficient). With none, unavailable. The scatter's height is that mean score; a student the cap holds down is drawn at the top of their level's band, and the hover says why. The grid's cells and a profile's chips read the same function. A subunit's level is read the same way on its own skills. Pace counts mastered skills in the selected goal instead. |
+| A student's level in a unit | ALPS's unit band, read on the key skills the class has been checked on so far: the level of the student's mean score on the ones they have a level on, capped by the share of them that is (ALPS's coverage caps: under 25% at most Attempted, under 50% at most Familiar, under 80% at most Proficient). With none, unavailable. The scatter plots the actual mean score; evidence coverage and a coverage-limited level are shown separately in the table and evidence panel. The grid's cells and a profile's chips read the same function. A subunit's level is read the same way on its own skills. Pace counts mastered skills in the selected goal instead. |
 | Pace | The teacher picks a target unit and a calendar date. The goal is mastered on all of that unit's key skills plus the earlier skills its lessons use, counted once. Unrelated earlier skills and later units are excluded. Each student's net increase on this set in the 30-day period ending at their latest recorded check sets their rate. The projection adds gains from the selected "As of" date to the deadline, capped at the goal, assuming learning continues or resumes at that observed pace. The unrecorded gap before "As of" is not extrapolated; a flat or declining observed rate adds no gains. Fewer than two checked skills (one for a one-skill goal), or checks on only one day with skills still to learn, means too early to estimate. The dotted line spreads the goal evenly from the class's first encounter with a required skill to the deadline; it is a reference, not a recorded timetable. |
 | A subunit's skills | Up to three skills the subunit gives most teaching weight to (`unit_skill_coverage`), preferring ones three or more of its questions check (`item_skill`). A review or test subunit lists what it checks most. |
 | Started | A quarter of the class has tried one of the subunit's questions. A unit is started when one of its subunits is. |
@@ -182,7 +254,7 @@ and "Back to today" returns to the export date.
 |---|---|
 | Profiles, Engagement and performance, Skills (by unit and faded), Stall points | Real, by the definitions above. |
 | Drifting | Real. Attendance is not recorded, so the signals are class days with no work, assigned sets unfinished and the change in accuracy. |
-| On pace | Real skill evidence, with a conditional projection if learning continues at each student's latest observed pace. It opens on 19 November 2025, the latest day the class was working and Drifting can judge, with Data Collections, the unit the class was in, as the target: on the export date the class had not worked for months, and the projection would only say what happens if it resumed. The evidence dates are shown in the row's tooltip, and older evidence is labeled on the page. The target's earlier skills are inferred from textbook coverage, rather than a skill dependency graph. The default deadline is 30 days after the selected "As of" date; the teacher can choose any date on or after the "As of" date. All relevant lessons count even before the class starts them; the earlier-skill list is not truncated to the readiness tree's top four. |
+| On pace | Real skill evidence, with a conditional projection if learning continues at each student's latest observed pace. It keeps the selected As of date. On the export date the class had not worked for months, so estimates explicitly assume work resumes. “View latest active period” offers the historical active date. Evidence dates and observed rates remain open in the selected student’s evidence panel. The target's earlier skills are inferred from textbook coverage, rather than a skill dependency graph. The default deadline is 30 days after the selected "As of" date; the teacher can choose any date on or after the "As of" date. All relevant lessons count even before the class starts them; the earlier-skill list is not truncated to the readiness tree's top four. |
 | Skills (weak now) | Real. It began as "Misconceptions", but the item bank does not tag wrong answers with the misconception behind them. The view now shows the skills many students are weak in at once, five days at a time, and who they are. |
 | Stall points | Questions only. Skipped means never tried though the student got past it (worked in that lesson or a later one); before that, not reached yet. An open is recorded for only about one in eight of the readings and videos students worked past, so they are left out. |
 | Ready for a unit | Real edges, judged by a model. What a unit builds on, two levels back, comes from the learner model's skill graph (`data/prereqs.js`), in which an LLM judged each pair of skills. A unit's skills are the ones its graded questions are tagged with at more than 50% relevance. The skill set spans other books, so some prerequisites are checked by no question in this class: those are drawn dashed, counted under the tree, and never colour the answer. A ring needs eight students with a level on the skill (two checks or more), and its share is of those students: the ones at the level the teacher picks on the readiness line, or above; its hover counts the others in ALPS's words, not attempted and unavailable. Under each skill, a book says it was taught (a lesson that a quarter of the class worked on has a teaching weight for it). Its hover says how many questions check it and when it was last asked. The top row is the four prerequisites the most of the unit's questions need (three or more), whatever the class's evidence on them. The page opens on Class Creation, the unit the class skipped: three of its four rings rest on 33 to 36 students; the fourth, Assign Values to Variables, needed by 10 of its 125 questions, is dashed, since no student has two answers on it. Without the file, and for the example's books, coverage weights stand in. |
@@ -253,25 +325,15 @@ the three answers that.
   profile, with the names on hover. Only Ready for a unit lists every unit,
   because there the future is the point.
 * **Engagement and performance opens on one unit's chart**: everyone placed
-  by engagement, the share of its questions they tried (across), and
-  performance, their mean score on its key skills (up), with ALPS's level
-  bands up the left edge and its cuts (40, 55, 65 and 80%) on the axis. The
-  three groups to act on sit beside it with a button each: struggling (doing
-  the work, beginning or attempted), low engagement and coasting. A group's
-  heading picks its students out on the chart and dims every other point; a
-  name, or a dot, does the same for one student, whom it also follows. The
-  latest pick wins, and a second click or Esc shows everyone. A select
-  picks the unit, among the started ones. The grid of every student is
-  folded under the chart ("Every student, by unit"): a row a student, a
-  column a started unit, each cell the student's level as ALPS's battery
-  (four blocks, as many filled in the level's colour as the level; dashed
-  when unavailable), a thin line under it for engagement (red when under
-  your line), and a red dot for struggling. Column names are
-  written on a slant, with the unit's number under each, and the Class row
-  shows how the class divides. A unit heading opens its subunits, a subunit
-  its skills; the trail above takes you back up. The line and the sort are
-  inside the fold with the grid. A student the Drifting page flags is marked
-  "drifting" beside the name.
+  by eligible practice tried (across, 0–100%) and actual mean score on checked
+  key skills (up, 0–100), with shaded regions and ALPS score bands. Select a
+  student for cards showing score, resulting mastery level, checked skills with
+  mastered/developing counts, and questions tried against the practice threshold.
+  Developing skills appear as cards with their level and score; each opens the
+  student/question evidence. Unknown checks and coverage caps remain explicit.
+  The Exact figures view retains every student on the same fields. The unit
+  picker and filters choose the cohort; Class actions apply to the selected
+  unit. The secondary student-by-unit grid has been removed.
 * **Drifting is in dates, five days at a time.** The line is the questions a
   student tried per five days, on any unit, against their own normal; the
   stretches in which nobody in the class worked are hatched and the line does
@@ -483,7 +545,7 @@ the three answers that.
   panel's actions. A question counts from the day it was first tried, with
   the result it ended with, as the levels count it. The left and right arrows
   pick a day on a focused row, and Esc clears it. *By unit* is the outline of the textbook with a bar a row, the class by
-  ALPS level (what was Hardest content); its panel offers the same "Where
+  mastery level (what was Hardest content); its panel offers the same "Where
   they stall" as *Weak now* for the same skill. A followed student
   has a column there as on Stall points, in the class key's own squares and
   colours: on a skill, the square of their level; on a subunit or unit how
@@ -583,7 +645,7 @@ the three answers that.
   to begin with, and the tree, the plan and the answer read it. Under the line
   is a tree two levels deep: the top row is what the unit's skills need, the
   row under it what those need, each a ring splitting the students with a
-  level on the skill by ALPS level (mastered first, a white gap between
+  level on the skill by mastery level (mastered first, a white gap between
   levels), with
   the share at the picked level or above inside it in its status colour (red
   under 60%, amber under 80%, green ready), so the numbers say what the class
@@ -790,20 +852,23 @@ beside a second chart, once the window is wide enough for both (`duoW` in
 from the first day of work to a little after the latest: nothing is drawn
 after that, so an idle stretch is left off.
 
-The script asks for colours by its own names (`--good`, `--bad`, `--watch`,
-`--accent` …). The second half of `:root` in `css/atlas.css` answers those
-names from the theme, so the script carries no colour of its own: to restyle,
-change that block.
+The current script uses private color names (`--il-good`, `--il-bad`,
+`--il-watch`, `--il-accent` …). Scoped declarations in `css/atlas.css` resolve
+them through `css/alps-theme.css`, which reads ALPS’s public theme tokens
+without redefining them. See [ALPS integration](reports/alps-integration.md).
 
 ### Files
 
 ```
-index.html               the frame: top bar, views rail, one view
+index.html               standalone entry point and mount root
 css/atlas.css            its styles, in the ALPS app's theme
 data/class.js            the class, exported from the database (facts only)
 data/example.js          the example with three more books: real outlines, invented work, and it says so
 data/prereqs.js          what each unit builds on, two levels back, from the learner model's skill graph, and ALPS's level on each of those skills
-js/atlas.js              the data layer, the pages, profiles, events
+js/atlas.js              mount API, shell, data layer, pages, profiles, events
+js/alps-design-system.js generated ALPS icon and semantic color contract
+css/alps-theme.css       generated host theme bridge
+tools/sync-alps-design-system.js  snapshots/checks the ALPS visual contract
 tools/export-atlas.py    writes data/class.js from the database, every book the section lists
 tools/make-example.py    writes data/example.js from data/class.js and the database
 tools/export-prereqs.py  writes data/prereqs.js from the database and the skill graph file
@@ -811,8 +876,7 @@ reports/                 the multi-book write-up, and the first-time-teacher rev
 ```
 
 `node tools/check.js --checks` also checks this mock: no text under 12px in
-`css/atlas.css`, text colours at 4.5:1, theme tokens identical to
-`css/lens.css`, and that `data/class.js` is whole (every result points at a
+`css/atlas.css`, text colors at 4.5:1, shared theme fallbacks and lifecycle isolation, and that `data/class.js` is whole (every result points at a
 student and a question that exist, one result per pair, names only for
 students), that the export takes its password from the environment, and that
 no chart takes the full page width by itself (each is handed its width and

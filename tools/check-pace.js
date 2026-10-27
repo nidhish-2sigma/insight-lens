@@ -9,7 +9,7 @@ const source = fs.readFileSync(path.join(root, 'js/atlas.js'), 'utf8');
 const boot = 'renderHead();fromHash();render();';
 assert.equal(source.split(boot).length, 2, 'one application entry point');
 const instrumented = source.replace(boot,
-  'globalThis.PACE_TEST={S,D,TB0,DUI,KEY,KIT,KT,EVD,ALL,TODAY,paceUnits,paceScope,paceOf,paceMemo,isoOf,v4,v4draw,h4,flags,vProf,render};');
+  'globalThis.PACE_TEST={S,D,TB0,DUI,KEY,KIT,KT,EVD,ALL,TODAY,paceUnits,paceScope,paceOf,paceMemo,isoOf,dayDateY,v4,v4draw,h4,flags,vProf,render};');
 
 function load(search = '', width = 1450) {
   const nodes = new Map(), events = new Map();
@@ -33,7 +33,7 @@ function load(search = '', width = 1450) {
     location: { search, hash: '#pace', pathname: '/index.html', assign() {}, replace() {} },
     setTimeout() { return 1; }, clearTimeout() {}, console
   });
-  for (const file of ['data/class.js', 'data/example.js']) {
+  for (const file of ['js/alps-design-system.js','data/class.js', 'data/example.js']) {
     vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
   }
   vm.runInContext(instrumented, context, { filename: 'js/atlas.js' });
@@ -69,7 +69,7 @@ check('stale exports retain observed pace and every projection stays bounded', (
   const initial = p.ALL.map(i => p.paceOf(i));
   assert(initial.some(o => o.end < p.TODAY - 30 && o.proj > o.now), 'the default view must show forecasts despite the old export');
   p.v4draw();
-  assert(app.node('#v4c').innerHTML.includes('stroke-width:3;stroke-dasharray:4 3'), 'default tracks visibly extend to predicted values');
+  assert(app.node('#v4c').innerHTML.includes('mastery-estimate'), 'default tracks visibly extend to predicted values');
   assert(p.v4().includes('Projections assume work resumes'), 'old evidence is presented as a conditional forecast');
   for (const u of p.paceUnits()) {
     p.S.v4.u = u;
@@ -166,17 +166,23 @@ check('calendar, target, sorting and follow controls update the rendered view', 
     app.change({ id: 'v4sort', value: sort });
     assert.equal(p.S.v4.sort, sort);
     const svg = app.node('#v4c').innerHTML;
-    assert.equal((svg.match(/data-act="stu"/g) || []).length, p.ALL.length);
+    assert.equal((svg.match(/data-student="\d+"/g) || []).length, p.ALL.length);
     assert(!/NaN|Infinity|undefined/.test(svg));
   }
   p.S.stu = 0;
   app.change({ id: 'v4unit', value: String(initialUnit) });
   assert(p.flags(0).some(f => f.v === 4 && f.t.includes(p.TB0[initialUnit].s)));
   assert.equal(app.node('#thread').hidden, false);
-  // the followed student's pace is a flag in the bar above their profile, so the profile shows it as a tile only when the bar isn't there
-  assert(p.S.prof !== 0 || !p.vProf().includes('Pace · ' + p.TB0[initialUnit].s));
-  p.S.stu = null;
-  assert(p.vProf().includes('Pace · ' + p.TB0[initialUnit].s));
+  // Every profile keeps its forecast field, including the selected target unit and date, whether or not the student is pinned.
+  for (const followed of [0, null]) {
+    p.S.stu = followed;
+    const profile = p.vProf();
+    assert(profile.includes('<p class="icl">Forecast</p>'));
+    assert(profile.includes(p.TB0[initialUnit].n + ' · by ' + p.dayDateY(p.S.v4.day)), 'the forecast names its actual target unit and date');
+    const forecast = p.paceOf(p.S.prof);
+    if (forecast.proj === null) assert(profile.includes('More checks needed'));
+    else assert(profile.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').includes(`${forecast.now} → ~${Number.isInteger(forecast.proj) ? forecast.proj : forecast.proj.toFixed(1)} of ${forecast.goal}`));
+  }
   p.S.stu = 0;
 });
 
@@ -196,8 +202,8 @@ check('wide and narrow tracks have a finite common skill scale and every student
     app.node('#view').clientWidth = width;
     p.v4draw();
     const svg = app.node('#v4c').innerHTML;
-    assert.equal((svg.match(/data-act="stu"/g) || []).length, p.ALL.length);
-    assert.equal((svg.match(/<svg class="viz"/g) || []).length, width === 1450 ? 2 : 1);
+    assert.equal((svg.match(/data-student="\d+"/g) || []).length, p.ALL.length);
+    assert.equal((svg.match(/class="mastery-plot graphic-lane"/g) || []).length, p.ALL.length, 'one common-scale track per student at every width');
     assert(!/NaN|Infinity|undefined/.test(svg));
     assert(svg.includes('Goal skills mastered'));
     assert(svg.includes('Goal: ' + p.paceScope(p.S.v4.u).ks.length));
@@ -219,7 +225,7 @@ check('active historical dates produce real gains and date-dependent dashed trac
   const after = q.paceOf(gains[0].i);
   assert(after.proj >= before.proj);
   q.v4draw();
-  assert(active.node('#v4c').innerHTML.includes('stroke-dasharray:4 3'));
+  assert(active.node('#v4c').innerHTML.includes('mastery-estimate'));
 });
 
 check('multiple books scope the target while preserving skill evidence; labs have no projection', () => {
@@ -237,7 +243,7 @@ check('multiple books scope the target while preserving skill evidence; labs hav
       if (search === '?books') {
         const old = q.ALL.map(i => q.paceOf(i));
         assert(old.some(o => o.proj > o.now), 'the All books view in the reported screenshot must show predictions');
-        assert(books.node('#v4c').innerHTML.includes('stroke-width:3;stroke-dasharray:4 3'));
+        assert(books.node('#v4c').innerHTML.includes('mastery-estimate'));
       }
       for (const u of units) {
         q.S.v4.u = u;

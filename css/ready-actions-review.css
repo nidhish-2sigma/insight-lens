@@ -1,0 +1,65 @@
+/* Ready and My actions: readable evidence summaries, shared quantitative scales. */
+.insight-lens .ready-review .rd-table,.insight-lens .actions-review .action-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.insight-lens .rd-table caption,.insight-lens .action-table caption{text-align:left;font-weight:600;padding:10px 0;color:var(--il-ink-2)}
+.insight-lens .rd-table th,.insight-lens .rd-table td,.insight-lens .action-table th,.insight-lens .action-table td{padding:13px 12px;border-bottom:1px solid var(--il-line);vertical-align:top;text-align:left;overflow-wrap:anywhere}
+.insight-lens .rd-table thead th,.insight-lens .action-table thead th{font-size:12px;font-weight:600;color:var(--il-ink-2);background:var(--il-surface)}
+.insight-lens .rd-table th:first-child{width:34%}.insight-lens .rd-table th:nth-child(2){width:25%}.insight-lens .rd-table th:nth-child(3){width:20%}
+.insight-lens .rd-table tbody th{font-weight:600}.insight-lens .rd-table .fold{font-weight:400;margin:8px 0 0;font-size:12px}
+.insight-lens .rd-table .fold summary{font-size:12px}.insight-lens .rd-table .fold p,.insight-lens .rd-table .fold ul{margin:8px 0;line-height:1.5}
+.insight-lens .rd-table .fold ul{padding-left:18px}.insight-lens .rd-table .pill,.insight-lens .action-table .pill{white-space:normal;line-height:1.5}
+.insight-lens .rd-track{height:8px;background:var(--il-line);border-radius:4px;margin-top:8px;overflow:hidden;min-width:75px}
+.insight-lens .rd-track i{display:block;height:100%;border-radius:4px}
+.insight-lens .ready-review>.fold{margin:18px 0}.insight-lens .ready-review .detail{margin-top:22px}
+.insight-lens .ready-review .evidence-note{margin:15px 0;font-size:12px;line-height:1.6;color:var(--il-ink-2)}
+.insight-lens .action-table th:first-child{width:35%}.insight-lens .action-table th:nth-child(2){width:38%}
+.insight-lens .action-table tbody tr.on{background:var(--il-blue-tint)}
+.insight-lens .action-set-name{text-align:left;line-height:1.5;white-space:normal;display:block;font-weight:600}
+.insight-lens .action-table .hint{margin:5px 0 0;line-height:1.5;font-weight:400}
+.insight-lens .action-axis,.insight-lens .action-range{display:block;width:100%;height:auto;overflow:visible}
+.insight-lens .action-range .axis{stroke:var(--il-ink-3);stroke-width:1.5}
+.insight-lens .action-range .grid{stroke:var(--il-line);stroke-width:1}
+.insight-lens .action-axis{margin:5px 0 -8px}.insight-lens .action-values{font-size:12px;display:block;text-align:center;line-height:1.6}
+.insight-lens .action-row-axis{display:none}
+.insight-lens .action-waiting>summary{cursor:pointer;font-size:15px;font-weight:500;color:var(--il-blue-ink);padding:4px 0}
+.insight-lens .actions-review>.detail{margin-top:22px}.insight-lens .action-waiting{margin-top:26px;padding-top:20px;border-top:1px solid var(--il-line)}
+.insight-lens .action-waiting h3{font-size:15px;margin:0 0 8px}.insight-lens .action-waiting .waitl{max-height:none;overflow:visible}.insight-lens .action-waiting .waitl li{padding:12px 0;overflow-wrap:anywhere}
+@media(max-width:700px){
+  .insight-lens .ready-review .table-scroll,.insight-lens .actions-review .table-scroll{overflow:visible}
+  .insight-lens .rd-table thead,.insight-lens .action-table thead{display:none}
+  .insight-lens .rd-table,.insight-lens .rd-table tbody,.insight-lens .rd-table tr,.insight-lens .rd-table th,.insight-lens .rd-table td,.insight-lens .action-table,.insight-lens .action-table tbody,.insight-lens .action-table tr,.insight-lens .action-table th,.insight-lens .action-table td{display:block;width:100%!important;box-sizing:border-box}
+  .insight-lens .rd-table caption,.insight-lens .action-table caption{display:block;font-size:12px;line-height:1.6}
+  .insight-lens .rd-table tr,.insight-lens .action-table tr{border:1px solid var(--il-line);border-radius:8px;margin-bottom:12px;padding:6px;overflow:hidden}
+  .insight-lens .rd-table th,.insight-lens .rd-table td,.insight-lens .action-table th,.insight-lens .action-table td{border:0;padding:7px 9px}
+  .insight-lens .rd-table td:nth-child(2)::before{content:'At target / assessed';display:block;font-size:12px;color:var(--il-ink-2);margin-bottom:4px}
+  .insight-lens .rd-table td:nth-child(3)::before{content:'Evidence coverage';display:block;font-size:12px;color:var(--il-ink-2);margin-bottom:4px}
+  .insight-lens .rd-table td:nth-child(4)::before{content:'Group readiness';display:block;font-size:12px;color:var(--il-ink-2);margin-bottom:4px}
+  .insight-lens .action-table td:nth-child(2)::before{content:'Score change difference · points';display:block;font-size:12px;color:var(--il-ink-2);margin-bottom:4px}
+  .insight-lens .action-range{max-height:55px}.insight-lens .action-table td:nth-child(3){padding-top:10px}
+  .insight-lens .action-row-axis{display:block;max-height:38px;margin:0}
+  .insight-lens .action-waiting .waitl li{display:block}.insight-lens .action-waiting .waitl li .hint{display:block;margin-top:5px}
+  .insight-lens .ready-review .lvline{overflow:visible}.insight-lens .ready-review .lvstops{gap:2px}.insight-lens .ready-review .lvv{font-size:12px;line-height:1.4}
+}
+
+/* A bounded, fitted canvas is shared by Tree and Radial. Zoomed graphs scroll inside it. */
+.insight-lens .ready-target{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:18px;font-size:13px;color:var(--il-ink-2)}
+.insight-lens .ready-target .seg{flex-wrap:wrap}
+.insight-lens .ready-target .seg button{display:flex;align-items:center;justify-content:center;gap:6px}
+.insight-lens .ready-graph-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:14px 0 10px}
+.insight-lens .ready-graph-tools .scale-label,.insight-lens .ready-graph-tools .hint{margin:0;line-height:1.6}
+.insight-lens .ready-zoom{display:flex;align-items:center;gap:6px;flex:none}
+.insight-lens .ready-zoom .btn{min-width:34px;min-height:34px;font-size:15px;line-height:1}
+.insight-lens .ready-zoom output{min-width:42px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums;color:var(--il-ink-2)}
+.insight-lens .ready-diagram{height:clamp(220px,50vh,520px);margin:0 0 12px;max-width:100%;overflow:auto;overscroll-behavior:contain;border:1px solid var(--il-line);border-radius:6px;background:var(--il-surface)}
+.insight-lens .ready-canvas{display:grid;place-items:center}
+.insight-lens .ready-diagram .viz{min-width:0;max-width:none;display:block}
+.insight-lens .readiness-node{cursor:pointer}
+.insight-lens .readiness-node[aria-pressed="true"]>circle:first-child{filter:drop-shadow(0 0 2px var(--il-accent))}
+.insight-lens .ready-review .rdkey{margin-top:8px}
+.insight-lens .ready-review .rdkey+.legend{margin-top:6px}
+.insight-lens .ready-review .rdkey .kn{font-weight:500}
+@media(max-width:480px){
+  .insight-lens .ready-target .seg{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .insight-lens .ready-target .seg button{padding:9px 6px}
+  .insight-lens .ready-graph-tools{align-items:flex-start}
+  .insight-lens .ready-zoom{margin-left:auto}
+}

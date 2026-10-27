@@ -1,0 +1,47 @@
+/* Generated ALPS bridge. Host tokens are read, never redefined. */
+.insight-lens {
+  --il-alps-primary:var(--primary-blue,#1864F2);
+  --il-alps-primary-dark:var(--primary-blue-dark,#0e4cc0);
+  --il-alps-hover:var(--hover-blue,#E8F1FE);
+  --il-alps-background:var(--background,#ffffff);
+  --il-alps-surface:var(--surface,#fafafa);
+  --il-alps-outline:var(--outline,rgb(0, 0, 0, .12));
+  --il-alps-primary-outline:var(--primary-blue-80,rgba(24, 100, 242, 0.35));
+  --il-alps-correct:var(--green,#408B4D);
+  --il-alps-incorrect:var(--red,#DC3545);
+  --il-alps-warning:var(--yellow,#E19F01);
+  --il-alps-error:var(--error,#B00020);
+  --il-alps-brand-accent:var(--accent,#FF9C39);
+  --il-alps-level-0:var(--not-started,#D7D7D7);
+  --il-alps-level-1:var(--attempted,#E3F2FD);
+  --il-alps-level-2:var(--familiar,#90CAF9);
+  --il-alps-level-3:var(--proficient,#1876D2);
+  --il-alps-level-4:var(--mastered,#0D47A1);
+  --il-alps-engagement-0:var(--not-started,#D7D7D7);
+  --il-alps-engagement-1:var(--low-engagement,#FFFDE7);
+  --il-alps-engagement-2:var(--medium-engagement,#FFF59D);
+  --il-alps-engagement-3:var(--high-engagement,#FDD836);
+  --il-alps-engagement-4:var(--very-high-engagement,#F9A925);
+  --il-item-activecode:#2e7d32;
+  --il-item-parsons:#00838f;
+  --il-item-parsonsprob:#00838f;
+  --il-item-hparsons:#00838f;
+  --il-item-dragndrop:#00897b;
+  --il-item-mchoice:#1565c0;
+  --il-item-fitb:#1565c0;
+  --il-item-fillintheblank:#1565c0;
+  --il-item-blockly:#1565c0;
+  --il-item-quizly:#1565c0;
+  --il-item-shortanswer:#c62828;
+  --il-item-reading:#e65100;
+  --il-item-figure:#f57c00;
+  --il-item-flashcard:#7b1fa2;
+  --il-item-clickablearea:#5e35b1;
+  --il-item-poll:#5e35b1;
+  --il-item-video:#d32f2f;
+  --il-item-youtube:#d32f2f;
+  --il-item-sectionheading:#455a64;
+  --il-item-mixed:#546e7a;
+  --il-item-slide:#546e7a;
+  --il-item-raw:#455a64;
+}
