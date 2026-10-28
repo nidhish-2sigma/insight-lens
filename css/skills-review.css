@@ -27,6 +27,10 @@
 .insight-lens :is(.skills-page,.stall-page) .visual-row{gap:16px;padding:14px 18px}
 .insight-lens :is(.skills-page,.stall-page) .visual-choice.selected{box-shadow:inset 3px 0 var(--il-accent)}
 .insight-lens :is(.skills-page,.stall-page) .visual-name{font-size:14px;line-height:1.5}
+.insight-lens .row-disclosure{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.insight-lens .row-disclosure>span{min-width:0}
+.insight-lens .row-disclosure>.chev{width:14px;height:14px;margin-top:4px}
+.insight-lens .visual-choice[aria-expanded="true"] .row-disclosure>.chev{transform:rotate(90deg);color:var(--il-blue-ink)}
 .insight-lens :is(.skills-page,.stall-page) .weak-chart .visual-name small{margin-top:5px}
 .insight-lens :is(.skills-page,.stall-page) .pvb>.weak-chart{max-height:none;overflow:hidden}
 .insight-lens .weak-chart>.visual-head{position:static}

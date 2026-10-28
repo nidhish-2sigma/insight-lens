@@ -226,6 +226,10 @@
 .insight-lens .skill-result-key{padding:12px 14px;border:1px solid var(--il-line);border-radius:10px;background:var(--il-surface);margin-bottom:12px}
 .insight-lens .skill-result-key .tkey{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:8px 16px;margin:0;font-size:12px;line-height:1.5}
 .insight-lens .skill-result-key .tkey>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.insight-lens .skill-credit-key{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--il-line);font-size:12px;line-height:1.5;color:var(--il-ink-3)}
+.insight-lens .skill-credit-key>b{font-weight:500;color:var(--il-ink-2)}
+.insight-lens .skill-credit-key>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.insight-lens .skill-credit-key .qm{width:18px;height:18px}
 .insight-lens .skill-results .semantic-key{contain:none;margin:8px 0 0;font-size:12px;line-height:1.5;color:var(--il-ink-3)}
 .insight-lens .skill-results .tbl-evidence-help{margin:0 0 12px;font-size:12px;line-height:1.5;color:var(--il-ink-3)}
 .insight-lens .skill-results .tbl-q{contain:none;margin:0 0 12px;padding:10px 12px;border:1px solid var(--il-outline);border-radius:8px;font-size:13px}
@@ -245,7 +249,8 @@
 .insight-lens .skill-results .sktbl tr.sum.b2>*{top:104px}
 .insight-lens .skill-results .sktbl .q{width:44px;min-width:44px;padding:0}
 .insight-lens .skill-results .sktbl .qh{width:100%;min-height:52px;align-content:center;padding:5px 0;gap:4px}
-.insight-lens .skill-results .sktbl .cell-inspect{min-height:43px}
+.insight-lens .skill-results .sktbl .cell-inspect{min-height:48px;align-content:center;gap:2px;padding:4px 2px}
+.insight-lens .skill-results .question-credit{font-size:12px;line-height:1.2;font-variant-numeric:tabular-nums;color:var(--il-ink-2)}
 .insight-lens .skill-results .sktbl .qon{background-color:var(--il-accent-soft)}
 .insight-lens .skill-results .tbl-sort-label{display:grid;gap:3px;text-align:left}
 .insight-lens .skill-results .tbl-sort-label small{font-size:12px;font-weight:400;color:var(--il-ink-3)}

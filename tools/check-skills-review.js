@@ -15,12 +15,23 @@ function load(search) {
   };
   const ctx = vm.createContext({window:{innerWidth:1750,addEventListener(){}},document:{querySelector:node,getElementById:id=>node('#'+id),addEventListener(){}}, location:{search,hash:'#skills',pathname:'/index.html',assign(){},replace(){}},setTimeout(){return 1},clearTimeout(){},console});
   ['js/alps-design-system.js','data/class.js','data/example.js','data/prereqs.js'].forEach(file=>vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),ctx,{filename:file}));
-  vm.runInContext(source.replace(boot,'globalThis.SK_REVIEW={S,ALL,N,NM,WEAK,FD,hard5,v6list,vSk,v7,v10,v10stu,statK,fadeEvidence,fadeTrack,fadeKind,ML,MT,EVD,AT,KIT,tblCfg,tblQ,tblRow,tblHTML,tblCellDetail,credit,NBC,dayDate,BE,LV,STW,ptSel,ptGroups};'),ctx,{filename:'js/atlas.js'});
+  vm.runInContext(source.replace(boot,'globalThis.SK_REVIEW={S,ALL,N,NM,WEAK,FD,hard5,v6list,vSk,v7,v10,v10stu,statK,fadeEvidence,fadeTrack,fadeKind,ML,MT,EVD,AT,KIT,tblCfg,tblQ,tblRow,tblHTML,tblCellDetail,credit,resultMark,rsOf,EVOK,IT,RIC,tips,NBC,dayDate,BE,LV,STW,ptSel,ptGroups};'),ctx,{filename:'js/atlas.js'});
   return ctx.SK_REVIEW;
 }
 let units=0, skills=0, fades=0, cells=0, modes=0, studentPeriods=0;
 for (const search of ['', '?books', '?today=2025-10-31']) {
   const X=load(search),S=X.S;
+  // Independent boundary cases catch changes to attempt credit or its result mark.
+  for(const [format,cases]of [['MCQ',[[1,1,'c1'],[2,.5,'cr'],[3,0,'crN'],[0,0,'nc']]],['Code',[[1,1,'c1'],[3,1,'crF'],[4,.5,'cr'],[6,.5,'cr'],[7,.25,'crQ'],[0,0,'nc']]],['Parsons',[[3,1,'crF'],[6,.5,'cr'],[7,.25,'crQ']]]]){
+    const item=X.IT.find(it=>it.f===format&&X.EVOK(it.ix));if(!item)continue;
+    for(const [attempt,credit,mark]of cases){
+      const a=[0,item.ix,attempt===1?1:0,attempt>0&&attempt<=3?1:0,attempt?1:0,Math.max(1,attempt),0,60,0,attempt,30];
+      assert.equal(X.credit(a),credit,`${format}, first correct on attempt ${attempt}`);
+      assert.equal(X.resultMark(a),X.RIC[mark],'result marks encode the same earned credit');
+      if(attempt>1){a[7]=32;assert.equal(X.resultMark(a),X.RIC[mark.replace('cr','rr')],'rapid retry badges retain the credit shade');}
+    }
+  }
+  assert.equal(X.resultMark(null),X.RIC.ns,'no attempt remains empty, not zero-credit incorrect');
   const page=X.vSk();
   assert.match(page, /id="pv-sk-weak"/);
   assert.match(page, /class="mcard pv shut" id="pv-sk-unit"/);
@@ -120,10 +131,18 @@ for (const search of ['', '?books', '?today=2025-10-31']) {
   const ks=[...new Set(X.WEAK.map(m=>m.k).concat(X.FD.map(o=>o.k)))];
   for(const k of ks){
     const T={k,from:'unit',P:null,f:'all',s:'lv0',s0:'lv0',dir:1,q:null,all:true},C=X.tblCfg(T),Q=X.tblQ(C,true);S.tbl=T;
-    assert(!/undefined|NaN|Infinity/.test(X.tblHTML()));
+    const chart=X.tblHTML();assert(!/undefined|NaN|Infinity/.test(chart));
+    assert(chart.includes('Credit after retries')&&chart.includes('Quarter · 25%'),'the chart explains all retry-credit shades');
+    const chartCells=new Map([...chart.matchAll(/<button[^>]*class="cell-inspect"[^>]*data-i="(\d+)" data-id="(\d+)"[^>]*>[^]*?<\/button>/g)].map(m=>[m[1]+':'+m[2],m[0]]));
     for(const q of Q.slice(0,4))for(const i of X.ALL){
       T.cell={i,ix:q.ix};const h=X.tblCellDetail(T,C,Q),a=X.AT[i].get(q.ix);
       assert(!/undefined|NaN|Infinity/.test(h));
+      const cell=chartCells.get(i+':'+q.ix),cr=a&&X.EVOK(q.ix)?X.credit(a):null;
+      assert(cell,'every student-question result is still inspectable');
+      assert(cell.includes(X.resultMark(a)),'the table uses the same earned-credit mark as the selected result');
+      assert(cell.includes(`data-credit="${cr===null?'':cr}"`)&&cell.includes(`class="question-credit" aria-hidden="true">${cr===null?'–':Math.round(cr*100)+'%'}`),'credit is visible in every result cell; excluded and missing results stay separate from zero');
+      const tooltip=X.tips.get(cell.match(/data-tip="([^"]+)"/)[1]);
+      if(a)assert(cell.includes(`${a[5]} ${a[5]===1?'attempt':'attempts'}`)&&tooltip.includes(a[9]?'first correct on attempt '+a[9]:'none correct'),'attempt counts and the first successful attempt are available to keyboard and pointer users');
       if(a){assert(h.includes(`${a[5]} total`),'attempt counts available without hover');assert(h.includes(`${Math.round(X.credit(a)*100)}%`),'partial credit remains exact');assert(h.includes('skill relevance'),'question weighting remains available');}
       else assert(h.includes('No attempt had started'),'missing evidence is not a zero score');
       cells++;

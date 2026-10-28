@@ -521,7 +521,7 @@ if (atlasData) {
             const want = lv >= 0 ? X.LV[lv] : X.CAT[i][k] === 'Q' ? 'More checks needed' : 'Not started';
             if (word !== want || (lv >= 0 && !r.includes(`<span class="sc">${Math.round(sc * 100)}</span>`))) bad.push(`${X.ASK[k]} · ${X.NM[i]}: ${word}`);
             if (/class="slip"/.test(r) !== (X.ML[i][k] !== null && X.MT[i][k] - X.ML[i][k] >= .2)) bad.push(`${X.ASK[k]} · ${X.NM[i]}: slip`);
-            const got = [...r.matchAll(/class="cell-inspect"[^>]*aria-label="[^"]*: (Correct on first attempt|Correct after retries|Rapid retries: all retries within 3 seconds|Not yet correct|Not started)\. Inspect/g)].map(m => m[1]);
+            const got = [...r.matchAll(/class="cell-inspect"[^>]*aria-label="[^"]*: (Correct on first attempt|Correct after retries|Rapid retries: all retries within 3 seconds|Not yet correct|Not started)\.[^"]*Inspect/g)].map(m => m[1]);
             const exp = qs.map(ix => { const a = X.AT[i].get(ix); return !a ? 'Not started' : a[9] === 1 ? 'Correct on first attempt' : a[4] ? (a[7] - a[10] <= 3 ? 'Rapid retries: all retries within 3 seconds' : 'Correct after retries') : 'Not yet correct'; });
             marks += exp.filter(v => v !== 'Not started').length; exp.forEach(v => { seen[v] = (seen[v] || 0) + 1; }); if (got.join() !== exp.join()) bad.push(`${X.ASK[k]} · ${X.NM[i]}: marks`); });
           // weakest first, with no level yet last; the first row counts who got each question wrong
@@ -551,7 +551,7 @@ if (atlasData) {
         h.split('<tbody>')[1].split('</tbody>')[0].split('<tr').slice(2).forEach(r => { const i = +(r.match(/data-act="(?:stu|prof)" data-i="(\d+)"/) || [])[1];
           const words = [...r.matchAll(/<span class="tbl-level">[^]*?<span>([^<]+)<\/span><\/span>|<span class="t3">(Not started|More checks needed)<\/span>/g)].map(m => m[1] || m[2]);
           if (words.join() !== cols.map(([k, j]) => lvWord(i, k, j)).join()) bad.push(`${name} · ${X.NM[i]}: ${words.join('/')}`);
-          const got = [...r.matchAll(/class="cell-inspect"[^>]*aria-label="[^"]*: (Correct on first attempt|Correct after retries|Rapid retries: all retries within 3 seconds|Not yet correct|Not started)\. Inspect/g)].map(m => m[1]), exp = qs.map(ix => { const a = X.AT[i].get(ix); return RSW(a && a[6] <= d ? a : null); });
+          const got = [...r.matchAll(/class="cell-inspect"[^>]*aria-label="[^"]*: (Correct on first attempt|Correct after retries|Rapid retries: all retries within 3 seconds|Not yet correct|Not started)\.[^"]*Inspect/g)].map(m => m[1]), exp = qs.map(ix => { const a = X.AT[i].get(ix); return RSW(a && a[6] <= d ? a : null); });
           if (got.join() !== exp.join()) bad.push(`${name} · ${X.NM[i]}: marks`);
           const d0 = P.kind === 'time' ? X.BE(P.a) : null, band = [...r.matchAll(/<td class="q([^"]*)"/g)].map(m => / then\b/.test(m[1]) ? 1 : 0).join(''),
             want = qs.map(ix => { const a = X.AT[i].get(ix); return d0 !== null && a && a[6] <= d0 ? 1 : 0; }).join('');
